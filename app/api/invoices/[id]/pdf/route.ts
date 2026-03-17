@@ -84,9 +84,9 @@ export async function GET(
     page1.drawText(formatDate(invoice.invoice_date), { x: col2, y, size: 11, font: fontBold });
     page1.drawText(formatDate(invoice.due_date), { x: col3, y, size: 11, font: fontBold });
     
-    // Divider
+    // Divider - full width to match table
     y -= 20;
-    page1.drawLine({ start: { x: 50, y }, end: { x: 480, y }, thickness: 2 });
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 2 });
     
     // Table Header with gray background
     y -= 30;
@@ -100,7 +100,7 @@ export async function GET(
     page1.drawRectangle({
       x: 50,
       y: y - 5,
-      width: 430,
+      width: 480,
       height: 25,
       color: rgb(0.96, 0.96, 0.96),
     });
@@ -112,7 +112,7 @@ export async function GET(
     
     // Line under header
     y -= 25;
-    page1.drawLine({ start: { x: 50, y }, end: { x: 480, y }, thickness: 1 });
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
     // Table Rows with lines
     y -= 5;
@@ -124,16 +124,16 @@ export async function GET(
       page1.drawText(`${item.total.toFixed(2)} ${currency}`, { x: totalX, y, size: 10, font });
       // Line under each row
       y -= 5;
-      page1.drawLine({ start: { x: 50, y }, end: { x: 480, y }, thickness: 0.5 });
+      page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 0.5 });
     }
     
     // Totals section with full width lines
     y -= 30;
-    const labelX = 350;
+    const labelX = 380;
     const valueX = 480;
     
-    // Line above subtotal
-    page1.drawLine({ start: { x: 350, y }, end: { x: 530, y }, thickness: 1 });
+    // Line above subtotal (full width like gray header)
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     y -= 20;
     page1.drawText('Subtotal', { x: labelX, y, size: 10, font });
     page1.drawText(`${invoice.subtotal.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
@@ -143,14 +143,14 @@ export async function GET(
     
     // Line above TOTAL
     y -= 10;
-    page1.drawLine({ start: { x: 350, y }, end: { x: 530, y }, thickness: 1 });
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     y -= 25;
     page1.drawText('TOTAL', { x: labelX, y, size: 12, font: fontBold });
     page1.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: valueX, y, size: 12, font: fontBold });
     
-    // Line below TOTAL (ends where EUR ends)
+    // Line below TOTAL (full width)
     y -= 10;
-    page1.drawLine({ start: { x: 350, y }, end: { x: 530, y }, thickness: 2 });
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 2 });
     
     // Footer
     y = 120;
