@@ -34,6 +34,28 @@ export async function GET(
     const page1 = pdfDoc.addPage([595.28, 841.89]);
     let y = 800;
     
+    // Company Logo (if exists)
+    if (invoice.company?.logo_url) {
+      try {
+        const logoUrl = invoice.company.logo_url.startsWith('http') 
+          ? invoice.company.logo_url 
+          : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/logos/${invoice.company.logo_url}`;
+        
+        const logoResponse = await fetch(logoUrl);
+        if (logoResponse.ok) {
+          const logoBytes = await logoResponse.arrayBuffer();
+          const logoImage = await pdfDoc.embedPng(logoBytes).catch(() => pdfDoc.embedJpg(logoBytes));
+          
+          const logoWidth = 100;
+          const logoHeight = (logoImage.height / logoImage.width) * logoWidth;
+          page1.drawImage(logoImage, { x: 50, y: y - logoHeight + 10, width: logoWidth, height: logoHeight });
+          y -= logoHeight + 15;
+        }
+      } catch (e) {
+        // Logo failed to load, continue without it
+      }
+    }
+    
     // Header - Company Info (left)
     page1.drawText(invoice.company?.name || '', { x: 50, y, size: 12, font: fontBold });
     y -= 15;
@@ -44,6 +66,7 @@ export async function GET(
     page1.drawText(invoice.company?.country || '', { x: 50, y, size: 10, font });
     y -= 12;
     page1.drawText(invoice.company?.email || '', { x: 50, y, size: 9, font });
+    y -= 20;
     
     // INVOICE TO (right)
     y = 800;
@@ -63,15 +86,15 @@ export async function GET(
     }
     
     // Title
-    y = 680;
+    y = 560;
     page1.drawText('INVOICE', { x: 50, y, size: 32, font: fontBold });
     
-    // Divider line
-    y = 635;
+    // Divider line - closer to labels
+    y = 505;
     page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
-    // Invoice Info Row (4 columns with status) - compact spacing
-    y = 608;
+    // Invoice Info Row (4 columns with status) - very compact
+    y = 490;
     const col1 = 50;
     const col2 = 165;
     const col3 = 300;
@@ -82,18 +105,18 @@ export async function GET(
     page1.drawText('DUE DATE', { x: col3, y, size: 9, font });
     page1.drawText('STATUS', { x: col4, y, size: 9, font });
     
-    y -= 10;
+    y -= 12;
     page1.drawText(invoice.invoice_number, { x: col1, y, size: 11, font: fontBold });
     page1.drawText(formatDate(invoice.invoice_date), { x: col2, y, size: 11, font: fontBold });
     page1.drawText(formatDate(invoice.due_date), { x: col3, y, size: 11, font: fontBold });
     page1.drawText(invoice.status?.toUpperCase() || '', { x: col4, y, size: 11, font: fontBold });
     
-    // Divider
-    y -= 8;
+    // Divider - closer to values
+    y -= 10;
     page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
     // Table Header with gray background
-    y -= 25;
+    y -= 35;
     const descX = 50;
     const qtyX = 280;
     const unitX = 340;
@@ -115,12 +138,12 @@ export async function GET(
     page1.drawText('PRICE', { x: priceX, y, size: 9, font: fontBold });
     page1.drawText('TOTAL', { x: totalX, y, size: 9, font: fontBold });
     
-    // Line under header
-    y -= 22;
-    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 0.5 });
+    // Line under header - directly below gray background
+    y -= 5;
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
     // Table Rows with lines
-    y -= 10;
+    y -= 18;
     for (const item of invoice.items || []) {
       page1.drawText((item.description || '').substring(0, 40), { x: descX, y, size: 10, font });
       page1.drawText(String(item.quantity), { x: qtyX + 20, y, size: 10, font });
