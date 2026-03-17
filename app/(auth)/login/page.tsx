@@ -38,8 +38,9 @@ export default function LoginPage() {
   return (
     <div className="w-full max-w-md px-4">
       <div className="text-center mb-12">
-        <Link href="/" className="text-2xl font-bold tracking-widest uppercase">
-          Invoice<span className="text-gray-400">SaaS</span>
+        <Link href="/" className="block">
+          <div className="text-xl font-bold tracking-wide" style={{ color: '#3b82f6' }}>Techno on the Block</div>
+          <div className="text-lg font-semibold text-white">Invoice Center</div>
         </Link>
       </div>
 
