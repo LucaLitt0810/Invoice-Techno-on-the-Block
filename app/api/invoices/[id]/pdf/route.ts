@@ -91,49 +91,69 @@ export async function GET(
     y -= 20;
     page1.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 2 });
     
-    // Table Header
-    y -= 35;
+    // Table Header with gray background
+    y -= 30;
     const descX = 50;
     const qtyX = 350;
     const priceX = 430;
     const totalX = 510;
+    const headerY = y;
+    
+    // Gray background for header
+    page1.drawRectangle({
+      x: 50,
+      y: y - 5,
+      width: 495,
+      height: 25,
+      color: rgb(0.96, 0.96, 0.96),
+    });
     
     page1.drawText('DESCRIPTION', { x: descX, y, size: 9, font: fontBold });
     page1.drawText('QTY', { x: qtyX, y, size: 9, font: fontBold });
     page1.drawText('PRICE', { x: priceX, y, size: 9, font: fontBold });
     page1.drawText('TOTAL', { x: totalX, y, size: 9, font: fontBold });
     
-    // Table Rows
+    // Line under header
     y -= 25;
+    page1.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 1 });
+    
+    // Table Rows with lines
+    y -= 5;
     for (const item of invoice.items || []) {
+      y -= 20;
       page1.drawText((item.description || '').substring(0, 40), { x: descX, y, size: 10, font });
       page1.drawText(String(item.quantity), { x: qtyX + 10, y, size: 10, font });
       page1.drawText(`${item.price.toFixed(2)} ${currency}`, { x: priceX, y, size: 10, font });
       page1.drawText(`${item.total.toFixed(2)} ${currency}`, { x: totalX, y, size: 10, font });
-      y -= 22;
+      // Line under each row
+      y -= 5;
+      page1.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 0.5 });
     }
     
-    // Divider above totals
-    y -= 10;
-    page1.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 1 });
-    
-    // Totals - right aligned
-    y -= 25;
+    // Totals section with full width lines
+    y -= 30;
     const labelX = 380;
     const valueX = 510;
     
+    // Line above subtotal
+    page1.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 1 });
+    y -= 20;
     page1.drawText('Subtotal', { x: labelX, y, size: 10, font });
     page1.drawText(`${invoice.subtotal.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
     y -= 20;
     page1.drawText(`Tax (${invoice.tax_rate}%)`, { x: labelX, y, size: 10, font });
     page1.drawText(`${invoice.tax.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
     
-    // Total line
-    y -= 15;
-    page1.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 2 });
+    // Line above TOTAL
+    y -= 10;
+    page1.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 1 });
     y -= 25;
     page1.drawText('TOTAL', { x: labelX, y, size: 12, font: fontBold });
     page1.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: valueX, y, size: 12, font: fontBold });
+    
+    // Line below TOTAL (full width like in the example)
+    y -= 10;
+    page1.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 2 });
     
     // Footer
     y = 120;
