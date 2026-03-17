@@ -113,8 +113,8 @@ export async function GET(
       y -= 22;
     }
     
-    // Divider
-    y -= 5;
+    // Divider - full width line above totals
+    y -= 10;
     page1.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 1 });
     
     // Totals - right aligned
@@ -156,50 +156,54 @@ export async function GET(
     y -= 25;
     page2.drawText(`Invoice ${invoice.invoice_number}`, { x: 250, y, size: 12, font });
     
-    // Payment Box - centered
-    y -= 60;
+    // Payment Box - centered, fixed position
     const boxX = 100;
     const boxWidth = 400;
-    page2.drawRectangle({ x: boxX, y: y - 200, width: boxWidth, height: 220, borderWidth: 2, borderColor: rgb(0, 0, 0) });
+    const boxTopY = 480;
+    const boxHeight = 200;
+    page2.drawRectangle({ x: boxX, y: boxTopY - boxHeight, width: boxWidth, height: boxHeight, borderWidth: 2, borderColor: rgb(0, 0, 0) });
     
-    // Payment info rows with proper alignment
+    // Payment info rows - fixed positions inside box
     const leftX = boxX + 30;
     const rightX = boxX + boxWidth - 30;
+    const rowHeight = 38;
+    let rowY = boxTopY - 35;
     
-    y -= 30;
-    page2.drawText('INVOICE NUMBER', { x: leftX, y, size: 10, font: fontBold });
-    page2.drawText(invoice.invoice_number, { x: rightX - 100, y, size: 11, font });
+    page2.drawText('INVOICE NUMBER', { x: leftX, y: rowY, size: 10, font: fontBold });
+    page2.drawText(invoice.invoice_number, { x: rightX - 100, y: rowY, size: 11, font });
     
-    y -= 35;
-    page2.drawLine({ start: { x: leftX, y: y + 15 }, end: { x: rightX, y: y + 15 }, thickness: 1 });
-    page2.drawText('AMOUNT DUE', { x: leftX, y, size: 10, font: fontBold });
-    page2.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: rightX - 100, y, size: 11, font });
+    rowY -= rowHeight;
+    page2.drawLine({ start: { x: leftX, y: rowY + 25 }, end: { x: rightX, y: rowY + 25 }, thickness: 1 });
+    page2.drawText('AMOUNT DUE', { x: leftX, y: rowY, size: 10, font: fontBold });
+    page2.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: rightX - 100, y: rowY, size: 11, font });
     
+    rowY -= rowHeight;
     if (invoice.company?.bank_name) {
-      y -= 35;
-      page2.drawLine({ start: { x: leftX, y: y + 15 }, end: { x: rightX, y: y + 15 }, thickness: 1 });
-      page2.drawText('BANK NAME', { x: leftX, y, size: 10, font: fontBold });
-      page2.drawText(invoice.company.bank_name, { x: rightX - 100, y, size: 11, font });
+      page2.drawLine({ start: { x: leftX, y: rowY + 25 }, end: { x: rightX, y: rowY + 25 }, thickness: 1 });
+      page2.drawText('BANK NAME', { x: leftX, y: rowY, size: 10, font: fontBold });
+      page2.drawText(invoice.company.bank_name, { x: rightX - 100, y: rowY, size: 11, font });
+    } else {
+      rowY += rowHeight; // Skip if no bank name
     }
     
+    rowY -= rowHeight;
     if (invoice.company?.iban) {
-      y -= 35;
-      page2.drawLine({ start: { x: leftX, y: y + 15 }, end: { x: rightX, y: y + 15 }, thickness: 1 });
-      page2.drawText('IBAN', { x: leftX, y, size: 10, font: fontBold });
-      page2.drawText(invoice.company.iban, { x: rightX - 160, y, size: 11, font });
+      page2.drawLine({ start: { x: leftX, y: rowY + 25 }, end: { x: rightX, y: rowY + 25 }, thickness: 1 });
+      page2.drawText('IBAN', { x: leftX, y: rowY, size: 10, font: fontBold });
+      page2.drawText(invoice.company.iban, { x: rightX - 160, y: rowY, size: 11, font });
     }
     
+    rowY -= rowHeight;
     if (invoice.company?.bic) {
-      y -= 35;
-      page2.drawLine({ start: { x: leftX, y: y + 15 }, end: { x: rightX, y: y + 15 }, thickness: 1 });
-      page2.drawText('BIC', { x: leftX, y, size: 10, font: fontBold });
-      page2.drawText(invoice.company.bic, { x: rightX - 100, y, size: 11, font });
+      page2.drawLine({ start: { x: leftX, y: rowY + 25 }, end: { x: rightX, y: rowY + 25 }, thickness: 1 });
+      page2.drawText('BIC', { x: leftX, y: rowY, size: 10, font: fontBold });
+      page2.drawText(invoice.company.bic, { x: rightX - 100, y: rowY, size: 11, font });
     }
     
-    y -= 35;
-    page2.drawLine({ start: { x: leftX, y: y + 15 }, end: { x: rightX, y: y + 15 }, thickness: 1 });
-    page2.drawText('REFERENCE', { x: leftX, y, size: 10, font: fontBold });
-    page2.drawText(invoice.invoice_number, { x: rightX - 100, y, size: 11, font });
+    rowY -= rowHeight;
+    page2.drawLine({ start: { x: leftX, y: rowY + 25 }, end: { x: rightX, y: rowY + 25 }, thickness: 1 });
+    page2.drawText('REFERENCE', { x: leftX, y: rowY, size: 10, font: fontBold });
+    page2.drawText(invoice.invoice_number, { x: rightX - 100, y: rowY, size: 11, font });
     
     // Footer note - centered
     y = 200;
