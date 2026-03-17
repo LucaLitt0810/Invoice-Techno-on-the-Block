@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-// Dynamic import for puppeteer to avoid issues with Vercel
+// Use puppeteer-core with chromium for Vercel
+let chromium: any;
 let puppeteer: any;
 
 export async function GET(
@@ -11,8 +12,9 @@ export async function GET(
   let browser;
   
   try {
-    // Dynamic import puppeteer
-    puppeteer = await import('puppeteer');
+    // Dynamic import for serverless compatibility
+    chromium = await import('@sparticuz/chromium');
+    puppeteer = await import('puppeteer-core');
     
     const supabase = createClient();
     
@@ -197,7 +199,6 @@ export async function GET(
       color: #666;
       text-align: center;
     }
-
   </style>
 </head>
 <body>
@@ -274,11 +275,11 @@ export async function GET(
       </div>
       <div class="fee-row">
         <span>Deposit (${formatDate(contract.deposit_due)})</span>
-        <span>${formatCurrency(contract.deposit)}</span>
+        <span>${formatCurrency(contract.deposit || 0)}</span>
       </div>
       <div class="fee-row">
         <span>Final Payment (${formatDate(contract.final_payment_due)})</span>
-        <span>${formatCurrency(contract.fee - contract.deposit)}</span>
+        <span>${formatCurrency(contract.fee - (contract.deposit || 0))}</span>
       </div>
     </div>
   </div>
@@ -335,20 +336,11 @@ export async function GET(
 </html>
     `;
 
-    // Launch browser and generate PDF
+    // Launch browser with chromium for serverless
     browser = await puppeteer.launch({
-      headless: 'new',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu',
-      ],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
     });
     
     const page = await browser.newPage();
