@@ -94,9 +94,9 @@ export async function GET(
     // Table Header with gray background
     y -= 30;
     const descX = 50;
-    const qtyX = 350;
-    const priceX = 430;
-    const totalX = 510;
+    const qtyX = 320;
+    const priceX = 400;
+    const totalX = 480;
     const headerY = y;
     
     // Gray background for header
@@ -109,7 +109,7 @@ export async function GET(
     });
     
     page1.drawText('DESCRIPTION', { x: descX, y, size: 9, font: fontBold });
-    page1.drawText('QTY', { x: qtyX, y, size: 9, font: fontBold });
+    page1.drawText('QTY', { x: qtyX + 5, y, size: 9, font: fontBold });
     page1.drawText('PRICE', { x: priceX, y, size: 9, font: fontBold });
     page1.drawText('TOTAL', { x: totalX, y, size: 9, font: fontBold });
     
@@ -122,7 +122,7 @@ export async function GET(
     for (const item of invoice.items || []) {
       y -= 20;
       page1.drawText((item.description || '').substring(0, 40), { x: descX, y, size: 10, font });
-      page1.drawText(String(item.quantity), { x: qtyX + 10, y, size: 10, font });
+      page1.drawText(String(item.quantity), { x: qtyX + 5, y, size: 10, font });
       page1.drawText(`${item.price.toFixed(2)} ${currency}`, { x: priceX, y, size: 10, font });
       page1.drawText(`${item.total.toFixed(2)} ${currency}`, { x: totalX, y, size: 10, font });
       // Line under each row
