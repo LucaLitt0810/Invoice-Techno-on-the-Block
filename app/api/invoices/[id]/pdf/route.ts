@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import puppeteer from 'puppeteer';
+
+// Dynamic import for puppeteer to avoid issues with Vercel
+let puppeteer: any;
 
 export async function GET(
   request: NextRequest,
@@ -9,6 +11,9 @@ export async function GET(
   let browser;
   
   try {
+    // Dynamic import puppeteer
+    puppeteer = await import('puppeteer');
+    
     const supabase = createClient();
     
     // Get invoice with related data
@@ -357,7 +362,17 @@ export async function GET(
     // Launch browser and generate PDF
     browser = await puppeteer.launch({
       headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu',
+      ],
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     });
     
     const page = await browser.newPage();
