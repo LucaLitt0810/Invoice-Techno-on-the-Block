@@ -9,9 +9,6 @@ const nextConfig = {
   output: 'standalone',
   staticPageGenerationTimeout: 1000,
   webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push('playwright');
-    }
     return config;
   },
   images: {

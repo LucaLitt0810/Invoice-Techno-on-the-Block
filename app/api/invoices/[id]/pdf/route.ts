@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -21,74 +22,77 @@ export async function GET(
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    const formatCurrency = (amount: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: invoice.currency || 'EUR' }).format(amount);
-    const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('de-DE') : '-';
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595.28, 841.89]);
+    const { width, height } = page.getSize();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Invoice ${invoice.invoice_number}</title>
-<style>
-@page { margin: 40px; size: A4; }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: Helvetica, Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #333; }
-.header { border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
-.invoice-title { font-size: 24pt; font-weight: bold; text-transform: uppercase; }
-.invoice-number { color: #666; margin-top: 5px; }
-.parties { display: flex; justify-content: space-between; margin-bottom: 30px; }
-.party { width: 45%; }
-.party-label { font-size: 9pt; text-transform: uppercase; color: #666; margin-bottom: 10px; }
-.party-name { font-weight: bold; font-size: 13pt; }
-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-th { background: #f5f5f5; font-weight: bold; }
-.totals { margin-top: 20px; text-align: right; }
-.totals-row { display: flex; justify-content: flex-end; padding: 5px 0; }
-.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 9pt; color: #666; text-align: center; }
-</style></head><body>
-<div class="header">
-  <div class="invoice-title">INVOICE</div>
-  <div class="invoice-number">${invoice.invoice_number} | ${formatDate(invoice.invoice_date)}</div>
-</div>
-<div class="parties">
-  <div class="party">
-    <div class="party-label">From</div>
-    <div class="party-name">${invoice.company?.name}</div>
-    <p>${invoice.company?.street}</p>
-    <p>${invoice.company?.postal_code} ${invoice.company?.city}</p>
-    <p>${invoice.company?.email}</p>
-  </div>
-  <div class="party">
-    <div class="party-label">To</div>
-    <div class="party-name">${invoice.customer?.company_name}</div>
-    <p>${invoice.customer?.street}</p>
-    <p>${invoice.customer?.postal_code} ${invoice.customer?.city}</p>
-    <p>${invoice.customer?.email}</p>
-  </div>
-</div>
-<table>
-  <thead><tr><th>Description</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-  <tbody>
-    ${invoice.items?.map((item: any) => `<tr><td>${item.description}</td><td>${item.quantity}</td><td>${formatCurrency(item.price)}</td><td>${formatCurrency(item.total)}</td></tr>`).join('') || ''}
-  </tbody>
-</table>
-<div class="totals">
-  <div class="totals-row"><span>Subtotal: ${formatCurrency(invoice.subtotal)}</span></div>
-  <div class="totals-row"><span>Tax (${invoice.tax_rate}%): ${formatCurrency(invoice.tax)}</span></div>
-  <div class="totals-row" style="font-weight: bold; font-size: 14pt;"><span>Total: ${formatCurrency(invoice.total)}</span></div>
-</div>
-<div class="footer">
-  <p>Due Date: ${formatDate(invoice.due_date)} | Status: ${invoice.status.toUpperCase()}</p>
-  ${invoice.notes ? `<p>Notes: ${invoice.notes}</p>` : ''}
-</div>
-</body></html>`;
+    let y = height - 50;
+    const currency = invoice.currency || 'EUR';
 
-    const { chromium } = await import('playwright');
-    const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle' });
-    const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' } });
-    await browser.close();
+    // Header
+    page.drawText('INVOICE', { x: 50, y, size: 28, font: fontBold });
+    y -= 25;
+    page.drawText(`${invoice.invoice_number} | ${new Date(invoice.invoice_date).toLocaleDateString('de-DE')}`, { x: 50, y, size: 11, font });
+    y -= 50;
 
-    return new NextResponse(pdf, {
+    // Parties
+    page.drawText('FROM', { x: 50, y, size: 9, font, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText('TO', { x: 300, y, size: 9, font, color: rgb(0.4, 0.4, 0.4) });
+    y -= 18;
+    page.drawText(invoice.company?.name || '', { x: 50, y, size: 12, font: fontBold });
+    page.drawText(invoice.customer?.company_name || '', { x: 300, y, size: 12, font: fontBold });
+    y -= 14;
+    page.drawText(invoice.company?.street || '', { x: 50, y, size: 10, font });
+    page.drawText(invoice.customer?.street || '', { x: 300, y, size: 10, font });
+    y -= 14;
+    page.drawText(`${invoice.company?.postal_code || ''} ${invoice.company?.city || ''}`, { x: 50, y, size: 10, font });
+    page.drawText(`${invoice.customer?.postal_code || ''} ${invoice.customer?.city || ''}`, { x: 300, y, size: 10, font });
+    y -= 50;
+
+    // Items header
+    page.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
+    y -= 20;
+    page.drawText('Description', { x: 50, y, size: 10, font: fontBold });
+    page.drawText('Qty', { x: 350, y, size: 10, font: fontBold });
+    page.drawText('Price', { x: 420, y, size: 10, font: fontBold });
+    page.drawText('Total', { x: 490, y, size: 10, font: fontBold });
+    y -= 10;
+    page.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
+    y -= 20;
+
+    // Items
+    for (const item of invoice.items || []) {
+      page.drawText(item.description || '', { x: 50, y, size: 10, font });
+      page.drawText(String(item.quantity), { x: 350, y, size: 10, font });
+      page.drawText(`${item.price.toFixed(2)}`, { x: 420, y, size: 10, font });
+      page.drawText(`${item.total.toFixed(2)}`, { x: 490, y, size: 10, font });
+      y -= 18;
+    }
+
+    y -= 20;
+    page.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
+    y -= 20;
+
+    // Totals
+    page.drawText(`Subtotal:`, { x: 380, y, size: 10, font });
+    page.drawText(`${invoice.subtotal.toFixed(2)} ${currency}`, { x: 480, y, size: 10, font });
+    y -= 16;
+    page.drawText(`Tax (${invoice.tax_rate}%):`, { x: 380, y, size: 10, font });
+    page.drawText(`${invoice.tax.toFixed(2)} ${currency}`, { x: 480, y, size: 10, font });
+    y -= 20;
+    page.drawText(`TOTAL:`, { x: 380, y, size: 12, font: fontBold });
+    page.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: 480, y, size: 12, font: fontBold });
+    y -= 30;
+
+    // Status and Due Date
+    page.drawText(`Status: ${invoice.status.toUpperCase()}`, { x: 50, y, size: 11, font });
+    page.drawText(`Due Date: ${new Date(invoice.due_date).toLocaleDateString('de-DE')}`, { x: 50, y: y - 15, size: 11, font });
+
+    const pdfBytes = await pdfDoc.save();
+
+    return new NextResponse(pdfBytes, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="Invoice-${invoice.invoice_number}.pdf"`,
