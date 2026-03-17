@@ -28,6 +28,7 @@ export async function GET(
     
     const currency = invoice.currency || 'EUR';
     const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('de-DE') : '-';
+    const formatNumber = (num: number) => num.toFixed(2).replace('.', ',');
     
     // Page 1 - Main Invoice
     const page1 = pdfDoc.addPage([595.28, 841.89]);
@@ -67,97 +68,104 @@ export async function GET(
     
     // Divider line
     y = 640;
-    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 2 });
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
-    // Invoice Info Row (3 columns - no status)
+    // Invoice Info Row (4 columns with status)
     y = 600;
     const col1 = 50;
-    const col2 = 220;
-    const col3 = 390;
+    const col2 = 165;
+    const col3 = 300;
+    const col4 = 435;
     
     page1.drawText('INVOICE NUMBER', { x: col1, y, size: 9, font });
     page1.drawText('INVOICE DATE', { x: col2, y, size: 9, font });
     page1.drawText('DUE DATE', { x: col3, y, size: 9, font });
+    page1.drawText('STATUS', { x: col4, y, size: 9, font });
     
     y -= 20;
     page1.drawText(invoice.invoice_number, { x: col1, y, size: 11, font: fontBold });
     page1.drawText(formatDate(invoice.invoice_date), { x: col2, y, size: 11, font: fontBold });
     page1.drawText(formatDate(invoice.due_date), { x: col3, y, size: 11, font: fontBold });
+    page1.drawText(invoice.status?.toUpperCase() || '', { x: col4, y, size: 11, font: fontBold });
     
-    // Divider - full width to match table
+    // Divider
     y -= 20;
-    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 2 });
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
     // Table Header with gray background
-    y -= 30;
+    y -= 25;
     const descX = 50;
-    const qtyX = 300;
-    const priceX = 380;
-    const totalX = 460;
-    const headerY = y;
+    const qtyX = 280;
+    const unitX = 340;
+    const priceX = 400;
+    const totalX = 470;
     
     // Gray background for header
     page1.drawRectangle({
       x: 50,
       y: y - 5,
       width: 480,
-      height: 25,
+      height: 22,
       color: rgb(0.96, 0.96, 0.96),
     });
     
     page1.drawText('DESCRIPTION', { x: descX, y, size: 9, font: fontBold });
-    page1.drawText('QTY', { x: qtyX + 5, y, size: 9, font: fontBold });
+    page1.drawText('QTY', { x: qtyX, y, size: 9, font: fontBold });
+    page1.drawText('UNIT', { x: unitX, y, size: 9, font: fontBold });
     page1.drawText('PRICE', { x: priceX, y, size: 9, font: fontBold });
     page1.drawText('TOTAL', { x: totalX, y, size: 9, font: fontBold });
     
     // Line under header
-    y -= 25;
-    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
+    y -= 22;
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 0.5 });
     
     // Table Rows with lines
-    y -= 5;
+    y -= 10;
     for (const item of invoice.items || []) {
-      y -= 20;
       page1.drawText((item.description || '').substring(0, 40), { x: descX, y, size: 10, font });
-      page1.drawText(String(item.quantity), { x: qtyX + 5, y, size: 10, font });
-      page1.drawText(`${item.price.toFixed(2)} ${currency}`, { x: priceX, y, size: 10, font });
-      page1.drawText(`${item.total.toFixed(2)} ${currency}`, { x: totalX, y, size: 10, font });
+      page1.drawText(String(item.quantity), { x: qtyX + 20, y, size: 10, font });
+      page1.drawText(item.unit || 'piece', { x: unitX, y, size: 10, font });
+      page1.drawText(`${formatNumber(item.price)} ${currency}`, { x: priceX - 10, y, size: 10, font });
+      page1.drawText(`${formatNumber(item.total)} ${currency}`, { x: totalX - 10, y, size: 10, font });
       // Line under each row
-      y -= 5;
-      page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 0.5 });
+      y -= 18;
+      page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 0.3 });
+      y -= 8;
     }
     
-    // Totals section with full width lines
-    y -= 30;
+    // Totals section
+    y -= 20;
     const labelX = 380;
-    const valueX = 460;
+    const valueX = 470;
     
     // Line above subtotal (starts at Subtotal label)
-    page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 1 });
-    y -= 20;
+    page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 0.5 });
+    y -= 18;
     page1.drawText('Subtotal', { x: labelX, y, size: 10, font });
-    page1.drawText(`${invoice.subtotal.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
-    y -= 20;
+    page1.drawText(`${formatNumber(invoice.subtotal)} ${currency}`, { x: valueX - 10, y, size: 10, font });
+    y -= 18;
     page1.drawText(`Tax (${invoice.tax_rate}%)`, { x: labelX, y, size: 10, font });
-    page1.drawText(`${invoice.tax.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
+    page1.drawText(`${formatNumber(invoice.tax)} ${currency}`, { x: valueX - 10, y, size: 10, font });
     
-    // Line above TOTAL (starts at Subtotal label)
-    y -= 10;
+    // Line above TOTAL
+    y -= 12;
     page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 1 });
-    y -= 25;
+    y -= 22;
     page1.drawText('TOTAL', { x: labelX, y, size: 12, font: fontBold });
-    page1.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: valueX, y, size: 12, font: fontBold });
+    page1.drawText(`${formatNumber(invoice.total)} ${currency}`, { x: valueX - 10, y, size: 12, font: fontBold });
     
-    // Line below TOTAL (aligned with totals lines)
-    y -= 10;
-    page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 2 });
+    // Line below TOTAL
+    y -= 12;
+    page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 1 });
     
-    // Footer
-    y = 120;
+    // Footer line
+    y = 100;
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 0.3 });
+    y -= 15;
     page1.drawText('Thank you for your business!', { x: 50, y, size: 10, font });
     y -= 15;
     page1.drawText(`Questions? Contact: ${invoice.company?.email}`, { x: 50, y, size: 9, font });
-    y -= 15;
+    y -= 12;
     page1.drawText('Payment information on next page', { x: 50, y, size: 8, font });
     
     // Page 2 - Payment Information
@@ -211,7 +219,7 @@ export async function GET(
     // Row 2: Amount Due
     page2.drawLine({ start: { x: leftX, y: contentY + 25 }, end: { x: rightX, y: contentY + 25 }, thickness: 1 });
     page2.drawText('AMOUNT DUE', { x: leftX, y: contentY, size: 10, font: fontBold });
-    const amountText = `${invoice.total.toFixed(2)} ${currency}`;
+    const amountText = `${formatNumber(invoice.total)} ${currency}`;
     const amountWidth = font.widthOfTextAtSize(amountText, 11);
     page2.drawText(amountText, { x: rightX - amountWidth, y: contentY, size: 11, font });
     contentY -= lineHeight;
