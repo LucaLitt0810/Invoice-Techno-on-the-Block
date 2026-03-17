@@ -44,20 +44,21 @@ export async function GET(
     y -= 12;
     page1.drawText(invoice.company?.email || '', { x: 50, y, size: 9, font });
     
-    // INVOICE TO (right)
+    // INVOICE TO (right aligned)
     y = 800;
-    page1.drawText('INVOICE TO:', { x: 400, y, size: 9, font });
+    const rightCol = 420;
+    page1.drawText('INVOICE TO:', { x: rightCol, y, size: 9, font });
     y -= 15;
-    page1.drawText(invoice.customer?.company_name || '', { x: 400, y, size: 12, font: fontBold });
+    page1.drawText(invoice.customer?.company_name || '', { x: rightCol, y, size: 12, font: fontBold });
     y -= 15;
-    page1.drawText(invoice.customer?.street || '', { x: 400, y, size: 10, font });
+    page1.drawText(invoice.customer?.street || '', { x: rightCol, y, size: 10, font });
     y -= 12;
-    page1.drawText(`${invoice.customer?.postal_code || ''} ${invoice.customer?.city || ''}`, { x: 400, y, size: 10, font });
+    page1.drawText(`${invoice.customer?.postal_code || ''} ${invoice.customer?.city || ''}`, { x: rightCol, y, size: 10, font });
     y -= 12;
-    page1.drawText(invoice.customer?.country || '', { x: 400, y, size: 10, font });
+    page1.drawText(invoice.customer?.country || '', { x: rightCol, y, size: 10, font });
     if (invoice.customer?.contact_person) {
       y -= 12;
-      page1.drawText(`Attn: ${invoice.customer.contact_person}`, { x: 400, y, size: 9, font });
+      page1.drawText(`Attn: ${invoice.customer.contact_person}`, { x: rightCol, y, size: 9, font });
     }
     
     // Title
@@ -65,63 +66,76 @@ export async function GET(
     page1.drawText('INVOICE', { x: 50, y, size: 32, font: fontBold });
     
     // Divider line
-    y = 650;
+    y = 640;
     page1.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 2 });
     
-    // Invoice Info Row
-    y = 620;
-    page1.drawText('INVOICE NUMBER', { x: 50, y, size: 9, font });
-    page1.drawText('INVOICE DATE', { x: 180, y, size: 9, font });
-    page1.drawText('DUE DATE', { x: 310, y, size: 9, font });
-    page1.drawText('STATUS', { x: 440, y, size: 9, font });
+    // Invoice Info Row - aligned columns
+    y = 600;
+    const col1 = 50;
+    const col2 = 180;
+    const col3 = 310;
+    const col4 = 440;
     
-    y -= 18;
-    page1.drawText(invoice.invoice_number, { x: 50, y, size: 11, font: fontBold });
-    page1.drawText(formatDate(invoice.invoice_date), { x: 180, y, size: 11, font: fontBold });
-    page1.drawText(formatDate(invoice.due_date), { x: 310, y, size: 11, font: fontBold });
-    page1.drawText(invoice.status.toUpperCase(), { x: 440, y, size: 11, font: fontBold });
+    page1.drawText('INVOICE NUMBER', { x: col1, y, size: 9, font });
+    page1.drawText('INVOICE DATE', { x: col2, y, size: 9, font });
+    page1.drawText('DUE DATE', { x: col3, y, size: 9, font });
+    page1.drawText('STATUS', { x: col4, y, size: 9, font });
+    
+    y -= 20;
+    page1.drawText(invoice.invoice_number, { x: col1, y, size: 11, font: fontBold });
+    page1.drawText(formatDate(invoice.invoice_date), { x: col2, y, size: 11, font: fontBold });
+    page1.drawText(formatDate(invoice.due_date), { x: col3, y, size: 11, font: fontBold });
+    page1.drawText(invoice.status.toUpperCase(), { x: col4, y, size: 11, font: fontBold });
     
     // Divider
-    y -= 15;
+    y -= 20;
     page1.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 2 });
     
-    // Table Header
-    y -= 30;
-    page1.drawText('DESCRIPTION', { x: 50, y, size: 9, font: fontBold });
-    page1.drawText('QTY', { x: 350, y, size: 9, font: fontBold });
-    page1.drawText('PRICE', { x: 430, y, size: 9, font: fontBold });
-    page1.drawText('TOTAL', { x: 510, y, size: 9, font: fontBold });
+    // Table Header - proper column alignment
+    y -= 35;
+    const descX = 50;
+    const qtyX = 350;
+    const priceX = 430;
+    const totalX = 510;
     
-    // Table Rows
-    y -= 20;
+    page1.drawText('DESCRIPTION', { x: descX, y, size: 9, font: fontBold });
+    page1.drawText('QTY', { x: qtyX, y, size: 9, font: fontBold });
+    page1.drawText('PRICE', { x: priceX, y, size: 9, font: fontBold });
+    page1.drawText('TOTAL', { x: totalX, y, size: 9, font: fontBold });
+    
+    // Table Rows with proper alignment
+    y -= 25;
     for (const item of invoice.items || []) {
-      page1.drawText((item.description || '').substring(0, 40), { x: 50, y, size: 10, font });
-      page1.drawText(String(item.quantity), { x: 355, y, size: 10, font });
-      page1.drawText(`${item.price.toFixed(2)} ${currency}`, { x: 430, y, size: 10, font });
-      page1.drawText(`${item.total.toFixed(2)} ${currency}`, { x: 510, y, size: 10, font });
-      y -= 18;
+      page1.drawText((item.description || '').substring(0, 40), { x: descX, y, size: 10, font });
+      page1.drawText(String(item.quantity), { x: qtyX + 10, y, size: 10, font });
+      page1.drawText(`${item.price.toFixed(2)} ${currency}`, { x: priceX, y, size: 10, font });
+      page1.drawText(`${item.total.toFixed(2)} ${currency}`, { x: totalX, y, size: 10, font });
+      y -= 22;
     }
     
     // Divider
-    y -= 10;
+    y -= 5;
     page1.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 1 });
     
-    // Totals
+    // Totals - right aligned
     y -= 25;
-    page1.drawText('Subtotal', { x: 400, y, size: 10, font });
-    page1.drawText(`${invoice.subtotal.toFixed(2)} ${currency}`, { x: 510, y, size: 10, font });
-    y -= 18;
-    page1.drawText(`Tax (${invoice.tax_rate}%)`, { x: 400, y, size: 10, font });
-    page1.drawText(`${invoice.tax.toFixed(2)} ${currency}`, { x: 510, y, size: 10, font });
+    const labelX = 380;
+    const valueX = 510;
+    
+    page1.drawText('Subtotal', { x: labelX, y, size: 10, font });
+    page1.drawText(`${invoice.subtotal.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
+    y -= 20;
+    page1.drawText(`Tax (${invoice.tax_rate}%)`, { x: labelX, y, size: 10, font });
+    page1.drawText(`${invoice.tax.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
     
     y -= 15;
     page1.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 2 });
-    y -= 20;
-    page1.drawText('TOTAL', { x: 400, y, size: 12, font: fontBold });
-    page1.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: 510, y, size: 12, font: fontBold });
+    y -= 25;
+    page1.drawText('TOTAL', { x: labelX, y, size: 12, font: fontBold });
+    page1.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: valueX, y, size: 12, font: fontBold });
     
     // Footer
-    y = 100;
+    y = 120;
     page1.drawText('Thank you for your business!', { x: 50, y, size: 10, font });
     y -= 15;
     page1.drawText(`Questions? Contact: ${invoice.company?.email}`, { x: 50, y, size: 9, font });
@@ -136,52 +150,58 @@ export async function GET(
     page2.drawText('Techno on the Block', { x: 50, y, size: 14, font: fontBold });
     page2.drawText('Invoice Center', { x: 50, y: y - 15, size: 10, font });
     
-    y = 700;
+    y = 680;
     // Centered Title
     page2.drawText('PAYMENT INFORMATION', { x: 170, y, size: 24, font: fontBold });
     y -= 25;
     page2.drawText(`Invoice ${invoice.invoice_number}`, { x: 250, y, size: 12, font });
     
-    // Payment Box
+    // Payment Box - centered
     y -= 60;
-    page2.drawRectangle({ x: 100, y: y - 200, width: 400, height: 220, borderWidth: 2, borderColor: rgb(0, 0, 0) });
+    const boxX = 100;
+    const boxWidth = 400;
+    page2.drawRectangle({ x: boxX, y: y - 200, width: boxWidth, height: 220, borderWidth: 2, borderColor: rgb(0, 0, 0) });
+    
+    // Payment info rows with proper alignment
+    const leftX = boxX + 30;
+    const rightX = boxX + boxWidth - 30;
     
     y -= 30;
-    page2.drawText('INVOICE NUMBER', { x: 130, y, size: 10, font: fontBold });
-    page2.drawText(invoice.invoice_number, { x: 380, y, size: 11, font });
+    page2.drawText('INVOICE NUMBER', { x: leftX, y, size: 10, font: fontBold });
+    page2.drawText(invoice.invoice_number, { x: rightX - 100, y, size: 11, font });
     
     y -= 35;
-    page2.drawLine({ start: { x: 130, y: y + 10 }, end: { x: 470, y: y + 10 }, thickness: 1 });
-    page2.drawText('AMOUNT DUE', { x: 130, y, size: 10, font: fontBold });
-    page2.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: 380, y, size: 11, font });
+    page2.drawLine({ start: { x: leftX, y: y + 15 }, end: { x: rightX, y: y + 15 }, thickness: 1 });
+    page2.drawText('AMOUNT DUE', { x: leftX, y, size: 10, font: fontBold });
+    page2.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: rightX - 100, y, size: 11, font });
     
     if (invoice.company?.bank_name) {
       y -= 35;
-      page2.drawLine({ start: { x: 130, y: y + 10 }, end: { x: 470, y: y + 10 }, thickness: 1 });
-      page2.drawText('BANK NAME', { x: 130, y, size: 10, font: fontBold });
-      page2.drawText(invoice.company.bank_name, { x: 380, y, size: 11, font });
+      page2.drawLine({ start: { x: leftX, y: y + 15 }, end: { x: rightX, y: y + 15 }, thickness: 1 });
+      page2.drawText('BANK NAME', { x: leftX, y, size: 10, font: fontBold });
+      page2.drawText(invoice.company.bank_name, { x: rightX - 100, y, size: 11, font });
     }
     
     if (invoice.company?.iban) {
       y -= 35;
-      page2.drawLine({ start: { x: 130, y: y + 10 }, end: { x: 470, y: y + 10 }, thickness: 1 });
-      page2.drawText('IBAN', { x: 130, y, size: 10, font: fontBold });
-      page2.drawText(invoice.company.iban, { x: 380, y, size: 11, font });
+      page2.drawLine({ start: { x: leftX, y: y + 15 }, end: { x: rightX, y: y + 15 }, thickness: 1 });
+      page2.drawText('IBAN', { x: leftX, y, size: 10, font: fontBold });
+      page2.drawText(invoice.company.iban, { x: rightX - 160, y, size: 11, font });
     }
     
     if (invoice.company?.bic) {
       y -= 35;
-      page2.drawLine({ start: { x: 130, y: y + 10 }, end: { x: 470, y: y + 10 }, thickness: 1 });
-      page2.drawText('BIC', { x: 130, y, size: 10, font: fontBold });
-      page2.drawText(invoice.company.bic, { x: 380, y, size: 11, font });
+      page2.drawLine({ start: { x: leftX, y: y + 15 }, end: { x: rightX, y: y + 15 }, thickness: 1 });
+      page2.drawText('BIC', { x: leftX, y, size: 10, font: fontBold });
+      page2.drawText(invoice.company.bic, { x: rightX - 100, y, size: 11, font });
     }
     
     y -= 35;
-    page2.drawLine({ start: { x: 130, y: y + 10 }, end: { x: 470, y: y + 10 }, thickness: 1 });
-    page2.drawText('REFERENCE', { x: 130, y, size: 10, font: fontBold });
-    page2.drawText(invoice.invoice_number, { x: 380, y, size: 11, font });
+    page2.drawLine({ start: { x: leftX, y: y + 15 }, end: { x: rightX, y: y + 15 }, thickness: 1 });
+    page2.drawText('REFERENCE', { x: leftX, y, size: 10, font: fontBold });
+    page2.drawText(invoice.invoice_number, { x: rightX - 100, y, size: 11, font });
     
-    // Footer note
+    // Footer note - centered
     y = 200;
     page2.drawText('Please use the invoice number as payment reference.', { x: 150, y, size: 10, font });
     y -= 20;
