@@ -148,9 +148,9 @@ export async function GET(
     page1.drawText('TOTAL', { x: labelX, y, size: 12, font: fontBold });
     page1.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: valueX, y, size: 12, font: fontBold });
     
-    // Line below TOTAL (full width)
+    // Line below TOTAL (aligned with totals lines)
     y -= 10;
-    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 2 });
+    page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 2 });
     
     // Footer
     y = 120;
