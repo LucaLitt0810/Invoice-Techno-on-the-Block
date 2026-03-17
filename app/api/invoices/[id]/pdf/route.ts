@@ -67,11 +67,11 @@ export async function GET(
     page1.drawText('INVOICE', { x: 50, y, size: 32, font: fontBold });
     
     // Divider line
-    y = 640;
+    y = 615;
     page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
     // Invoice Info Row (4 columns with status)
-    y = 600;
+    y = 590;
     const col1 = 50;
     const col2 = 165;
     const col3 = 300;
@@ -82,14 +82,14 @@ export async function GET(
     page1.drawText('DUE DATE', { x: col3, y, size: 9, font });
     page1.drawText('STATUS', { x: col4, y, size: 9, font });
     
-    y -= 20;
+    y -= 15;
     page1.drawText(invoice.invoice_number, { x: col1, y, size: 11, font: fontBold });
     page1.drawText(formatDate(invoice.invoice_date), { x: col2, y, size: 11, font: fontBold });
     page1.drawText(formatDate(invoice.due_date), { x: col3, y, size: 11, font: fontBold });
     page1.drawText(invoice.status?.toUpperCase() || '', { x: col4, y, size: 11, font: fontBold });
     
     // Divider
-    y -= 20;
+    y -= 12;
     page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
     // Table Header with gray background
