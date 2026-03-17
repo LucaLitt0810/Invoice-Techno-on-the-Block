@@ -98,6 +98,7 @@ export type InvoiceItem = {
   quantity: number;
   price: number;
   total: number;
+  unit: string | null;
   created_at: string;
 };
 
