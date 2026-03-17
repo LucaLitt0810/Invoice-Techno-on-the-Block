@@ -85,7 +85,7 @@ export default function InvoiceDetailPage() {
       toast.success('Invoice sent successfully');
       
       // Update invoice status to sent
-      await supabase.from('invoices').update({ status: 'sent' }).eq('id', params.id);
+      await (supabase.from('invoices') as any).update({ status: 'sent' }).eq('id', params.id);
       fetchInvoice();
     } catch (error) {
       console.error('Error sending invoice:', error);
@@ -97,8 +97,8 @@ export default function InvoiceDetailPage() {
 
   const handleMarkAsPaid = async () => {
     try {
-      const { error } = await supabase
-        .from('invoices')
+      const { error } = await (supabase
+        .from('invoices') as any)
         .update({ status: 'paid' })
         .eq('id', params.id);
 
