@@ -130,7 +130,7 @@ export async function GET(
     // Totals section with full width lines
     y -= 30;
     const labelX = 380;
-    const valueX = 480;
+    const valueX = 460;
     
     // Line above subtotal (starts at Subtotal label)
     page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 1 });
