@@ -10,8 +10,7 @@ const nextConfig = {
   staticPageGenerationTimeout: 1000,
   webpack: (config, { isServer }) => {
     if (isServer) {
-      config.externals.push('puppeteer-core');
-      config.externals.push('@sparticuz/chromium');
+      config.externals.push('playwright');
     }
     return config;
   },
