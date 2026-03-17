@@ -8,6 +8,13 @@ const nextConfig = {
   },
   output: 'standalone',
   staticPageGenerationTimeout: 1000,
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push('puppeteer-core');
+      config.externals.push('@sparticuz/chromium');
+    }
+    return config;
+  },
   images: {
     domains: ['localhost', '*.supabase.co'],
     remotePatterns: [
