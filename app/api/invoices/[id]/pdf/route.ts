@@ -132,8 +132,8 @@ export async function GET(
     const labelX = 380;
     const valueX = 480;
     
-    // Line above subtotal (full width like gray header)
-    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
+    // Line above subtotal (starts at Subtotal label)
+    page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 1 });
     y -= 20;
     page1.drawText('Subtotal', { x: labelX, y, size: 10, font });
     page1.drawText(`${invoice.subtotal.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
@@ -141,9 +141,9 @@ export async function GET(
     page1.drawText(`Tax (${invoice.tax_rate}%)`, { x: labelX, y, size: 10, font });
     page1.drawText(`${invoice.tax.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
     
-    // Line above TOTAL
+    // Line above TOTAL (starts at Subtotal label)
     y -= 10;
-    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
+    page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 1 });
     y -= 25;
     page1.drawText('TOTAL', { x: labelX, y, size: 12, font: fontBold });
     page1.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: valueX, y, size: 12, font: fontBold });
