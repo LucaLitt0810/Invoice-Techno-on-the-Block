@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { PDFDocument, StandardFonts } from 'pdf-lib';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -139,7 +139,7 @@ export async function GET(
     
     // Payment Box
     y -= 60;
-    page2.drawRectangle({ x: 100, y: y - 200, width: 400, height: 220, borderWidth: 2, borderColor: { r: 0, g: 0, b: 0 } });
+    page2.drawRectangle({ x: 100, y: y - 200, width: 400, height: 220, borderWidth: 2, borderColor: rgb(0, 0, 0) });
     
     y -= 30;
     page2.drawText('INVOICE NUMBER', { x: 130, y, size: 10, font: fontBold });
