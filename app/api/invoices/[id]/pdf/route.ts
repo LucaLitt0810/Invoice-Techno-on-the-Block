@@ -130,8 +130,13 @@ export async function GET(
     
     // Page 2 - Payment Information
     const page2 = pdfDoc.addPage([595.28, 841.89]);
-    y = 750;
+    y = 780;
     
+    // Brand Header
+    page2.drawText('Techno on the Block', { x: 50, y, size: 14, font: fontBold });
+    page2.drawText('Invoice Center', { x: 50, y: y - 15, size: 10, font });
+    
+    y = 700;
     // Centered Title
     page2.drawText('PAYMENT INFORMATION', { x: 170, y, size: 24, font: fontBold });
     y -= 25;
