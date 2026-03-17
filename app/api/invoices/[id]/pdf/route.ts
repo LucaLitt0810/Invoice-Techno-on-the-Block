@@ -67,7 +67,7 @@ export async function GET(
     
     // Divider line
     y = 640;
-    page1.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 2 });
+    page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 2 });
     
     // Invoice Info Row (3 columns - no status)
     y = 600;
@@ -91,9 +91,9 @@ export async function GET(
     // Table Header with gray background
     y -= 30;
     const descX = 50;
-    const qtyX = 320;
-    const priceX = 400;
-    const totalX = 480;
+    const qtyX = 300;
+    const priceX = 380;
+    const totalX = 460;
     const headerY = y;
     
     // Gray background for header
@@ -204,20 +204,24 @@ export async function GET(
     
     // Row 1: Invoice Number
     page2.drawText('INVOICE NUMBER', { x: leftX, y: contentY, size: 10, font: fontBold });
-    page2.drawText(invoice.invoice_number, { x: rightX - 80, y: contentY, size: 11, font });
+    const invoiceNumWidth = font.widthOfTextAtSize(invoice.invoice_number, 11);
+    page2.drawText(invoice.invoice_number, { x: rightX - invoiceNumWidth, y: contentY, size: 11, font });
     contentY -= lineHeight;
     
     // Row 2: Amount Due
     page2.drawLine({ start: { x: leftX, y: contentY + 25 }, end: { x: rightX, y: contentY + 25 }, thickness: 1 });
     page2.drawText('AMOUNT DUE', { x: leftX, y: contentY, size: 10, font: fontBold });
-    page2.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: rightX - 100, y: contentY, size: 11, font });
+    const amountText = `${invoice.total.toFixed(2)} ${currency}`;
+    const amountWidth = font.widthOfTextAtSize(amountText, 11);
+    page2.drawText(amountText, { x: rightX - amountWidth, y: contentY, size: 11, font });
     contentY -= lineHeight;
     
     // Row 3: Bank Name (if exists)
     if (invoice.company?.bank_name) {
       page2.drawLine({ start: { x: leftX, y: contentY + 25 }, end: { x: rightX, y: contentY + 25 }, thickness: 1 });
       page2.drawText('BANK NAME', { x: leftX, y: contentY, size: 10, font: fontBold });
-      page2.drawText(invoice.company.bank_name, { x: rightX - 80, y: contentY, size: 11, font });
+      const bankNameWidth = font.widthOfTextAtSize(invoice.company.bank_name, 11);
+      page2.drawText(invoice.company.bank_name, { x: rightX - bankNameWidth, y: contentY, size: 11, font });
       contentY -= lineHeight;
     }
     
@@ -225,7 +229,8 @@ export async function GET(
     if (invoice.company?.iban) {
       page2.drawLine({ start: { x: leftX, y: contentY + 25 }, end: { x: rightX, y: contentY + 25 }, thickness: 1 });
       page2.drawText('IBAN', { x: leftX, y: contentY, size: 10, font: fontBold });
-      page2.drawText(invoice.company.iban, { x: rightX - 160, y: contentY, size: 11, font });
+      const ibanWidth = font.widthOfTextAtSize(invoice.company.iban, 11);
+      page2.drawText(invoice.company.iban, { x: rightX - ibanWidth, y: contentY, size: 11, font });
       contentY -= lineHeight;
     }
     
@@ -233,14 +238,16 @@ export async function GET(
     if (invoice.company?.bic) {
       page2.drawLine({ start: { x: leftX, y: contentY + 25 }, end: { x: rightX, y: contentY + 25 }, thickness: 1 });
       page2.drawText('BIC', { x: leftX, y: contentY, size: 10, font: fontBold });
-      page2.drawText(invoice.company.bic, { x: rightX - 80, y: contentY, size: 11, font });
+      const bicWidth = font.widthOfTextAtSize(invoice.company.bic, 11);
+      page2.drawText(invoice.company.bic, { x: rightX - bicWidth, y: contentY, size: 11, font });
       contentY -= lineHeight;
     }
     
     // Row 6: Reference (always last, inside box)
     page2.drawLine({ start: { x: leftX, y: contentY + 25 }, end: { x: rightX, y: contentY + 25 }, thickness: 1 });
     page2.drawText('REFERENCE', { x: leftX, y: contentY, size: 10, font: fontBold });
-    page2.drawText(invoice.invoice_number, { x: rightX - 80, y: contentY, size: 11, font });
+    const refWidth = font.widthOfTextAtSize(invoice.invoice_number, 11);
+    page2.drawText(invoice.invoice_number, { x: rightX - refWidth, y: contentY, size: 11, font });
     
     // Footer note - centered below box
     const footerY = boxTopY - boxHeight - 50;
