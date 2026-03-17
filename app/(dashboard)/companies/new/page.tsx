@@ -68,6 +68,7 @@ export default function NewCompanyPage() {
       const insertData: Record<string, any> = {
         ...formData,
         logo_url: logoUrl,
+        user_id: user.id,
       };
       
       const { data, error } = await (supabase
