@@ -89,6 +89,29 @@ export async function GET(
     // Status and Due Date
     page.drawText(`Status: ${invoice.status.toUpperCase()}`, { x: 50, y, size: 11, font });
     page.drawText(`Due Date: ${new Date(invoice.due_date).toLocaleDateString('de-DE')}`, { x: 50, y: y - 15, size: 11, font });
+    
+    // Payment Instructions
+    y -= 50;
+    page.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
+    y -= 20;
+    page.drawText('PAYMENT INSTRUCTIONS', { x: 50, y, size: 12, font: fontBold });
+    y -= 18;
+    
+    if (invoice.company?.bank_name) {
+      page.drawText(`Bank: ${invoice.company.bank_name}`, { x: 50, y, size: 10, font });
+      y -= 14;
+    }
+    if (invoice.company?.iban) {
+      page.drawText(`IBAN: ${invoice.company.iban}`, { x: 50, y, size: 10, font });
+      y -= 14;
+    }
+    if (invoice.company?.bic) {
+      page.drawText(`BIC: ${invoice.company.bic}`, { x: 50, y, size: 10, font });
+      y -= 14;
+    }
+    
+    y -= 10;
+    page.drawText(`Please include invoice number ${invoice.invoice_number} in payment reference.`, { x: 50, y, size: 9, font, color: rgb(0.4, 0.4, 0.4) });
 
     const pdfBytes = await pdfDoc.save();
 
