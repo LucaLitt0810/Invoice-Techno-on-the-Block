@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -23,263 +23,164 @@ export async function GET(
     }
 
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595.28, 841.89]);
-    const { width, height } = page.getSize();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    const fontOblique = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
-
-    let y = height - 40;
+    
     const currency = invoice.currency || 'EUR';
-    const primaryColor = rgb(0.23, 0.51, 0.96); // Blue #3b82f6
-    const darkColor = rgb(0.1, 0.1, 0.1);
-    const grayColor = rgb(0.4, 0.4, 0.4);
-    const lightGray = rgb(0.95, 0.95, 0.95);
-
-    // Header Background
-    page.drawRectangle({
-      x: 0,
-      y: height - 120,
-      width: width,
-      height: 120,
-      color: lightGray,
-    });
-
-    // Logo / Brand
-    page.drawText('Techno on the Block', { 
-      x: 50, 
-      y: height - 55, 
-      size: 18, 
-      font: fontBold,
-      color: primaryColor 
-    });
-    page.drawText('Invoice Center', { 
-      x: 50, 
-      y: height - 75, 
-      size: 11, 
-      font,
-      color: darkColor 
-    });
-
-    // INVOICE Title (right side)
-    page.drawText('INVOICE', { 
-      x: 420, 
-      y: height - 60, 
-      size: 32, 
-      font: fontBold,
-      color: darkColor 
-    });
-
-    // Invoice Number and Date
-    y = height - 140;
-    page.drawText(`Invoice Number:`, { x: 350, y, size: 9, font, color: grayColor });
-    page.drawText(`${invoice.invoice_number}`, { x: 450, y, size: 11, font: fontBold });
+    const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('de-DE') : '-';
+    
+    // Page 1 - Main Invoice
+    const page1 = pdfDoc.addPage([595.28, 841.89]);
+    let y = 800;
+    
+    // Header - Company Info (left)
+    page1.drawText(invoice.company?.name || '', { x: 50, y, size: 12, font: fontBold });
+    y -= 15;
+    page1.drawText(invoice.company?.street || '', { x: 50, y, size: 10, font });
+    y -= 12;
+    page1.drawText(`${invoice.company?.postal_code || ''} ${invoice.company?.city || ''}`, { x: 50, y, size: 10, font });
+    y -= 12;
+    page1.drawText(invoice.company?.country || '', { x: 50, y, size: 10, font });
+    y -= 12;
+    page1.drawText(invoice.company?.email || '', { x: 50, y, size: 9, font });
+    
+    // INVOICE TO (right)
+    y = 800;
+    page1.drawText('INVOICE TO:', { x: 400, y, size: 9, font });
+    y -= 15;
+    page1.drawText(invoice.customer?.company_name || '', { x: 400, y, size: 12, font: fontBold });
+    y -= 15;
+    page1.drawText(invoice.customer?.street || '', { x: 400, y, size: 10, font });
+    y -= 12;
+    page1.drawText(`${invoice.customer?.postal_code || ''} ${invoice.customer?.city || ''}`, { x: 400, y, size: 10, font });
+    y -= 12;
+    page1.drawText(invoice.customer?.country || '', { x: 400, y, size: 10, font });
+    if (invoice.customer?.contact_person) {
+      y -= 12;
+      page1.drawText(`Attn: ${invoice.customer.contact_person}`, { x: 400, y, size: 9, font });
+    }
+    
+    // Title
+    y = 680;
+    page1.drawText('INVOICE', { x: 50, y, size: 32, font: fontBold });
+    
+    // Divider line
+    y = 650;
+    page1.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 2 });
+    
+    // Invoice Info Row
+    y = 620;
+    page1.drawText('INVOICE NUMBER', { x: 50, y, size: 9, font });
+    page1.drawText('INVOICE DATE', { x: 180, y, size: 9, font });
+    page1.drawText('DUE DATE', { x: 310, y, size: 9, font });
+    page1.drawText('STATUS', { x: 440, y, size: 9, font });
+    
     y -= 18;
-    page.drawText(`Date:`, { x: 350, y, size: 9, font, color: grayColor });
-    page.drawText(`${new Date(invoice.invoice_date).toLocaleDateString('de-DE')}`, { x: 450, y, size: 11, font });
-    y -= 18;
-    page.drawText(`Due Date:`, { x: 350, y, size: 9, font, color: grayColor });
-    page.drawText(`${new Date(invoice.due_date).toLocaleDateString('de-DE')}`, { x: 450, y, size: 11, font });
-
-    // Parties Section
-    y -= 40;
+    page1.drawText(invoice.invoice_number, { x: 50, y, size: 11, font: fontBold });
+    page1.drawText(formatDate(invoice.invoice_date), { x: 180, y, size: 11, font: fontBold });
+    page1.drawText(formatDate(invoice.due_date), { x: 310, y, size: 11, font: fontBold });
+    page1.drawText(invoice.status.toUpperCase(), { x: 440, y, size: 11, font: fontBold });
     
-    // From Box
-    page.drawRectangle({
-      x: 45,
-      y: y - 5,
-      width: 240,
-      height: 110,
-      borderColor: primaryColor,
-      borderWidth: 2,
-      color: rgb(1, 1, 1),
-    });
-    page.drawText('FROM', { x: 55, y: y + 85, size: 8, font, color: primaryColor });
-    page.drawText(invoice.company?.name || '', { x: 55, y: y + 65, size: 12, font: fontBold, color: darkColor });
-    page.drawText(invoice.company?.street || '', { x: 55, y: y + 48, size: 10, font });
-    page.drawText(`${invoice.company?.postal_code || ''} ${invoice.company?.city || ''}`, { x: 55, y: y + 33, size: 10, font });
-    if (invoice.company?.email) {
-      page.drawText(invoice.company.email, { x: 55, y: y + 18, size: 9, font, color: grayColor });
-    }
-
-    // To Box
-    page.drawRectangle({
-      x: 305,
-      y: y - 5,
-      width: 240,
-      height: 110,
-      borderColor: grayColor,
-      borderWidth: 1,
-      color: rgb(1, 1, 1),
-    });
-    page.drawText('BILL TO', { x: 315, y: y + 85, size: 8, font, color: grayColor });
-    page.drawText(invoice.customer?.company_name || '', { x: 315, y: y + 65, size: 12, font: fontBold, color: darkColor });
-    page.drawText(invoice.customer?.street || '', { x: 315, y: y + 48, size: 10, font });
-    page.drawText(`${invoice.customer?.postal_code || ''} ${invoice.customer?.city || ''}`, { x: 315, y: y + 33, size: 10, font });
-    if (invoice.customer?.email) {
-      page.drawText(invoice.customer.email, { x: 315, y: y + 18, size: 9, font, color: grayColor });
-    }
-
-    // Items Table
-    y -= 140;
+    // Divider
+    y -= 15;
+    page1.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 2 });
     
-    // Table Header Background
-    page.drawRectangle({
-      x: 50,
-      y: y - 5,
-      width: 495,
-      height: 25,
-      color: primaryColor,
-    });
+    // Table Header
+    y -= 30;
+    page1.drawText('DESCRIPTION', { x: 50, y, size: 9, font: fontBold });
+    page1.drawText('QTY', { x: 350, y, size: 9, font: fontBold });
+    page1.drawText('PRICE', { x: 430, y, size: 9, font: fontBold });
+    page1.drawText('TOTAL', { x: 510, y, size: 9, font: fontBold });
     
-    // Table Headers
-    page.drawText('Description', { x: 60, y: y + 2, size: 10, font: fontBold, color: rgb(1, 1, 1) });
-    page.drawText('Qty', { x: 350, y: y + 2, size: 10, font: fontBold, color: rgb(1, 1, 1) });
-    page.drawText('Price', { x: 420, y: y + 2, size: 10, font: fontBold, color: rgb(1, 1, 1) });
-    page.drawText('Total', { x: 490, y: y + 2, size: 10, font: fontBold, color: rgb(1, 1, 1) });
-    
-    y -= 25;
-    
-    // Table Rows with alternating background
-    let rowIndex = 0;
-    for (const item of invoice.items || []) {
-      if (rowIndex % 2 === 0) {
-        page.drawRectangle({
-          x: 50,
-          y: y - 5,
-          width: 495,
-          height: 22,
-          color: lightGray,
-        });
-      }
-      
-      page.drawText(item.description?.substring(0, 35) || '', { x: 60, y: y, size: 10, font });
-      page.drawText(String(item.quantity), { x: 355, y: y, size: 10, font });
-      page.drawText(`${item.price.toFixed(2)}`, { x: 420, y: y, size: 10, font });
-      page.drawText(`${item.total.toFixed(2)}`, { x: 485, y: y, size: 10, font: fontBold });
-      y -= 22;
-      rowIndex++;
-    }
-
-    // Bottom line of table
-    y += 5;
-    page.drawLine({ 
-      start: { x: 50, y }, 
-      end: { x: 545, y }, 
-      thickness: 2, 
-      color: primaryColor 
-    });
-
-    // Totals Section (right aligned)
-    y -= 40;
-    
-    const totalsX = 350;
-    const valueX = 500;
-    
-    page.drawText('Subtotal:', { x: totalsX, y, size: 10, font, color: grayColor });
-    page.drawText(`${invoice.subtotal.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
+    // Table Rows
     y -= 20;
+    for (const item of invoice.items || []) {
+      page1.drawText((item.description || '').substring(0, 40), { x: 50, y, size: 10, font });
+      page1.drawText(String(item.quantity), { x: 355, y, size: 10, font });
+      page1.drawText(`${item.price.toFixed(2)} ${currency}`, { x: 430, y, size: 10, font });
+      page1.drawText(`${item.total.toFixed(2)} ${currency}`, { x: 510, y, size: 10, font });
+      y -= 18;
+    }
     
-    page.drawText(`Tax (${invoice.tax_rate}%):`, { x: totalsX, y, size: 10, font, color: grayColor });
-    page.drawText(`${invoice.tax.toFixed(2)} ${currency}`, { x: valueX, y, size: 10, font });
+    // Divider
+    y -= 10;
+    page1.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 1 });
+    
+    // Totals
     y -= 25;
+    page1.drawText('Subtotal', { x: 400, y, size: 10, font });
+    page1.drawText(`${invoice.subtotal.toFixed(2)} ${currency}`, { x: 510, y, size: 10, font });
+    y -= 18;
+    page1.drawText(`Tax (${invoice.tax_rate}%)`, { x: 400, y, size: 10, font });
+    page1.drawText(`${invoice.tax.toFixed(2)} ${currency}`, { x: 510, y, size: 10, font });
     
-    // Total with highlight
-    page.drawRectangle({
-      x: 340,
-      y: y - 5,
-      width: 210,
-      height: 28,
-      color: primaryColor,
-    });
-    page.drawText('TOTAL:', { x: 350, y, size: 12, font: fontBold, color: rgb(1, 1, 1) });
-    page.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: 430, y, size: 12, font: fontBold, color: rgb(1, 1, 1) });
-
-    // Payment Instructions Section
+    y -= 15;
+    page1.drawLine({ start: { x: 350, y }, end: { x: 545, y }, thickness: 2 });
+    y -= 20;
+    page1.drawText('TOTAL', { x: 400, y, size: 12, font: fontBold });
+    page1.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: 510, y, size: 12, font: fontBold });
+    
+    // Footer
+    y = 100;
+    page1.drawText('Thank you for your business!', { x: 50, y, size: 10, font });
+    y -= 15;
+    page1.drawText(`Questions? Contact: ${invoice.company?.email}`, { x: 50, y, size: 9, font });
+    y -= 15;
+    page1.drawText('Payment information on next page', { x: 50, y, size: 8, font });
+    
+    // Page 2 - Payment Information
+    const page2 = pdfDoc.addPage([595.28, 841.89]);
+    y = 750;
+    
+    // Centered Title
+    page2.drawText('PAYMENT INFORMATION', { x: 170, y, size: 24, font: fontBold });
+    y -= 25;
+    page2.drawText(`Invoice ${invoice.invoice_number}`, { x: 250, y, size: 12, font });
+    
+    // Payment Box
     y -= 60;
+    page2.drawRectangle({ x: 100, y: y - 200, width: 400, height: 220, borderWidth: 2, borderColor: { r: 0, g: 0, b: 0 } });
     
-    page.drawRectangle({
-      x: 50,
-      y: y - 80,
-      width: 300,
-      height: 90,
-      borderColor: primaryColor,
-      borderWidth: 1,
-      color: rgb(1, 1, 1),
-    });
+    y -= 30;
+    page2.drawText('INVOICE NUMBER', { x: 130, y, size: 10, font: fontBold });
+    page2.drawText(invoice.invoice_number, { x: 380, y, size: 11, font });
     
-    page.drawText('PAYMENT INFORMATION', { 
-      x: 60, 
-      y: y, 
-      size: 10, 
-      font: fontBold, 
-      color: primaryColor 
-    });
-    y -= 22;
+    y -= 35;
+    page2.drawLine({ start: { x: 130, y: y + 10 }, end: { x: 470, y: y + 10 }, thickness: 1 });
+    page2.drawText('AMOUNT DUE', { x: 130, y, size: 10, font: fontBold });
+    page2.drawText(`${invoice.total.toFixed(2)} ${currency}`, { x: 380, y, size: 11, font });
     
     if (invoice.company?.bank_name) {
-      page.drawText('Bank:', { x: 60, y, size: 9, font, color: grayColor });
-      page.drawText(invoice.company.bank_name, { x: 120, y, size: 10, font: fontBold });
-      y -= 16;
+      y -= 35;
+      page2.drawLine({ start: { x: 130, y: y + 10 }, end: { x: 470, y: y + 10 }, thickness: 1 });
+      page2.drawText('BANK NAME', { x: 130, y, size: 10, font: fontBold });
+      page2.drawText(invoice.company.bank_name, { x: 380, y, size: 11, font });
     }
+    
     if (invoice.company?.iban) {
-      page.drawText('IBAN:', { x: 60, y, size: 9, font, color: grayColor });
-      page.drawText(invoice.company.iban, { x: 120, y, size: 10, font: fontBold });
-      y -= 16;
+      y -= 35;
+      page2.drawLine({ start: { x: 130, y: y + 10 }, end: { x: 470, y: y + 10 }, thickness: 1 });
+      page2.drawText('IBAN', { x: 130, y, size: 10, font: fontBold });
+      page2.drawText(invoice.company.iban, { x: 380, y, size: 11, font });
     }
+    
     if (invoice.company?.bic) {
-      page.drawText('BIC:', { x: 60, y, size: 9, font, color: grayColor });
-      page.drawText(invoice.company.bic, { x: 120, y, size: 10, font: fontBold });
-      y -= 16;
+      y -= 35;
+      page2.drawLine({ start: { x: 130, y: y + 10 }, end: { x: 470, y: y + 10 }, thickness: 1 });
+      page2.drawText('BIC', { x: 130, y, size: 10, font: fontBold });
+      page2.drawText(invoice.company.bic, { x: 380, y, size: 11, font });
     }
     
-    y -= 10;
-    page.drawText(`Reference: ${invoice.invoice_number}`, { 
-      x: 60, 
-      y, 
-      size: 9, 
-      font: fontOblique,
-      color: grayColor 
-    });
-
-    // Status Badge
-    const statusColors: Record<string, any> = {
-      paid: rgb(0.2, 0.8, 0.2),
-      sent: rgb(0.23, 0.51, 0.96),
-      created: rgb(0.6, 0.6, 0.6),
-      overdue: rgb(0.9, 0.2, 0.2),
-    };
-    const statusColor = statusColors[invoice.status] || grayColor;
+    y -= 35;
+    page2.drawLine({ start: { x: 130, y: y + 10 }, end: { x: 470, y: y + 10 }, thickness: 1 });
+    page2.drawText('REFERENCE', { x: 130, y, size: 10, font: fontBold });
+    page2.drawText(invoice.invoice_number, { x: 380, y, size: 11, font });
     
-    page.drawRectangle({
-      x: 380,
-      y: y - 5,
-      width: 100,
-      height: 25,
-      color: statusColor,
-    });
-    page.drawText(invoice.status.toUpperCase(), { 
-      x: 395, 
-      y: y + 2, 
-      size: 10, 
-      font: fontBold, 
-      color: rgb(1, 1, 1) 
-    });
-
-    // Footer
-    page.drawLine({ 
-      start: { x: 50, y: 60 }, 
-      end: { x: 545, y: 60 }, 
-      thickness: 1, 
-      color: lightGray 
-    });
-    page.drawText('Thank you for your business!', { 
-      x: 50, 
-      y: 40, 
-      size: 9, 
-      font: fontOblique,
-      color: grayColor 
-    });
+    // Footer note
+    y = 200;
+    page2.drawText('Please use the invoice number as payment reference.', { x: 150, y, size: 10, font });
+    y -= 20;
+    page2.drawText('Thank you for your business!', { x: 210, y, size: 10, font });
 
     const pdfBytes = await pdfDoc.save();
 
