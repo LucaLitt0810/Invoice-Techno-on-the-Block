@@ -6,6 +6,8 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  output: 'standalone',
+  staticPageGenerationTimeout: 1000,
   images: {
     domains: ['localhost', '*.supabase.co'],
     remotePatterns: [
