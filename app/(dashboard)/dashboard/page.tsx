@@ -49,7 +49,7 @@ export default function DashboardPage() {
 
       if (error) throw error;
 
-      const invoiceList = invoices || [];
+      const invoiceList: Invoice[] = invoices || [];
 
       const thisMonthInvoices = invoiceList.filter(
         (inv) => new Date(inv.created_at) >= startOfMonth
