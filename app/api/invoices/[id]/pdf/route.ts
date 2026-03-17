@@ -67,7 +67,7 @@ export async function GET(
     page1.drawText('INVOICE', { x: 50, y, size: 32, font: fontBold });
     
     // Divider line
-    y = 615;
+    y = 635;
     page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
     // Invoice Info Row (4 columns with status) - compact spacing
