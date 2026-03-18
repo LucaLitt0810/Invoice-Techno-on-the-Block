@@ -60,66 +60,23 @@ CREATE POLICY "Authenticated users can delete DJs"
 ON djs FOR DELETE
 USING (auth.role() = 'authenticated');
 
--- RLS Policies for Bookings table
--- Admin/Manager: see all bookings
-CREATE POLICY "Admin users can view all bookings"
+-- Simple RLS Policies for Bookings (all authenticated users can CRUD)
+-- Role-based filtering is handled in the API layer
+CREATE POLICY "Authenticated users can view bookings"
 ON bookings FOR SELECT
-USING (
-  auth.role() = 'authenticated' AND 
-  (auth.jwt() ->> 'role' = 'admin' OR auth.jwt() ->> 'role' IS NULL)
-);
+USING (auth.role() = 'authenticated');
 
--- DJ role: see only their own bookings
-CREATE POLICY "DJs can view their own bookings"
-ON bookings FOR SELECT
-USING (
-  auth.role() = 'authenticated' AND 
-  auth.jwt() ->> 'role' = 'dj' AND
-  dj_id IN (
-    SELECT id FROM djs WHERE user_id = auth.uid()
-  )
-);
-
--- Insert: any authenticated user
 CREATE POLICY "Authenticated users can insert bookings"
 ON bookings FOR INSERT
 WITH CHECK (auth.role() = 'authenticated');
 
--- Update: admin or DJ who owns the booking
-CREATE POLICY "Admin users can update any booking"
+CREATE POLICY "Authenticated users can update bookings"
 ON bookings FOR UPDATE
-USING (
-  auth.role() = 'authenticated' AND 
-  (auth.jwt() ->> 'role' = 'admin' OR auth.jwt() ->> 'role' IS NULL)
-);
+USING (auth.role() = 'authenticated');
 
-CREATE POLICY "DJs can update their own bookings"
-ON bookings FOR UPDATE
-USING (
-  auth.role() = 'authenticated' AND 
-  auth.jwt() ->> 'role' = 'dj' AND
-  dj_id IN (
-    SELECT id FROM djs WHERE user_id = auth.uid()
-  )
-);
-
--- Delete: admin or DJ who owns the booking
-CREATE POLICY "Admin users can delete any booking"
+CREATE POLICY "Authenticated users can delete bookings"
 ON bookings FOR DELETE
-USING (
-  auth.role() = 'authenticated' AND 
-  (auth.jwt() ->> 'role' = 'admin' OR auth.jwt() ->> 'role' IS NULL)
-);
-
-CREATE POLICY "DJs can delete their own bookings"
-ON bookings FOR DELETE
-USING (
-  auth.role() = 'authenticated' AND 
-  auth.jwt() ->> 'role' = 'dj' AND
-  dj_id IN (
-    SELECT id FROM djs WHERE user_id = auth.uid()
-  )
-);
+USING (auth.role() = 'authenticated');
 
 -- Function to check for booking conflicts
 CREATE OR REPLACE FUNCTION check_booking_conflict(
