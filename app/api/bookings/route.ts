@@ -21,12 +21,29 @@ export async function GET(request: NextRequest) {
     
     const role = user.user_metadata?.role || 'admin';
     
+    // Build select query - handle potential customer join issues
+    let selectQuery = `
+      *,
+      dj:djs(*)
+    `;
+    
+    // Try to join customer data if customer_id column exists
+    try {
+      const { data: testData } = await supabase
+        .from('bookings')
+        .select('customer_id')
+        .limit(1);
+      
+      if (testData !== null) {
+        selectQuery += `,customer:customers(id, company_name, contact_person)`;
+      }
+    } catch (e) {
+      // Column doesn't exist, skip customer join
+    }
+    
     let query = supabase
       .from('bookings')
-      .select(`
-        *,
-        dj:djs(*)
-      `)
+      .select(selectQuery)
       .order('start_date', { ascending: true });
     
     // DJ role: only see own bookings

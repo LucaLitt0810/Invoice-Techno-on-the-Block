@@ -19,16 +19,18 @@ import {
   PlusIcon,
   Bars3Icon,
   DocumentCheckIcon,
-  CalendarIcon
+  CalendarIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 
 // Navigation based on role
 const getNavigation = (role: string | undefined) => {
-  // DJ role: only see bookings
+  // DJ role: only see bookings and unavailability
   if (role === 'dj') {
     return [
       { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
       { name: 'My Bookings', href: '/bookings', icon: CalendarIcon },
+      { name: 'My Unavailability', href: '/bookings/unavailability', icon: ClockIcon },
     ];
   }
   

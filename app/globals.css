@@ -183,6 +183,13 @@ input[type="datetime-local"]::-moz-calendar-picker-indicator {
   @apply text-black;
 }
 
+.fc .fc-button-active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  @apply text-black !important;
+  background-color: #fff !important;
+  border-color: #fff !important;
+}
+
 .fc .fc-button-primary:disabled {
   @apply opacity-50;
 }

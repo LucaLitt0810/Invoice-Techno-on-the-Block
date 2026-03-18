@@ -10,7 +10,8 @@ import { createClient } from '@/lib/supabase/client';
 import { Booking, DJ, DJUnavailability, BOOKING_STATUS_COLORS } from '@/types/bookings';
 import BookingModal from './BookingModal';
 import toast from 'react-hot-toast';
-import { PlusIcon, CalendarIcon, ListBulletIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, CalendarIcon, ListBulletIcon, ClockIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 interface CalendarEvent {
   id: string;
@@ -37,6 +38,31 @@ export default function BookingsPage() {
   const [showUnavailability, setShowUnavailability] = useState(true);
   const [userRole, setUserRole] = useState<string>('user');
   const [currentDJId, setCurrentDJId] = useState<string>('');
+  
+  // Fetch user role and DJ ID on mount
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const role = user.user_metadata?.role || 'user';
+        setUserRole(role);
+        
+        // If DJ, fetch their DJ ID
+        if (role === 'dj') {
+          const { data: djData } = await supabase
+            .from('djs')
+            .select('id')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (djData) {
+            setCurrentDJId(djData.id);
+          }
+        }
+      }
+    };
+    fetchUserRole();
+  }, [supabase]);
   
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -76,11 +102,15 @@ export default function BookingsPage() {
     }
   }, []);
 
+
+
   const fetchUnavailability = useCallback(async () => {
     try {
       let url = '/api/unavailability';
-      if (selectedDJ) {
-        url += `?dj_id=${selectedDJ}`;
+      // For DJs, use their own ID; for others use selectedDJ
+      const djFilterId = userRole === 'dj' ? currentDJId : selectedDJ;
+      if (djFilterId) {
+        url += `?dj_id=${djFilterId}`;
       }
       
       const response = await fetch(url);
@@ -91,14 +121,17 @@ export default function BookingsPage() {
     } catch (error) {
       console.error('Error fetching unavailability:', error);
     }
-  }, [selectedDJ]);
+  }, [selectedDJ, userRole, currentDJId]);
 
   useEffect(() => {
     if (userRole !== 'dj') {
       fetchDJs();
     }
+  }, [fetchDJs, userRole]);
+  
+  useEffect(() => {
     fetchUnavailability();
-  }, [fetchDJs, fetchUnavailability, userRole]);
+  }, [fetchUnavailability, currentDJId]);
 
   useEffect(() => {
     fetchBookings();
@@ -222,13 +255,13 @@ export default function BookingsPage() {
           <div className="flex border border-dark-500">
             <button
               onClick={() => setView('calendar')}
-              className={`px-3 py-2 ${view === 'calendar' ? 'bg-white text-black' : 'text-white hover:bg-dark-700'}`}
+              className={`px-3 py-2 transition-colors ${view === 'calendar' ? 'bg-white !text-black font-medium' : 'text-white hover:bg-dark-700'}`}
             >
               <CalendarIcon className="h-5 w-5" />
             </button>
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-2 ${view === 'list' ? 'bg-white text-black' : 'text-white hover:bg-dark-700'}`}
+              className={`px-3 py-2 transition-colors ${view === 'list' ? 'bg-white !text-black font-medium' : 'text-white hover:bg-dark-700'}`}
             >
               <ListBulletIcon className="h-5 w-5" />
             </button>
@@ -247,8 +280,20 @@ export default function BookingsPage() {
             🚫 Unavailable
           </button>
           
-          {/* Add Button - only for non-DJs */}
-          {userRole !== 'dj' && (
+          {/* Add Button - different for DJs */}
+          {userRole === 'dj' ? (
+            <button
+              onClick={() => {
+                setSelectedBooking(null);
+                setSelectedDate(new Date());
+                setModalOpen(true);
+              }}
+              className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+            >
+              <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+              New Booking for me
+            </button>
+          ) : (
             <button
               onClick={() => {
                 setSelectedBooking(null);
@@ -260,6 +305,17 @@ export default function BookingsPage() {
               <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
               New Booking
             </button>
+          )}
+          
+          {/* My Unavailability - only for DJs */}
+          {userRole === 'dj' && (
+            <Link
+              href="/bookings/unavailability"
+              className="inline-flex items-center px-4 py-2 border border-gray-500 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+            >
+              <ClockIcon className="-ml-1 mr-2 h-5 w-5" />
+              My Unavailability
+            </Link>
           )}
         </div>
       </div>
@@ -331,6 +387,8 @@ export default function BookingsPage() {
           booking={selectedBooking}
           initialDate={selectedDate}
           djs={djs}
+          userRole={userRole}
+          currentDJId={currentDJId}
           onClose={() => setModalOpen(false)}
           onSaved={handleBookingSaved}
         />

@@ -10,11 +10,13 @@ interface BookingModalProps {
   booking: Booking | null;
   initialDate: Date | null;
   djs: DJ[];
+  userRole: string;
+  currentDJId?: string;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export default function BookingModal({ booking, initialDate, djs, onClose, onSaved }: BookingModalProps) {
+export default function BookingModal({ booking, initialDate, djs, userRole, currentDJId, onClose, onSaved }: BookingModalProps) {
   const [formData, setFormData] = useState({
     dj_id: '',
     event_name: '',
@@ -31,6 +33,13 @@ export default function BookingModal({ booking, initialDate, djs, onClose, onSav
   });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Set DJ automatically for DJs when modal opens
+  useEffect(() => {
+    if (userRole === 'dj' && currentDJId && !booking) {
+      setFormData(prev => ({ ...prev, dj_id: currentDJId }));
+    }
+  }, [userRole, currentDJId, booking]);
 
   useEffect(() => {
     if (booking) {
@@ -55,11 +64,12 @@ export default function BookingModal({ booking, initialDate, djs, onClose, onSav
       const end = new Date(start.getTime() + 4 * 60 * 60 * 1000); // Default 4 hours
       setFormData({
         ...formData,
+        dj_id: userRole === 'dj' && currentDJId ? currentDJId : '',
         start_date: formatDateTimeInput(start),
         end_date: formatDateTimeInput(end),
       });
     }
-  }, [booking, initialDate]);
+  }, [booking, initialDate, userRole, currentDJId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +145,7 @@ export default function BookingModal({ booking, initialDate, djs, onClose, onSav
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-medium text-white uppercase tracking-wider">
-              {booking ? 'Edit Booking' : 'New Booking'}
+              {booking ? 'Edit Booking' : userRole === 'dj' ? 'New Booking for Me' : 'New Booking'}
             </h3>
             <button
               onClick={onClose}
@@ -146,23 +156,37 @@ export default function BookingModal({ booking, initialDate, djs, onClose, onSav
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* DJ Selection */}
-            <div>
-              <label className="label">DJ *</label>
-              <select
-                className="input bg-dark-800 border-dark-500 text-white w-full"
-                value={formData.dj_id}
-                onChange={(e) => setFormData({ ...formData, dj_id: e.target.value })}
-                required
-              >
-                <option value="">Select DJ...</option>
-                {djs.map((dj) => (
-                  <option key={dj.id} value={dj.id}>
-                    {dj.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* DJ Selection - Hidden for DJs, they can only book themselves */}
+            {userRole === 'dj' ? (
+              <div>
+                <label className="label">DJ</label>
+                <input
+                  type="text"
+                  className="input bg-dark-800 border-dark-500 text-gray-400 w-full cursor-not-allowed"
+                  value={djs.find(d => d.id === currentDJId)?.name || 'Myself'}
+                  disabled
+                  readOnly
+                />
+                <input type="hidden" value={formData.dj_id} />
+              </div>
+            ) : (
+              <div>
+                <label className="label">DJ *</label>
+                <select
+                  className="input bg-dark-800 border-dark-500 text-white w-full"
+                  value={formData.dj_id}
+                  onChange={(e) => setFormData({ ...formData, dj_id: e.target.value })}
+                  required
+                >
+                  <option value="">Select DJ...</option>
+                  {djs.map((dj) => (
+                    <option key={dj.id} value={dj.id}>
+                      {dj.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Event Name */}
             <div>
