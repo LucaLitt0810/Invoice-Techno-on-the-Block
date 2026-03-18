@@ -28,7 +28,7 @@ const getNavigation = (role: string | undefined) => {
   // DJ role: only see bookings and unavailability
   if (role === 'dj') {
     return [
-      { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+      { name: 'DJ-Dashboard', href: '/dashboard', icon: HomeIcon },
       { name: 'My Bookings', href: '/bookings', icon: CalendarIcon },
       { name: 'My Unavailability', href: '/bookings/unavailability', icon: ClockIcon },
     ];

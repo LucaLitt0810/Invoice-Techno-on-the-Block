@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
+    const role = user.user_metadata?.role || 'admin';
+    
     let query = supabase
       .from('dj_unavailability')
       .select(`
@@ -24,7 +26,22 @@ export async function GET(request: NextRequest) {
       `)
       .order('start_date', { ascending: true });
     
-    if (djId) {
+    // DJs can only see their own unavailability
+    if (role === 'dj') {
+      const { data: djData } = await supabase
+        .from('djs')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (djData) {
+        query = query.eq('dj_id', djData.id);
+      } else {
+        // DJ not found, return empty
+        return NextResponse.json({ unavailability: [] });
+      }
+    } else if (djId) {
+      // Non-DJs can filter by DJ ID
       query = query.eq('dj_id', djId);
     }
     

@@ -130,8 +130,12 @@ export default function BookingsPage() {
   }, [fetchDJs, userRole]);
   
   useEffect(() => {
-    // For DJs, only fetch unavailability when currentDJId is loaded
-    if (userRole === 'dj' && !currentDJId) return;
+    // For DJs: only fetch when currentDJId is loaded
+    // For others: fetch normally
+    if (userRole === 'dj' && !currentDJId) {
+      setUnavailability([]);
+      return;
+    }
     fetchUnavailability();
   }, [fetchUnavailability, currentDJId, userRole]);
 

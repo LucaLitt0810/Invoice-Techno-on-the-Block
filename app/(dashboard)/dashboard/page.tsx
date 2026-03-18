@@ -95,10 +95,10 @@ export default function DashboardPage() {
 
       const bookingList: Booking[] = bookings || [];
 
-      // Calculate stats
-      const paidBookings = bookingList.filter(b => b.status === 'paid');
-      const totalGross = paidBookings.reduce((sum, b) => sum + (b.fee || 0), 0);
-      const totalProvision = paidBookings.reduce((sum, b) => sum + ((b.fee || 0) * (b.provision || 0) / 100), 0);
+      // Calculate stats - all non-cancelled bookings for financial overview
+      const nonCancelledBookings = bookingList.filter(b => b.status !== 'cancelled');
+      const totalGross = nonCancelledBookings.reduce((sum, b) => sum + (b.fee || 0), 0);
+      const totalProvision = nonCancelledBookings.reduce((sum, b) => sum + ((b.fee || 0) * (b.provision || 0) / 100), 0);
       
       const stats: DJStats = {
         totalBookings: bookingList.length,
@@ -255,7 +255,7 @@ export default function DashboardPage() {
         {/* Header */}
         <div>
           <h2 className="text-2xl font-bold uppercase tracking-tight text-white">
-            DJ Dashboard
+            DJ-Dashboard
           </h2>
           <p className="mt-1 text-sm text-gray-400">
             Overview of your bookings and schedule

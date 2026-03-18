@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { DJ } from '@/types/bookings';
 import toast from 'react-hot-toast';
-import { PlusIcon, TrashIcon, PencilIcon, XMarkIcon, UserPlusIcon, CheckIcon, UserGroupIcon, MusicalNoteIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, PencilIcon, XMarkIcon, UserPlusIcon, CheckIcon, UserGroupIcon, MusicalNoteIcon, CalendarIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 interface User {
   id: string;
@@ -393,6 +394,13 @@ export default function AdminDJsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div className="flex items-center space-x-3">
+                          <Link
+                            href={`/admin/djs/${dj.id}/dashboard`}
+                            className="text-gray-400 hover:text-blue-400"
+                            title="View Dashboard"
+                          >
+                            <ChartBarIcon className="h-5 w-5" />
+                          </Link>
                           <button
                             onClick={() => openEditModal(dj)}
                             className="text-gray-400 hover:text-white"
