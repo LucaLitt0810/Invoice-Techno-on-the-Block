@@ -50,19 +50,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const { name, email, phone, user_id } = body;
+    const { dj_code, name, email, phone, genre, bio, rate_per_hour, user_id, active } = body;
     
-    if (!name) {
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    if (!dj_code || !name) {
+      return NextResponse.json({ error: 'DJ ID and Name are required' }, { status: 400 });
     }
     
     const { data: dj, error } = await supabase
       .from('djs')
       .insert({
+        dj_code: dj_code.toUpperCase(),
         name,
         email,
         phone,
+        genre,
+        bio,
+        rate_per_hour: rate_per_hour || 0,
         user_id,
+        active: active !== undefined ? active : true,
       })
       .select()
       .single();

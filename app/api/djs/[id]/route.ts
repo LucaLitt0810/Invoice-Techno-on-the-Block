@@ -23,15 +23,31 @@ export async function PUT(
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
     
-    const { name, email, phone } = body;
+    const { dj_code, name, email, phone, genre, bio, rate_per_hour, user_id, active } = body;
     
     if (!name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
     
+    const updateData: any = { 
+      name, 
+      email, 
+      phone, 
+      genre, 
+      bio, 
+      rate_per_hour: rate_per_hour || 0, 
+      user_id, 
+      active 
+    };
+    
+    // Only update dj_code if provided (for new records)
+    if (dj_code) {
+      updateData.dj_code = dj_code.toUpperCase();
+    }
+    
     const { data: dj, error } = await supabase
       .from('djs')
-      .update({ name, email, phone })
+      .update(updateData)
       .eq('id', params.id)
       .select()
       .single();

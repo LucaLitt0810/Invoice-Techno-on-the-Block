@@ -2,9 +2,13 @@ export type BookingStatus = 'request' | 'negotiation' | 'confirmed' | 'paid' | '
 
 export interface DJ {
   id: string;
+  dj_code: string;
   name: string;
   email: string | null;
   phone: string | null;
+  genre: string | null;
+  bio: string | null;
+  rate_per_hour: number;
   user_id: string | null;
   active: boolean;
   created_at: string;

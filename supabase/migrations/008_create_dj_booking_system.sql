@@ -4,9 +4,13 @@
 -- Create DJs table
 CREATE TABLE djs (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  dj_code TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   email TEXT UNIQUE,
   phone TEXT,
+  genre TEXT,
+  bio TEXT,
+  rate_per_hour DECIMAL(10, 2) DEFAULT 0,
   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
