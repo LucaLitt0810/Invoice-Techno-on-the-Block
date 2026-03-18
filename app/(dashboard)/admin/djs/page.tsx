@@ -32,7 +32,6 @@ export default function AdminDJsPage() {
     phone: '',
     genre: '',
     bio: '',
-    rate_per_hour: 0,
     user_id: '',
     active: true,
   });
@@ -117,10 +116,7 @@ export default function AdminDJsPage() {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          rate_per_hour: parseFloat(formData.rate_per_hour.toString()) || 0,
-        }),
+        body: JSON.stringify(formData),
       });
       
       if (!response.ok) {
@@ -216,7 +212,6 @@ export default function AdminDJsPage() {
       phone: dj.phone || '',
       genre: dj.genre || '',
       bio: dj.bio || '',
-      rate_per_hour: dj.rate_per_hour,
       user_id: dj.user_id || '',
       active: dj.active,
     });
@@ -232,7 +227,6 @@ export default function AdminDJsPage() {
       phone: '',
       genre: '',
       bio: '',
-      rate_per_hour: 0,
       user_id: '',
       active: true,
     });
@@ -256,7 +250,6 @@ export default function AdminDJsPage() {
       phone: '',
       genre: '',
       bio: '',
-      rate_per_hour: 0,
       user_id: '',
       active: true,
     });
@@ -314,9 +307,6 @@ export default function AdminDJsPage() {
                   Genre
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Rate/h
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   User
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -330,7 +320,7 @@ export default function AdminDJsPage() {
             <tbody className="divide-y divide-dark-500">
               {djs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
                     No DJs found. Create your first DJ to get started.
                   </td>
                 </tr>
@@ -348,11 +338,6 @@ export default function AdminDJsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-400">{dj.genre || '-'}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-400">
-                          {dj.rate_per_hour > 0 ? `€${dj.rate_per_hour}` : '-'}
-                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {linkedUser ? (
@@ -491,30 +476,16 @@ export default function AdminDJsPage() {
                   </div>
                 </div>
 
-                {/* Genre & Rate */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="label">Genre</label>
-                    <input
-                      type="text"
-                      className="input bg-dark-800 border-dark-500 text-white w-full"
-                      value={formData.genre}
-                      onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-                      placeholder="Techno, House, etc."
-                    />
-                  </div>
-                  <div>
-                    <label className="label">Rate per Hour (€)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      className="input bg-dark-800 border-dark-500 text-white w-full"
-                      value={formData.rate_per_hour || ''}
-                      onChange={(e) => setFormData({ ...formData, rate_per_hour: parseFloat(e.target.value) || 0 })}
-                      placeholder="0.00"
-                    />
-                  </div>
+                {/* Genre */}
+                <div>
+                  <label className="label">Genre</label>
+                  <input
+                    type="text"
+                    className="input bg-dark-800 border-dark-500 text-white w-full"
+                    value={formData.genre}
+                    onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
+                    placeholder="Techno, House, etc."
+                  />
                 </div>
 
                 {/* Bio */}

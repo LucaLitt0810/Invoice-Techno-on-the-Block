@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const { dj_code, name, email, phone, genre, bio, rate_per_hour, user_id, active } = body;
+    const { dj_code, name, email, phone, genre, bio, user_id, active } = body;
     
     if (!dj_code || !name) {
       return NextResponse.json({ error: 'DJ ID and Name are required' }, { status: 400 });
@@ -65,7 +65,6 @@ export async function POST(request: NextRequest) {
         phone,
         genre,
         bio,
-        rate_per_hour: rate_per_hour || 0,
         user_id,
         active: active !== undefined ? active : true,
       })

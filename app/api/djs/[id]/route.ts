@@ -23,7 +23,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
     
-    const { dj_code, name, email, phone, genre, bio, rate_per_hour, user_id, active } = body;
+    const { dj_code, name, email, phone, genre, bio, user_id, active } = body;
     
     if (!name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
@@ -35,7 +35,6 @@ export async function PUT(
       phone, 
       genre, 
       bio, 
-      rate_per_hour: rate_per_hour || 0, 
       user_id, 
       active 
     };
