@@ -25,6 +25,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
     location: '',
     client_name: '',
     fee: 0,
+    provision: 0,
     status: 'request' as const,
     notes: '',
     is_recurring: false,
@@ -51,6 +52,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
         location: booking.location || '',
         client_name: booking.client_name || '',
         fee: booking.fee,
+        provision: booking.provision || 0,
         status: booking.status,
         notes: booking.notes || '',
         is_recurring: booking.is_recurring,
@@ -249,8 +251,8 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
               </div>
             </div>
 
-            {/* Fee & Status */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Fee, Provision & Status */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="label">Fee (€)</label>
                 <input
@@ -261,6 +263,19 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
                   value={formData.fee === 0 ? '' : formData.fee}
                   onChange={(e) => setFormData({ ...formData, fee: parseFloat(e.target.value) || 0 })}
                   placeholder="0.00"
+                />
+              </div>
+              <div>
+                <label className="label">Provision (%)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  className="input bg-dark-800 border-dark-500 text-white w-full"
+                  value={formData.provision === 0 ? '' : formData.provision}
+                  onChange={(e) => setFormData({ ...formData, provision: parseFloat(e.target.value) || 0 })}
+                  placeholder="0"
                 />
               </div>
               <div>

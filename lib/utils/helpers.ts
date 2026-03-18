@@ -28,6 +28,11 @@ export function formatDateTimeInput(date: string | Date): string {
   return format(d, "yyyy-MM-dd'T'HH:mm");
 }
 
+export function formatDateTime(date: string | Date): string {
+  const d = typeof date === 'string' ? parseISO(date) : date;
+  return format(d, 'dd.MM.yyyy HH:mm');
+}
+
 export function getCurrentYear(): number {
   return new Date().getFullYear();
 }

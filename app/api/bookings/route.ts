@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const { dj_id, event_name, start_date, end_date, location, client_name, fee, status, notes } = body;
+    const { dj_id, event_name, start_date, end_date, location, client_name, fee, provision, status, notes } = body;
     
     if (!dj_id || !event_name || !start_date || !end_date) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -124,6 +124,7 @@ export async function POST(request: NextRequest) {
         location,
         client_name,
         fee: fee || 0,
+        provision: provision || 0,
         status: status || 'request',
         notes,
         user_id: user.id,

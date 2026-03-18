@@ -7,7 +7,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import { createClient } from '@/lib/supabase/client';
-import { Booking, DJ, DJUnavailability, BOOKING_STATUS_COLORS } from '@/types/bookings';
+import { Booking, DJ, DJUnavailability, BOOKING_STATUS_COLORS, BOOKING_STATUS_LABELS } from '@/types/bookings';
 import BookingModal from './BookingModal';
 import toast from 'react-hot-toast';
 import { PlusIcon, CalendarIcon, ListBulletIcon, ClockIcon } from '@heroicons/react/24/outline';
@@ -130,8 +130,10 @@ export default function BookingsPage() {
   }, [fetchDJs, userRole]);
   
   useEffect(() => {
+    // For DJs, only fetch unavailability when currentDJId is loaded
+    if (userRole === 'dj' && !currentDJId) return;
     fetchUnavailability();
-  }, [fetchUnavailability, currentDJId]);
+  }, [fetchUnavailability, currentDJId, userRole]);
 
   useEffect(() => {
     fetchBookings();
@@ -344,42 +346,142 @@ export default function BookingsPage() {
         </div>
       </div>
 
-      {/* Calendar */}
-      <div className="card bg-dark-800 border-dark-500 p-4">
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-          initialView="dayGridMonth"
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
-          }}
-          events={calendarEvents}
-          dateClick={handleDateClick}
-          eventClick={handleEventClick}
-          editable={true}
-          droppable={true}
-          eventDrop={handleEventDrop}
-          height="auto"
-          themeSystem="standard"
-          eventTimeFormat={{
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-          }}
-          dayMaxEvents={true}
-          slotMinTime="00:00:00"
-          slotMaxTime="24:00:00"
-          allDaySlot={true}
-          buttonText={{
-            today: 'Today',
-            month: 'Month',
-            week: 'Week',
-            day: 'Day',
-            list: 'List',
-          }}
-        />
-      </div>
+      {/* Calendar or List View */}
+      {view === 'calendar' ? (
+        <div className="card bg-dark-800 border-dark-500 p-4">
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+            initialView="dayGridMonth"
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
+            }}
+            events={calendarEvents}
+            dateClick={handleDateClick}
+            eventClick={handleEventClick}
+            editable={true}
+            droppable={true}
+            eventDrop={handleEventDrop}
+            height="auto"
+            themeSystem="standard"
+            eventTimeFormat={{
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+            }}
+            dayMaxEvents={true}
+            slotMinTime="00:00:00"
+            slotMaxTime="24:00:00"
+            allDaySlot={true}
+            buttonText={{
+              today: 'Today',
+              month: 'Month',
+              week: 'Week',
+              day: 'Day',
+              list: 'List',
+            }}
+          />
+        </div>
+      ) : (
+        <div className="card bg-dark-800 border-dark-500">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-dark-500">
+              <thead className="bg-dark-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Event</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">DJ</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date & Time</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Location</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Client</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Fee</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Prov. %</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Net</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody className="bg-dark-800 divide-y divide-dark-500">
+                {bookings.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                      No bookings found
+                    </td>
+                  </tr>
+                ) : (
+                  bookings
+                    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+                    .map((booking) => (
+                      <tr 
+                        key={booking.id} 
+                        className="hover:bg-dark-700 cursor-pointer"
+                        onClick={() => {
+                          setSelectedBooking(booking);
+                          setSelectedDate(null);
+                          setModalOpen(true);
+                        }}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-white">{booking.event_name}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-400">{booking.dj?.name || 'Unknown'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-400">
+                            {new Date(booking.start_date).toLocaleString('de-DE', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            to {new Date(booking.end_date).toLocaleString('de-DE', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-400">{booking.location || '-'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-400">{booking.client_name || '-'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-white">€{booking.fee?.toFixed(2) || '0.00'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-orange-400">{booking.provision || 0}%</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-green-400">
+                            €{((booking.fee || 0) * (1 - (booking.provision || 0) / 100)).toFixed(2)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span 
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium uppercase"
+                            style={{ 
+                              backgroundColor: BOOKING_STATUS_COLORS[booking.status],
+                              color: '#000'
+                            }}
+                          >
+                            {BOOKING_STATUS_LABELS[booking.status]}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Booking Modal */}
       {modalOpen && (
