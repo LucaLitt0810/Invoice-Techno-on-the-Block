@@ -1,0 +1,299 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Booking, DJ, BOOKING_STATUS_OPTIONS } from '@/types/bookings';
+import { formatDateInput, formatDateTimeInput } from '@/lib/utils/helpers';
+import toast from 'react-hot-toast';
+import { XMarkIcon, TrashIcon } from '@heroicons/react/24/outline';
+
+interface BookingModalProps {
+  booking: Booking | null;
+  initialDate: Date | null;
+  djs: DJ[];
+  onClose: () => void;
+  onSaved: () => void;
+}
+
+export default function BookingModal({ booking, initialDate, djs, onClose, onSaved }: BookingModalProps) {
+  const [formData, setFormData] = useState({
+    dj_id: '',
+    event_name: '',
+    start_date: '',
+    end_date: '',
+    location: '',
+    client_name: '',
+    fee: 0,
+    status: 'request' as const,
+    notes: '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (booking) {
+      setFormData({
+        dj_id: booking.dj_id,
+        event_name: booking.event_name,
+        start_date: formatDateTimeInput(new Date(booking.start_date)),
+        end_date: formatDateTimeInput(new Date(booking.end_date)),
+        location: booking.location || '',
+        client_name: booking.client_name || '',
+        fee: booking.fee,
+        status: booking.status,
+        notes: booking.notes || '',
+      });
+    } else if (initialDate) {
+      const start = new Date(initialDate);
+      const end = new Date(start.getTime() + 4 * 60 * 60 * 1000); // Default 4 hours
+      setFormData({
+        ...formData,
+        start_date: formatDateTimeInput(start),
+        end_date: formatDateTimeInput(end),
+      });
+    }
+  }, [booking, initialDate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.dj_id || !formData.event_name || !formData.start_date || !formData.end_date) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setSaving(true);
+    
+    try {
+      const url = booking ? `/api/bookings/${booking.id}` : '/api/bookings';
+      const method = booking ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          fee: parseFloat(formData.fee.toString()) || 0,
+        }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save booking');
+      }
+      
+      toast.success(booking ? 'Booking updated successfully' : 'Booking created successfully');
+      onSaved();
+    } catch (error: any) {
+      console.error('Error saving booking:', error);
+      toast.error(error.message || 'Failed to save booking');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!booking) return;
+    if (!confirm('Are you sure you want to delete this booking?')) return;
+    
+    setDeleting(true);
+    
+    try {
+      const response = await fetch(`/api/bookings/${booking.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) throw new Error('Failed to delete booking');
+      
+      toast.success('Booking deleted successfully');
+      onSaved();
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      toast.error('Failed to delete booking');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen px-4">
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+          onClick={onClose}
+        />
+        <div className="relative bg-dark-800 border border-dark-500 max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-medium text-white uppercase tracking-wider">
+              {booking ? 'Edit Booking' : 'New Booking'}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-white"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* DJ Selection */}
+            <div>
+              <label className="label">DJ *</label>
+              <select
+                className="input bg-dark-800 border-dark-500 text-white w-full"
+                value={formData.dj_id}
+                onChange={(e) => setFormData({ ...formData, dj_id: e.target.value })}
+                required
+              >
+                <option value="">Select DJ...</option>
+                {djs.map((dj) => (
+                  <option key={dj.id} value={dj.id}>
+                    {dj.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Event Name */}
+            <div>
+              <label className="label">Event Name *</label>
+              <input
+                type="text"
+                className="input bg-dark-800 border-dark-500 text-white w-full"
+                value={formData.event_name}
+                onChange={(e) => setFormData({ ...formData, event_name: e.target.value })}
+                placeholder="e.g., Wedding Party"
+                required
+              />
+            </div>
+
+            {/* Date/Time */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Start Date & Time *</label>
+                <input
+                  type="datetime-local"
+                  className="input bg-dark-800 border-dark-500 text-white w-full"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="label">End Date & Time *</label>
+                <input
+                  type="datetime-local"
+                  className="input bg-dark-800 border-dark-500 text-white w-full"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Location & Client */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Location</label>
+                <input
+                  type="text"
+                  className="input bg-dark-800 border-dark-500 text-white w-full"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  placeholder="Venue address"
+                />
+              </div>
+              <div>
+                <label className="label">Client Name</label>
+                <input
+                  type="text"
+                  className="input bg-dark-800 border-dark-500 text-white w-full"
+                  value={formData.client_name}
+                  onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                  placeholder="Client name"
+                />
+              </div>
+            </div>
+
+            {/* Fee & Status */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Fee (€)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="input bg-dark-800 border-dark-500 text-white w-full"
+                  value={formData.fee === 0 ? '' : formData.fee}
+                  onChange={(e) => setFormData({ ...formData, fee: parseFloat(e.target.value) || 0 })}
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <label className="label">Status *</label>
+                <select
+                  className="input bg-dark-800 border-dark-500 text-white w-full"
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                  required
+                >
+                  {BOOKING_STATUS_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="label">Notes</label>
+              <textarea
+                className="input bg-dark-800 border-dark-500 text-white w-full"
+                rows={3}
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                placeholder="Additional notes..."
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-between items-center pt-4">
+              {booking ? (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="inline-flex items-center px-4 py-2 border border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50"
+                >
+                  <TrashIcon className="-ml-1 mr-2 h-5 w-5" />
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              ) : (
+                <div />
+              )}
+              
+              <div className="flex space-x-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : booking ? 'Update Booking' : 'Create Booking'}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}

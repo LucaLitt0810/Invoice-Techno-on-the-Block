@@ -18,13 +18,15 @@ import {
   ChevronDownIcon,
   PlusIcon,
   Bars3Icon,
-  DocumentCheckIcon
+  DocumentCheckIcon,
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Invoices', href: '/invoices', icon: DocumentTextIcon },
   { name: 'Contracts', href: '/contracts', icon: DocumentCheckIcon },
+  { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
   { name: 'Products', href: '/products', icon: ShoppingBagIcon },
   { name: 'Customers', href: '/customers', icon: UsersIcon },
   { name: 'Companies', href: '/companies', icon: BuildingOfficeIcon },

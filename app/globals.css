@@ -155,3 +155,88 @@ input[type="datetime-local"]::-moz-calendar-picker-indicator {
   filter: invert(1);
   cursor: pointer;
 }
+
+/* FullCalendar Dark Theme */
+.fc {
+  --fc-page-bg-color: transparent;
+  --fc-border-color: #333;
+  --fc-button-text-color: #fff;
+  --fc-button-bg-color: transparent;
+  --fc-button-border-color: #fff;
+  --fc-button-hover-bg-color: #fff;
+  --fc-button-hover-border-color: #fff;
+  --fc-button-active-bg-color: #fff;
+  --fc-button-active-border-color: #fff;
+  --fc-event-bg-color: #eab308;
+  --fc-event-border-color: #eab308;
+  --fc-event-text-color: #000;
+  --fc-list-event-hover-bg-color: #1f2937;
+  --fc-today-bg-color: rgba(255, 255, 255, 0.05);
+}
+
+.fc .fc-button {
+  @apply uppercase tracking-wider text-xs font-medium;
+  padding: 0.5rem 1rem;
+}
+
+.fc .fc-button:hover {
+  @apply text-black;
+}
+
+.fc .fc-button-primary:disabled {
+  @apply opacity-50;
+}
+
+.fc .fc-toolbar-title {
+  @apply text-white text-lg font-bold uppercase tracking-wider;
+}
+
+.fc th {
+  @apply text-gray-400 uppercase tracking-wider text-xs font-medium;
+}
+
+.fc td {
+  @apply text-white;
+}
+
+.fc .fc-daygrid-day-number,
+.fc .fc-col-header-cell-cushion {
+  @apply text-white;
+}
+
+.fc .fc-day-other .fc-daygrid-day-number {
+  @apply text-gray-600;
+}
+
+.fc .fc-day-today {
+  @apply bg-white/5;
+}
+
+.fc .fc-event {
+  @apply border-0 rounded shadow-none;
+}
+
+.fc .fc-event-title {
+  @apply text-xs font-medium;
+}
+
+.fc .fc-timegrid-slot-label-cushion,
+.fc .fc-timegrid-axis-cushion {
+  @apply text-gray-400 text-xs;
+}
+
+.fc-direction-ltr .fc-timegrid-slot-label-frame {
+  @apply text-right;
+}
+
+.fc .fc-list-empty {
+  @apply bg-dark-800 text-gray-400;
+}
+
+.fc .fc-list-day-cushion {
+  @apply bg-dark-700;
+}
+
+.fc .fc-list-event:hover td {
+  @apply bg-dark-700;
+}
