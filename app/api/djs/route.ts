@@ -61,11 +61,11 @@ export async function POST(request: NextRequest) {
       .insert({
         dj_code: dj_code.toUpperCase(),
         name,
-        email,
-        phone,
-        genre,
-        bio,
-        user_id,
+        email: email || null,
+        phone: phone || null,
+        genre: genre || null,
+        bio: bio || null,
+        user_id: user_id || null,
         active: active !== undefined ? active : true,
       })
       .select()

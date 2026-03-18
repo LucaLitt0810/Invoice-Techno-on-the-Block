@@ -31,11 +31,11 @@ export async function PUT(
     
     const updateData: any = { 
       name, 
-      email, 
-      phone, 
-      genre, 
-      bio, 
-      user_id, 
+      email: email || null, 
+      phone: phone || null, 
+      genre: genre || null, 
+      bio: bio || null, 
+      user_id: user_id || null, 
       active 
     };
     
