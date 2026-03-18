@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Booking, DJ, BOOKING_STATUS_OPTIONS } from '@/types/bookings';
+import { Booking, DJ, BOOKING_STATUS_OPTIONS, RecurrencePattern } from '@/types/bookings';
 import { formatDateInput, formatDateTimeInput } from '@/lib/utils/helpers';
 import toast from 'react-hot-toast';
 import { XMarkIcon, TrashIcon } from '@heroicons/react/24/outline';
@@ -25,6 +25,9 @@ export default function BookingModal({ booking, initialDate, djs, onClose, onSav
     fee: 0,
     status: 'request' as const,
     notes: '',
+    is_recurring: false,
+    recurrence_pattern: '' as RecurrencePattern | '',
+    recurrence_end_date: '',
   });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -41,6 +44,11 @@ export default function BookingModal({ booking, initialDate, djs, onClose, onSav
         fee: booking.fee,
         status: booking.status,
         notes: booking.notes || '',
+        is_recurring: booking.is_recurring,
+        recurrence_pattern: booking.recurrence_pattern || '',
+        recurrence_end_date: booking.recurrence_end_date 
+          ? formatDateInput(new Date(booking.recurrence_end_date)) 
+          : '',
       });
     } else if (initialDate) {
       const start = new Date(initialDate);
@@ -73,6 +81,8 @@ export default function BookingModal({ booking, initialDate, djs, onClose, onSav
         body: JSON.stringify({
           ...formData,
           fee: parseFloat(formData.fee.toString()) || 0,
+          recurrence_pattern: formData.is_recurring ? formData.recurrence_pattern : null,
+          recurrence_end_date: formData.is_recurring ? formData.recurrence_end_date : null,
         }),
       });
       
@@ -245,6 +255,54 @@ export default function BookingModal({ booking, initialDate, djs, onClose, onSav
                 </select>
               </div>
             </div>
+
+            {/* Recurring Event - Only for new bookings */}
+            {!booking && (
+              <div className="border border-dark-500 rounded p-4 space-y-4">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="is_recurring"
+                    className="h-4 w-4 bg-dark-800 border-dark-500 rounded"
+                    checked={formData.is_recurring}
+                    onChange={(e) => setFormData({ ...formData, is_recurring: e.target.checked })}
+                  />
+                  <label htmlFor="is_recurring" className="ml-2 text-sm text-white font-medium">
+                    Recurring Event
+                  </label>
+                </div>
+                
+                {formData.is_recurring && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-6">
+                    <div>
+                      <label className="label">Repeat Pattern *</label>
+                      <select
+                        className="input bg-dark-800 border-dark-500 text-white w-full"
+                        value={formData.recurrence_pattern}
+                        onChange={(e) => setFormData({ ...formData, recurrence_pattern: e.target.value as RecurrencePattern })}
+                        required={formData.is_recurring}
+                      >
+                        <option value="">Select pattern...</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Bi-weekly</option>
+                        <option value="monthly">Monthly</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="label">End Date *</label>
+                      <input
+                        type="date"
+                        className="input bg-dark-800 border-dark-500 text-white w-full"
+                        value={formData.recurrence_end_date}
+                        onChange={(e) => setFormData({ ...formData, recurrence_end_date: e.target.value })}
+                        required={formData.is_recurring}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Notes */}
             <div>

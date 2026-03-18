@@ -7,7 +7,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import { createClient } from '@/lib/supabase/client';
-import { Booking, DJ, BOOKING_STATUS_COLORS } from '@/types/bookings';
+import { Booking, DJ, DJUnavailability, BOOKING_STATUS_COLORS } from '@/types/bookings';
 import BookingModal from './BookingModal';
 import toast from 'react-hot-toast';
 import { PlusIcon, CalendarIcon, ListBulletIcon } from '@heroicons/react/24/outline';
@@ -19,18 +19,22 @@ interface CalendarEvent {
   end: string;
   backgroundColor: string;
   borderColor: string;
+  textColor?: string;
   extendedProps: {
-    booking: Booking;
+    booking?: Booking;
+    unavailability?: DJUnavailability;
   };
 }
 
 export default function BookingsPage() {
   const supabase = createClient();
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [unavailability, setUnavailability] = useState<DJUnavailability[]>([]);
   const [djs, setDjs] = useState<DJ[]>([]);
   const [selectedDJ, setSelectedDJ] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
+  const [showUnavailability, setShowUnavailability] = useState(true);
   
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -70,9 +74,27 @@ export default function BookingsPage() {
     }
   }, []);
 
+  const fetchUnavailability = useCallback(async () => {
+    try {
+      let url = '/api/unavailability';
+      if (selectedDJ) {
+        url += `?dj_id=${selectedDJ}`;
+      }
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch unavailability');
+      
+      const data = await response.json();
+      setUnavailability(data.unavailability || []);
+    } catch (error) {
+      console.error('Error fetching unavailability:', error);
+    }
+  }, [selectedDJ]);
+
   useEffect(() => {
     fetchDJs();
-  }, [fetchDJs]);
+    fetchUnavailability();
+  }, [fetchDJs, fetchUnavailability]);
 
   useEffect(() => {
     fetchBookings();
@@ -122,17 +144,33 @@ export default function BookingsPage() {
     }
   };
 
-  const calendarEvents: CalendarEvent[] = bookings.map((booking) => ({
-    id: booking.id,
-    title: `${booking.event_name} (${booking.dj?.name || 'Unknown DJ'})`,
-    start: booking.start_date,
-    end: booking.end_date,
-    backgroundColor: BOOKING_STATUS_COLORS[booking.status],
-    borderColor: BOOKING_STATUS_COLORS[booking.status],
-    extendedProps: {
-      booking,
-    },
-  }));
+  const calendarEvents: CalendarEvent[] = [
+    // Bookings
+    ...bookings.map((booking) => ({
+      id: booking.id,
+      title: `${booking.event_name} (${booking.dj?.name || 'Unknown DJ'})`,
+      start: booking.start_date,
+      end: booking.end_date,
+      backgroundColor: BOOKING_STATUS_COLORS[booking.status],
+      borderColor: BOOKING_STATUS_COLORS[booking.status],
+      extendedProps: {
+        booking,
+      },
+    })),
+    // Unavailability (if enabled)
+    ...(showUnavailability ? unavailability.map((unav) => ({
+      id: `unav-${unav.id}`,
+      title: `🚫 ${unav.dj?.name || 'DJ'} - ${unav.reason || 'Unavailable'}`,
+      start: unav.start_date,
+      end: unav.end_date,
+      backgroundColor: '#333333',
+      borderColor: '#666666',
+      textColor: '#999999',
+      extendedProps: {
+        unavailability: unav,
+      },
+    })) : []),
+  ];
 
   const handleBookingSaved = () => {
     setModalOpen(false);
@@ -189,6 +227,19 @@ export default function BookingsPage() {
               <ListBulletIcon className="h-5 w-5" />
             </button>
           </div>
+          
+          {/* Unavailability Toggle */}
+          <button
+            onClick={() => setShowUnavailability(!showUnavailability)}
+            className={`px-3 py-2 border text-xs uppercase tracking-wider ${
+              showUnavailability 
+                ? 'border-gray-500 bg-gray-800 text-gray-300' 
+                : 'border-dark-500 text-gray-500 hover:text-gray-300'
+            }`}
+            title="Toggle unavailability display"
+          >
+            🚫 Unavailable
+          </button>
           
           {/* Add Button */}
           <button
