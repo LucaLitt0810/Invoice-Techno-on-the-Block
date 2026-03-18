@@ -222,6 +222,13 @@ export default function AdminUsersPage() {
             DJs
           </a>
           <a
+            href="/bookings"
+            className="inline-flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-dark-700 text-sm font-medium uppercase tracking-wider transition-colors"
+          >
+            <CalendarIcon className="-ml-1 mr-2 h-5 w-5" />
+            Bookings
+          </a>
+          <a
             href="/admin/unavailability"
             className="inline-flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-dark-700 text-sm font-medium uppercase tracking-wider transition-colors"
           >

@@ -12,7 +12,8 @@ import {
   MagnifyingGlassIcon, 
   EyeIcon, 
   TrashIcon, 
-  BuildingOfficeIcon
+  BuildingOfficeIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
 const statusOptions: { value: InvoiceStatus | ''; label: string }[] = [
@@ -188,11 +189,14 @@ export default function InvoicesPage() {
                     <td className="table-cell font-medium text-white">{formatCurrency(invoice.total)}</td>
                     <td className="table-cell">{getStatusBadge(invoice.status, invoice.due_date)}</td>
                     <td className="table-cell">
-                      <div className="flex items-center space-x-2">
-                        <Link href={`/invoices/${invoice.id}`} className="text-gray-400 hover:text-white">
+                      <div className="flex items-center space-x-3">
+                        <Link href={`/invoices/${invoice.id}`} className="text-gray-400 hover:text-white" title="View">
                           <EyeIcon className="h-5 w-5" />
                         </Link>
-                        <button onClick={() => handleDelete(invoice.id)} className="text-gray-400 hover:text-red-400">
+                        <Link href={`/api/invoices/${invoice.id}/pdf`} target="_blank" className="text-gray-400 hover:text-yellow-400" title="PDF">
+                          <DocumentTextIcon className="h-5 w-5" />
+                        </Link>
+                        <button onClick={() => handleDelete(invoice.id)} className="text-gray-400 hover:text-red-400" title="Delete">
                           <TrashIcon className="h-5 w-5" />
                         </button>
                       </div>

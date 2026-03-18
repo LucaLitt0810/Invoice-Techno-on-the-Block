@@ -39,10 +39,10 @@ const getNavigation = (role: string | undefined) => {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Invoices', href: '/invoices', icon: DocumentTextIcon },
     { name: 'Contracts', href: '/contracts', icon: DocumentCheckIcon },
-    { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
     { name: 'Products', href: '/products', icon: ShoppingBagIcon },
     { name: 'Customers', href: '/customers', icon: UsersIcon },
     { name: 'Companies', href: '/companies', icon: BuildingOfficeIcon },
+    { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
     { name: 'Admin', href: '/admin/users', icon: ShieldCheckIcon },
   ];
 };
@@ -267,7 +267,7 @@ export default function DashboardLayout({
         {/* Page content */}
         <main className="flex-1">
           <div className="py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
               {children}
             </div>
           </div>
