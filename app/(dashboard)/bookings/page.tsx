@@ -35,6 +35,8 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
   const [showUnavailability, setShowUnavailability] = useState(true);
+  const [userRole, setUserRole] = useState<string>('user');
+  const [currentDJId, setCurrentDJId] = useState<string>('');
   
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -92,9 +94,11 @@ export default function BookingsPage() {
   }, [selectedDJ]);
 
   useEffect(() => {
-    fetchDJs();
+    if (userRole !== 'dj') {
+      fetchDJs();
+    }
     fetchUnavailability();
-  }, [fetchDJs, fetchUnavailability]);
+  }, [fetchDJs, fetchUnavailability, userRole]);
 
   useEffect(() => {
     fetchBookings();
@@ -191,26 +195,28 @@ export default function BookingsPage() {
       <div className="md:flex md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white uppercase tracking-tight">
-            DJ Bookings
+            {userRole === 'dj' ? 'My Bookings' : 'DJ Bookings'}
           </h2>
           <p className="mt-1 text-sm text-gray-400">
-            Manage DJ bookings and calendar
+            {userRole === 'dj' ? 'View your bookings and availability' : 'Manage DJ bookings and calendar'}
           </p>
         </div>
         <div className="mt-4 flex md:mt-0 space-x-3">
-          {/* DJ Filter */}
-          <select
-            className="input bg-dark-800 border-dark-500 text-white"
-            value={selectedDJ}
-            onChange={(e) => setSelectedDJ(e.target.value)}
-          >
-            <option value="">All DJs</option>
-            {djs.map((dj) => (
-              <option key={dj.id} value={dj.id}>
-                {dj.name}
-              </option>
-            ))}
-          </select>
+          {/* DJ Filter - only for non-DJs */}
+          {userRole !== 'dj' && (
+            <select
+              className="input bg-dark-800 border-dark-500 text-white"
+              value={selectedDJ}
+              onChange={(e) => setSelectedDJ(e.target.value)}
+            >
+              <option value="">All DJs</option>
+              {djs.map((dj) => (
+                <option key={dj.id} value={dj.id}>
+                  {dj.name}
+                </option>
+              ))}
+            </select>
+          )}
           
           {/* View Toggle */}
           <div className="flex border border-dark-500">
@@ -241,18 +247,20 @@ export default function BookingsPage() {
             🚫 Unavailable
           </button>
           
-          {/* Add Button */}
-          <button
-            onClick={() => {
-              setSelectedBooking(null);
-              setSelectedDate(new Date());
-              setModalOpen(true);
-            }}
-            className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
-          >
-            <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
-            New Booking
-          </button>
+          {/* Add Button - only for non-DJs */}
+          {userRole !== 'dj' && (
+            <button
+              onClick={() => {
+                setSelectedBooking(null);
+                setSelectedDate(new Date());
+                setModalOpen(true);
+              }}
+              className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+            >
+              <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+              New Booking
+            </button>
+          )}
         </div>
       </div>
 

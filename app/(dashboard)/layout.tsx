@@ -22,16 +22,28 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/outline';
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Invoices', href: '/invoices', icon: DocumentTextIcon },
-  { name: 'Contracts', href: '/contracts', icon: DocumentCheckIcon },
-  { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
-  { name: 'Products', href: '/products', icon: ShoppingBagIcon },
-  { name: 'Customers', href: '/customers', icon: UsersIcon },
-  { name: 'Companies', href: '/companies', icon: BuildingOfficeIcon },
-  { name: 'Admin', href: '/admin/users', icon: ShieldCheckIcon },
-];
+// Navigation based on role
+const getNavigation = (role: string | undefined) => {
+  // DJ role: only see bookings
+  if (role === 'dj') {
+    return [
+      { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+      { name: 'My Bookings', href: '/bookings', icon: CalendarIcon },
+    ];
+  }
+  
+  // Admin/Manager: see everything
+  return [
+    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+    { name: 'Invoices', href: '/invoices', icon: DocumentTextIcon },
+    { name: 'Contracts', href: '/contracts', icon: DocumentCheckIcon },
+    { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
+    { name: 'Products', href: '/products', icon: ShoppingBagIcon },
+    { name: 'Customers', href: '/customers', icon: UsersIcon },
+    { name: 'Companies', href: '/companies', icon: BuildingOfficeIcon },
+    { name: 'Admin', href: '/admin/users', icon: ShieldCheckIcon },
+  ];
+};
 
 export default function DashboardLayout({
   children,
@@ -39,6 +51,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [user, setUser] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string>('user');
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
@@ -55,6 +68,7 @@ export default function DashboardLayout({
         return;
       }
       setUser(user);
+      setUserRole(user.user_metadata?.role || 'user');
       setLoading(false);
     };
 
@@ -119,7 +133,7 @@ export default function DashboardLayout({
                 </div>
               </div>
               <nav className="px-4 space-y-1">
-                {navigation.map((item) => (
+                {getNavigation(userRole).map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
@@ -151,7 +165,7 @@ export default function DashboardLayout({
               </Link>
             </div>
             <nav className="flex-1 px-4 space-y-1">
-              {navigation.map((item) => (
+              {getNavigation(userRole).map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
