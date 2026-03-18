@@ -46,7 +46,7 @@ export async function GET(
           const logoBytes = await logoResponse.arrayBuffer();
           const logoImage = await pdfDoc.embedPng(logoBytes).catch(() => pdfDoc.embedJpg(logoBytes));
           
-          const logoWidth = 100;
+          const logoWidth = 70;
           const logoHeight = (logoImage.height / logoImage.width) * logoWidth;
           page1.drawImage(logoImage, { x: 50, y: y - logoHeight + 10, width: logoWidth, height: logoHeight });
           y -= logoHeight + 15;
@@ -93,7 +93,7 @@ export async function GET(
     y = 505;
     page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
-    // Invoice Info Row (4 columns with status) - very compact
+    // Invoice Info Row (4 columns, centered) - very compact
     y = 490;
     const col1 = 50;
     const col2 = 165;
@@ -102,14 +102,14 @@ export async function GET(
     
     page1.drawText('INVOICE NUMBER', { x: col1, y, size: 9, font });
     page1.drawText('INVOICE DATE', { x: col2, y, size: 9, font });
-    page1.drawText('DUE DATE', { x: col3, y, size: 9, font });
-    page1.drawText('STATUS', { x: col4, y, size: 9, font });
+    page1.drawText('SERVICE DATE', { x: col3, y, size: 9, font });
+    page1.drawText('DUE DATE', { x: col4, y, size: 9, font });
     
     y -= 12;
     page1.drawText(invoice.invoice_number, { x: col1, y, size: 11, font: fontBold });
     page1.drawText(formatDate(invoice.invoice_date), { x: col2, y, size: 11, font: fontBold });
-    page1.drawText(formatDate(invoice.due_date), { x: col3, y, size: 11, font: fontBold });
-    page1.drawText(invoice.status?.toUpperCase() || '', { x: col4, y, size: 11, font: fontBold });
+    page1.drawText(formatDate(invoice.service_date || invoice.invoice_date), { x: col3, y, size: 11, font: fontBold });
+    page1.drawText(formatDate(invoice.due_date), { x: col4, y, size: 11, font: fontBold });
     
     // Divider - closer to values
     y -= 10;
@@ -117,7 +117,7 @@ export async function GET(
     
     // Table Header with gray background
     y -= 35;
-    const descX = 50;
+    const descX = 60;
     const qtyX = 280;
     const unitX = 340;
     const priceX = 400;
@@ -129,7 +129,7 @@ export async function GET(
       y: y - 5,
       width: 480,
       height: 22,
-      color: rgb(0.96, 0.96, 0.96),
+      color: rgb(0.9, 0.9, 0.9),
     });
     
     page1.drawText('DESCRIPTION', { x: descX, y, size: 9, font: fontBold });
@@ -151,9 +151,9 @@ export async function GET(
       page1.drawText(`${formatNumber(item.price)} ${currency}`, { x: priceX - 10, y, size: 10, font });
       page1.drawText(`${formatNumber(item.total)} ${currency}`, { x: totalX - 10, y, size: 10, font });
       // Line under each row
-      y -= 18;
+      y -= 14;
       page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 0.3 });
-      y -= 8;
+      y -= 14;
     }
     
     // Totals section
@@ -180,6 +180,31 @@ export async function GET(
     // Line below TOTAL
     y -= 12;
     page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 1 });
+    
+    // Notes section (if exists)
+    if (invoice.notes) {
+      y = 130;
+      page1.drawText('NOTES:', { x: 50, y, size: 10, font: fontBold });
+      y -= 15;
+      // Wrap notes text to fit page width
+      const maxWidth = 480;
+      const words = invoice.notes.split(' ');
+      let line = '';
+      for (const word of words) {
+        const testLine = line + word + ' ';
+        const lineWidth = font.widthOfTextAtSize(testLine, 9);
+        if (lineWidth > maxWidth && line !== '') {
+          page1.drawText(line.trim(), { x: 50, y, size: 9, font });
+          y -= 12;
+          line = word + ' ';
+        } else {
+          line = testLine;
+        }
+      }
+      if (line.trim()) {
+        page1.drawText(line.trim(), { x: 50, y, size: 9, font });
+      }
+    }
     
     // Footer line
     y = 100;

@@ -58,19 +58,19 @@ export const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
 
 // Default templates for DJ bookings
 export const DJ_BOOKING_TEMPLATES = {
-  offer: {
+  booking_offer: {
     title: 'DJ Booking Offer',
     cancellation_terms: 'Cancellation by client: Up to 30 days before event: 50% of fee due. Less than 30 days: 100% of fee due.',
     technical_requirements: '• Professional DJ setup with 2x CDJ-3000 and DJM-900NXS2\n• Minimum 2x15" speakers (active)\n• Power supply: 230V, min. 16A\n• DJ booth/table (min. 2m width)\n• Load-in access 2 hours before event',
     notes: 'We are pleased to offer our DJ services for your event. This offer is valid for 14 days.',
   },
-  confirmation: {
+  booking_confirmation: {
     title: 'DJ Booking Confirmation',
     cancellation_terms: 'Both parties have agreed to the terms. Cancellation policy as stated in the original offer.',
     technical_requirements: '• Professional DJ setup with 2x CDJ-3000 and DJM-900NXS2\n• Minimum 2x15" speakers (active)\n• Power supply: 230V, min. 16A\n• DJ booth/table (min. 2m width)\n• Load-in access 2 hours before event',
     notes: 'Thank you for booking our DJ services. We look forward to making your event unforgettable!',
   },
-  rejection: {
+  booking_rejection: {
     title: 'DJ Booking - Alternative Date/Information',
     cancellation_terms: '',
     technical_requirements: '',

@@ -17,6 +17,9 @@ export default function ContractDetailPage() {
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejecting, setRejecting] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -84,6 +87,11 @@ export default function ContractDetailPage() {
   };
 
   const handleStatusUpdate = async (newStatus: 'accepted' | 'rejected') => {
+    if (newStatus === 'rejected') {
+      setShowRejectionModal(true);
+      return;
+    }
+    
     try {
       const { error } = await (supabase
         .from('contracts') as any)
@@ -97,6 +105,45 @@ export default function ContractDetailPage() {
     } catch (error) {
       console.error('Error updating status:', error);
       toast.error('Failed to update status');
+    }
+  };
+
+  const handleRejectWithLetter = async () => {
+    if (!rejectionReason.trim()) {
+      toast.error('Please provide a reason for rejection');
+      return;
+    }
+    
+    setRejecting(true);
+    try {
+      const response = await fetch(`/api/contracts/${params.id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rejection_reason: rejectionReason }),
+      });
+
+      if (!response.ok) throw new Error('Failed to generate rejection letter');
+
+      // Download the PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Rejection-${contract?.contract_number}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success('Rejection letter generated successfully');
+      setShowRejectionModal(false);
+      setRejectionReason('');
+      fetchContract();
+    } catch (error) {
+      console.error('Error rejecting contract:', error);
+      toast.error('Failed to generate rejection letter');
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -184,24 +231,20 @@ export default function ContractDetailPage() {
             <EnvelopeIcon className="-ml-1 mr-2 h-5 w-5" />
             {sending ? 'Sending...' : 'Send'}
           </button>
-          {contract.status === 'sent' && (
-            <>
-              <button
-                onClick={() => handleStatusUpdate('accepted')}
-                className="inline-flex items-center px-4 py-2 border border-green-500 text-green-400 hover:bg-green-500 hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
-              >
-                <CheckIcon className="-ml-1 mr-2 h-5 w-5" />
-                Accept
-              </button>
-              <button
-                onClick={() => handleStatusUpdate('rejected')}
-                className="inline-flex items-center px-4 py-2 border border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
-              >
-                <XMarkIcon className="-ml-1 mr-2 h-5 w-5" />
-                Reject
-              </button>
-            </>
-          )}
+          <button
+            onClick={() => handleStatusUpdate('accepted')}
+            className="inline-flex items-center px-4 py-2 border border-green-500 text-green-400 hover:bg-green-500 hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+          >
+            <CheckIcon className="-ml-1 mr-2 h-5 w-5" />
+            Accept
+          </button>
+          <button
+            onClick={() => handleStatusUpdate('rejected')}
+            className="inline-flex items-center px-4 py-2 border border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+          >
+            <XMarkIcon className="-ml-1 mr-2 h-5 w-5" />
+            Reject
+          </button>
           <button
             onClick={handleDelete}
             className="inline-flex items-center px-4 py-2 border border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
@@ -322,6 +365,54 @@ export default function ContractDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Rejection Modal */}
+      {showRejectionModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div 
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={() => setShowRejectionModal(false)}
+            />
+            <div className="relative bg-dark-800 border border-dark-500 max-w-lg w-full p-6">
+              <h3 className="text-lg font-medium text-white uppercase tracking-wider mb-4">
+                Reject Contract
+              </h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Please provide a reason for rejecting this booking request. This will be included in the rejection letter.
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <label className="label">Reason for Rejection *</label>
+                  <textarea
+                    className="input bg-dark-800 border-dark-500 text-white w-full h-32 resize-none"
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    placeholder="e.g., Unfortunately, we are already booked for this date..."
+                    required
+                  />
+                </div>
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowRejectionModal(false)}
+                    className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleRejectWithLetter}
+                    disabled={rejecting || !rejectionReason.trim()}
+                    className="inline-flex items-center px-4 py-2 border border-red-500 bg-red-500 text-white hover:bg-transparent hover:text-red-500 transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50"
+                  >
+                    {rejecting ? 'Generating...' : 'Generate Rejection Letter'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -48,10 +48,15 @@ export async function GET(
     page1.drawText('Techno on the Block', { x: 50, y, size: 14, font: fontBold });
     page1.drawText('Invoice Center', { x: 50, y: y - 15, size: 10, font });
     
-    // Contract Type (right)
+    // Contract Type (right) - align N to end at line (545)
     const typeLabel = getTypeLabel(contract.contract_type);
-    page1.drawText(typeLabel, { x: 320, y, size: 22, font: fontBold });
-    page1.drawText(`Contract No. ${contract.contract_number}`, { x: 320, y: y - 20, size: 10, font });
+    const titleWidth = fontBold.widthOfTextAtSize(typeLabel, 22);
+    const titleX = 545 - titleWidth;
+    page1.drawText(typeLabel, { x: titleX, y, size: 22, font: fontBold });
+    
+    const contractNumText = `Contract No. ${contract.contract_number}`;
+    const numWidth = font.widthOfTextAtSize(contractNumText, 10);
+    page1.drawText(contractNumText, { x: 545 - numWidth, y: y - 20, size: 10, font });
     
     // Divider
     y = 750;
@@ -97,10 +102,17 @@ export async function GET(
       page1.drawText(desc, { x: leftCol, y, size: 10, font });
     }
     
-    // Event Details
-    y -= 50;
-    page1.drawText('EVENT DETAILS', { x: leftCol, y, size: 14, font: fontBold });
-    y -= 25;
+    // Event Details with gray background (no header)
+    y -= 40;
+    
+    // Gray background for event details row
+    page1.drawRectangle({
+      x: 45,
+      y: y - 15,
+      width: 505,
+      height: 35,
+      color: rgb(0.9, 0.9, 0.9),
+    });
     
     const col1 = 50;
     const col2 = 200;
@@ -147,6 +159,18 @@ export async function GET(
       y -= 20;
       const lines = contract.cancellation_terms.split('\n').slice(0, 5);
       for (const line of lines) {
+        page1.drawText(line.substring(0, 90), { x: leftCol, y, size: 9, font });
+        y -= 12;
+      }
+    }
+    
+    // Technical Requirements
+    if (contract.technical_requirements) {
+      y -= 20;
+      page1.drawText('TECHNICAL REQUIREMENTS', { x: leftCol, y, size: 12, font: fontBold });
+      y -= 20;
+      const techLines = contract.technical_requirements.split('\n').slice(0, 8);
+      for (const line of techLines) {
         page1.drawText(line.substring(0, 90), { x: leftCol, y, size: 9, font });
         y -= 12;
       }
