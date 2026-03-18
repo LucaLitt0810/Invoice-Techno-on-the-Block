@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { DJ } from '@/types/bookings';
 import toast from 'react-hot-toast';
-import { PlusIcon, TrashIcon, PencilIcon, XMarkIcon, UserPlusIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, PencilIcon, XMarkIcon, UserPlusIcon, CheckIcon, UserGroupIcon, MusicalNoteIcon, CalendarIcon } from '@heroicons/react/24/outline';
 
 interface User {
   id: string;
@@ -270,6 +270,33 @@ export default function AdminDJsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Admin Navigation */}
+      <div className="border-b border-dark-500 pb-4">
+        <div className="flex space-x-1">
+          <a
+            href="/admin/users"
+            className="inline-flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-dark-700 text-sm font-medium uppercase tracking-wider transition-colors"
+          >
+            <UserGroupIcon className="-ml-1 mr-2 h-5 w-5" />
+            Users
+          </a>
+          <a
+            href="/admin/djs"
+            className="inline-flex items-center px-4 py-2 bg-white text-black text-sm font-medium uppercase tracking-wider"
+          >
+            <MusicalNoteIcon className="-ml-1 mr-2 h-5 w-5" />
+            DJs
+          </a>
+          <a
+            href="/admin/unavailability"
+            className="inline-flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-dark-700 text-sm font-medium uppercase tracking-wider transition-colors"
+          >
+            <CalendarIcon className="-ml-1 mr-2 h-5 w-5" />
+            Unavailability
+          </a>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between">
         <div>
