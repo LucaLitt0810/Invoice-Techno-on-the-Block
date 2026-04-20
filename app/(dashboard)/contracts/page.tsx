@@ -79,7 +79,7 @@ export default function ContractsPage() {
       gray: 'bg-gray-700 text-gray-400 border-gray-600',
     };
     return (
-      <span className={`inline-flex items-center px-2 py-1 text-[10px] font-medium uppercase tracking-wider border ${colors[typeInfo?.color || 'gray']}`}>
+      <span className={`inline-flex items-center px-2 py-1 text-[10px] font-medium uppercase tracking-wider border max-w-full truncate ${colors[typeInfo?.color || 'gray']}`} title={typeInfo?.label.split('(')[0].trim() || type}>
         {typeInfo?.label.split('(')[0].trim() || type}
       </span>
     );
@@ -159,14 +159,14 @@ export default function ContractsPage() {
           <table className="w-full divide-y divide-dark-500" style={{ tableLayout: 'fixed' }}>
             <thead className="bg-dark-700">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '10%' }}>Number</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '15%' }}>Type</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '28%' }}>Title</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '12%' }}>Number</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '13%' }}>Type</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '24%' }}>Title</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '14%' }}>Customer</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '9%' }}>Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '9%' }}>Fee</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '10%' }}>Date</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '10%' }}>Fee</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '10%' }}>Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '15%' }}>Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '7%' }}>Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-dark-500">
@@ -179,10 +179,10 @@ export default function ContractsPage() {
               ) : (
                 filteredContracts.map((contract) => (
                   <tr key={contract.id} className="hover:bg-dark-700/50">
-                    <td className="px-4 py-4 whitespace-nowrap font-mono text-sm text-gray-400">
+                    <td className="px-4 py-4 whitespace-nowrap font-mono text-sm text-gray-400 truncate" title={contract.contract_number}>
                       {contract.contract_number}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 overflow-hidden">
                       {getTypeBadge(contract.contract_type)}
                     </td>
                     <td className="px-4 py-4 font-medium text-white truncate" title={contract.title}>
@@ -191,17 +191,17 @@ export default function ContractsPage() {
                     <td className="px-4 py-4 text-gray-400 truncate" title={contract.customer?.company_name}>
                       {contract.customer?.company_name}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-gray-400">
+                    <td className="px-4 py-4 whitespace-nowrap text-gray-400 truncate">
                       {contract.event_date ? formatDate(contract.event_date) : '-'}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-white">
+                    <td className="px-4 py-4 whitespace-nowrap text-white truncate">
                       {formatCurrency(contract.fee)}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap overflow-hidden">
                       {getStatusBadge(contract.status)}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-3">
                         <Link href={`/contracts/${contract.id}`} className="text-gray-400 hover:text-white" title="View">
                           <EyeIcon className="h-5 w-5" />
                         </Link>
