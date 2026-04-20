@@ -98,7 +98,7 @@ export default function NewCompanyPage() {
     <div className="space-y-6">
       <div className="md:flex md:items-center md:justify-between">
         <div className="flex-1 min-w-0">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl">
+          <h2 className="text-2xl font-bold leading-7 text-white sm:text-3xl">
             New Coworker
           </h2>
           <p className="mt-1 text-sm text-gray-500">
@@ -256,7 +256,7 @@ export default function NewCompanyPage() {
 
           {/* Tax Info */}
           <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Tax Information</h3>
+            <h3 className="text-lg font-medium text-white mb-4">Tax Information</h3>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label htmlFor="tax_number" className="label">
@@ -290,7 +290,7 @@ export default function NewCompanyPage() {
 
           {/* Bank Info */}
           <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Bank Information</h3>
+            <h3 className="text-lg font-medium text-white mb-4">Bank Information</h3>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label htmlFor="bank_name" className="label">
