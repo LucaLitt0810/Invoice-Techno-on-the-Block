@@ -158,14 +158,14 @@ export default function ContractsPage() {
         <table className="min-w-full divide-y divide-dark-500 whitespace-nowrap">
           <thead className="bg-dark-700">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Number</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Title</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Fee</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+              <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Number</th>
+              <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
+              <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Title</th>
+              <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
+              <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+              <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Fee</th>
+              <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-dark-500">
@@ -178,28 +178,28 @@ export default function ContractsPage() {
             ) : (
               filteredContracts.map((contract) => (
                 <tr key={contract.id} className="hover:bg-dark-700/50">
-                  <td className="px-4 py-4 font-mono text-sm text-gray-400">
+                  <td className="px-4 py-5 font-mono text-sm text-gray-400">
                     {contract.contract_number}
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-5">
                     {getTypeBadge(contract.contract_type)}
                   </td>
-                  <td className="px-4 py-4 font-medium text-white">
+                  <td className="px-4 py-5 font-medium text-white">
                     {contract.title}
                   </td>
-                  <td className="px-4 py-4 text-gray-400">
+                  <td className="px-4 py-5 text-gray-400">
                     {contract.customer?.company_name}
                   </td>
-                  <td className="px-4 py-4 text-gray-400">
+                  <td className="px-4 py-5 text-gray-400">
                     {contract.event_date ? formatDate(contract.event_date) : '-'}
                   </td>
-                  <td className="px-4 py-4 text-white">
+                  <td className="px-4 py-5 text-white">
                     {formatCurrency(contract.fee)}
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-5">
                     {getStatusBadge(contract.status)}
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-5">
                     <div className="flex items-center space-x-3">
                       <Link href={`/contracts/${contract.id}`} className="text-gray-400 hover:text-white" title="View">
                         <EyeIcon className="h-5 w-5" />

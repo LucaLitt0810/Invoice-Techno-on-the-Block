@@ -263,19 +263,19 @@ export default function AdminUsersPage() {
           <table className="min-w-full divide-y divide-dark-500">
             <thead className="bg-dark-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Created
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Last Sign In
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -290,7 +290,7 @@ export default function AdminUsersPage() {
               ) : (
                 users.map((user) => (
                   <tr key={user.id} className="hover:bg-dark-700/50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-dark-600 flex items-center justify-center">
                           <span className="text-lg font-bold text-white">
@@ -303,7 +303,7 @@ export default function AdminUsersPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-5 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${
                         user.role === 'admin' 
                           ? 'bg-purple-900/50 text-purple-400 border border-purple-800' 
@@ -313,15 +313,15 @@ export default function AdminUsersPage() {
                         {user.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-400">
                       {new Date(user.created_at).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-400">
                       {user.last_sign_in_at 
                         ? new Date(user.last_sign_in_at).toLocaleDateString() 
                         : 'Never'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm">
                       <div className="flex items-center space-x-3">
                         {user.id !== currentUser?.id && (
                           <>
@@ -358,11 +358,11 @@ export default function AdminUsersPage() {
               className="fixed inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setShowModal(false)}
             />
-            <div className="relative bg-dark-800 border border-dark-500 max-w-lg w-full p-6">
-              <h3 className="text-lg font-medium text-white uppercase tracking-wider mb-4">
+            <div className="relative bg-dark-800 border border-dark-500 max-w-lg w-full p-8">
+              <h3 className="text-lg font-medium text-white uppercase tracking-wider mb-8">
                 Add New User
               </h3>
-              <form onSubmit={handleCreateUser} className="space-y-4">
+              <form onSubmit={handleCreateUser} className="space-y-6">
                 <div>
                   <label className="label">Email Address</label>
                   <div className="relative">

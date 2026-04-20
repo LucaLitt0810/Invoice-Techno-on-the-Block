@@ -237,7 +237,7 @@ export default function NewContractPage() {
           <div className="card-header border-b border-dark-500">
             <h3 className="text-lg font-medium text-white uppercase tracking-wider">Event Details</h3>
           </div>
-          <div className="card-body space-y-4">
+          <div className="card-body space-y-6">
             <div>
               <label className="label">Title / Subject *</label>
               <input
@@ -249,7 +249,7 @@ export default function NewContractPage() {
                 required
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label className="label">Event Date</label>
                 <input
@@ -288,8 +288,8 @@ export default function NewContractPage() {
           <div className="card-header border-b border-dark-500">
             <h3 className="text-lg font-medium text-white uppercase tracking-wider">Payment Terms</h3>
           </div>
-          <div className="card-body space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+          <div className="card-body space-y-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-4">
               <div>
                 <label className="label">Currency</label>
                 <select
@@ -339,7 +339,7 @@ export default function NewContractPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label className="label">Deposit Due</label>
                 <input
@@ -367,7 +367,7 @@ export default function NewContractPage() {
           <div className="card-header border-b border-dark-500">
             <h3 className="text-lg font-medium text-white uppercase tracking-wider">Terms & Conditions</h3>
           </div>
-          <div className="card-body space-y-4">
+          <div className="card-body space-y-6">
             <div>
               <label className="label">Cancellation Terms</label>
               <textarea

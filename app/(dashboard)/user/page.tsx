@@ -151,7 +151,7 @@ export default function UserManagementPage() {
           </div>
         </div>
         <div className="card-body">
-          <form onSubmit={handleUpdatePassword} className="space-y-4 max-w-lg">
+          <form onSubmit={handleUpdatePassword} className="space-y-6 max-w-lg">
             <div>
               <label className="label">New Password</label>
               <input

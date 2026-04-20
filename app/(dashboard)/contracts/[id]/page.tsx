@@ -294,7 +294,7 @@ export default function ContractDetailPage() {
 
           {/* Event Details */}
           <div className="border-t border-dark-500 pt-6">
-            <h3 className="text-lg font-medium text-white uppercase tracking-wider mb-4">Event Details</h3>
+            <h3 className="text-lg font-medium text-white uppercase tracking-wider mb-8">Event Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-gray-500 uppercase">Event Date</p>
@@ -374,14 +374,14 @@ export default function ContractDetailPage() {
               className="fixed inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setShowRejectionModal(false)}
             />
-            <div className="relative bg-dark-800 border border-dark-500 max-w-lg w-full p-6">
+            <div className="relative bg-dark-800 border border-dark-500 max-w-lg w-full p-8">
               <h3 className="text-lg font-medium text-white uppercase tracking-wider mb-4">
                 Reject Contract
               </h3>
               <p className="text-gray-400 text-sm mb-4">
                 Please provide a reason for rejecting this booking request. This will be included in the rejection letter.
               </p>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
                   <label className="label">Reason for Rejection *</label>
                   <textarea

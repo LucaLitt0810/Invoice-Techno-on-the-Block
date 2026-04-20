@@ -517,7 +517,7 @@ export default function NewInvoicePage() {
             {items.map((item, index) => (
               <div key={index} className="mb-4 p-4 border border-dark-500">
                 <div className="flex items-start gap-4">
-                  <div className="flex-1 grid grid-cols-1 gap-4 sm:grid-cols-12">
+                  <div className="flex-1 grid grid-cols-1 gap-6 sm:grid-cols-12">
                     <div className="sm:col-span-4">
                       <label className="label">Description</label>
                       <input
@@ -650,7 +650,7 @@ export default function NewInvoicePage() {
 
         {/* Notes & Terms */}
         <div className="card bg-dark-800 border-dark-500">
-          <div className="card-body space-y-4">
+          <div className="card-body space-y-6">
             <div>
               <label className="label">Notes</label>
               <textarea
@@ -703,19 +703,19 @@ export default function NewInvoicePage() {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowCompanyModal(false)} />
-            <div className="relative bg-dark-800 border border-dark-500 max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
+            <div className="relative bg-dark-800 border border-dark-500 max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-8">
                 <h3 className="text-lg font-medium text-white uppercase tracking-wider">New Coworker</h3>
                 <button onClick={() => setShowCompanyModal(false)} className="text-gray-400 hover:text-white">
                   <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
-              <form onSubmit={handleCreateCompany} className="space-y-4">
+              <form onSubmit={handleCreateCompany} className="space-y-6">
                 <div>
                   <label className="label">Coworker Name *</label>
                   <input type="text" required className="input bg-dark-800 border-dark-500 text-white" value={newCompany.name} onChange={(e) => setNewCompany({...newCompany, name: e.target.value})} />
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label className="label">Street *</label>
                     <input type="text" required className="input bg-dark-800 border-dark-500 text-white" value={newCompany.street} onChange={(e) => setNewCompany({...newCompany, street: e.target.value})} />
@@ -735,7 +735,7 @@ export default function NewInvoicePage() {
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div>
                     <label className="label">Email *</label>
                     <input type="email" required className="input bg-dark-800 border-dark-500 text-white" value={newCompany.email} onChange={(e) => setNewCompany({...newCompany, email: e.target.value})} />
@@ -747,7 +747,7 @@ export default function NewInvoicePage() {
                 </div>
                 <div className="border-t border-dark-500 pt-4 mt-4">
                   <h4 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">Payment Information</h4>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div className="sm:col-span-2">
                       <label className="label">Bank Name</label>
                       <input type="text" className="input bg-dark-800 border-dark-500 text-white" value={newCompany.bank_name} onChange={(e) => setNewCompany({...newCompany, bank_name: e.target.value})} />
@@ -762,7 +762,7 @@ export default function NewInvoicePage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-end space-x-3 pt-4">
+                <div className="flex justify-end space-x-3 pt-6">
                   <button type="button" onClick={() => setShowCompanyModal(false)} className="px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider">Cancel</button>
                   <button type="submit" disabled={savingCompany} className="px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50">{savingCompany ? 'Creating...' : 'Create Coworker'}</button>
                 </div>
@@ -777,14 +777,14 @@ export default function NewInvoicePage() {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowCustomerModal(false)} />
-            <div className="relative bg-dark-800 border border-dark-500 max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
+            <div className="relative bg-dark-800 border border-dark-500 max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-8">
                 <h3 className="text-lg font-medium text-white uppercase tracking-wider">New Customer</h3>
                 <button onClick={() => setShowCustomerModal(false)} className="text-gray-400 hover:text-white">
                   <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
-              <form onSubmit={handleCreateCustomer} className="space-y-4">
+              <form onSubmit={handleCreateCustomer} className="space-y-6">
                 <div>
                   <label className="label">Customer Name *</label>
                   <input type="text" required className="input bg-dark-800 border-dark-500 text-white" value={newCustomer.company_name} onChange={(e) => setNewCustomer({...newCustomer, company_name: e.target.value})} />
@@ -793,7 +793,7 @@ export default function NewInvoicePage() {
                   <label className="label">Contact Person</label>
                   <input type="text" className="input bg-dark-800 border-dark-500 text-white" value={newCustomer.contact_person} onChange={(e) => setNewCustomer({...newCustomer, contact_person: e.target.value})} />
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div>
                     <label className="label">Email *</label>
                     <input type="email" required className="input bg-dark-800 border-dark-500 text-white" value={newCustomer.email} onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})} />
@@ -803,7 +803,7 @@ export default function NewInvoicePage() {
                     <input type="tel" className="input bg-dark-800 border-dark-500 text-white" value={newCustomer.phone} onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})} />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label className="label">Street *</label>
                     <input type="text" required className="input bg-dark-800 border-dark-500 text-white" value={newCustomer.street} onChange={(e) => setNewCustomer({...newCustomer, street: e.target.value})} />
@@ -829,7 +829,7 @@ export default function NewInvoicePage() {
                 </div>
                 <div className="border-t border-dark-500 pt-4 mt-4">
                   <h4 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">Payment Information (Optional)</h4>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div className="sm:col-span-2">
                       <label className="label">Bank Name</label>
                       <input type="text" className="input bg-dark-800 border-dark-500 text-white" value={newCustomer.bank_name} onChange={(e) => setNewCustomer({...newCustomer, bank_name: e.target.value})} />
@@ -844,7 +844,7 @@ export default function NewInvoicePage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-end space-x-3 pt-4">
+                <div className="flex justify-end space-x-3 pt-6">
                   <button type="button" onClick={() => setShowCustomerModal(false)} className="px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider">Cancel</button>
                   <button type="submit" disabled={savingCustomer} className="px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50">{savingCustomer ? 'Creating...' : 'Create Customer'}</button>
                 </div>

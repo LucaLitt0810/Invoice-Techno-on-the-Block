@@ -233,11 +233,11 @@ function ProductModal({
           className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
           onClick={onClose}
         />
-        <div className="relative bg-dark-800 border border-dark-500 max-w-lg w-full p-6">
-          <h3 className="text-lg font-medium text-white uppercase tracking-wider mb-4">
+        <div className="relative bg-dark-800 border border-dark-500 max-w-lg w-full p-8">
+          <h3 className="text-lg font-medium text-white uppercase tracking-wider mb-8">
             {editingProduct ? 'Edit Product' : 'Add Product'}
           </h3>
-          <form onSubmit={onSave} className="space-y-4">
+          <form onSubmit={onSave} className="space-y-6">
             <div>
               <label htmlFor="name" className="label">
                 Name <span className="text-red-500">*</span>

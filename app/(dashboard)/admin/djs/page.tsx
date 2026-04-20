@@ -332,22 +332,22 @@ export default function AdminDJsPage() {
           <table className="min-w-full divide-y divide-dark-500">
             <thead className="bg-dark-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   DJ ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Genre
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -364,17 +364,17 @@ export default function AdminDJsPage() {
                   const linkedUser = getLinkedUser(dj.user_id);
                   return (
                     <tr key={dj.id} className="hover:bg-dark-700/50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 whitespace-nowrap">
                         <div className="text-sm font-mono text-blue-400">{dj.dj_code}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 whitespace-nowrap">
                         <div className="text-sm font-medium text-white">{dj.name}</div>
                         <div className="text-xs text-gray-500">{dj.email || 'No email'}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 whitespace-nowrap">
                         <div className="text-sm text-gray-400">{dj.genre || '-'}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 whitespace-nowrap">
                         {linkedUser ? (
                           <div className="flex items-center">
                             <CheckIcon className="h-4 w-4 text-green-400 mr-1" />
@@ -390,7 +390,7 @@ export default function AdminDJsPage() {
                           </button>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${
                           dj.active 
                             ? 'bg-green-900/50 text-green-400 border border-green-800' 
@@ -399,7 +399,7 @@ export default function AdminDJsPage() {
                           {dj.active ? 'Active' : 'Inactive'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-6 py-5 whitespace-nowrap text-sm">
                         <div className="flex items-center space-x-3">
                           <Link
                             href={`/admin/djs/${dj.id}/dashboard`}
@@ -441,8 +441,8 @@ export default function AdminDJsPage() {
               className="fixed inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setShowModal(false)}
             />
-            <div className="relative bg-dark-800 border border-dark-500 max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
+            <div className="relative bg-dark-800 border border-dark-500 max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-8">
                 <h3 className="text-lg font-medium text-white uppercase tracking-wider">
                   {editingDJ ? 'Edit DJ' : 'Add New DJ'}
                 </h3>
@@ -454,7 +454,7 @@ export default function AdminDJsPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 {/* DJ ID */}
                 <div>
                   <label className="label">DJ ID *</label>
@@ -495,7 +495,7 @@ export default function AdminDJsPage() {
                 </div>
 
                 {/* Email & Phone */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="label">Email</label>
                     <input
@@ -603,8 +603,8 @@ export default function AdminDJsPage() {
               className="fixed inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setShowInviteModal(false)}
             />
-            <div className="relative bg-dark-800 border border-dark-500 max-w-md w-full p-6">
-              <div className="flex items-center justify-between mb-6">
+            <div className="relative bg-dark-800 border border-dark-500 max-w-md w-full p-8">
+              <div className="flex items-center justify-between mb-8">
                 <h3 className="text-lg font-medium text-white uppercase tracking-wider">
                   Invite DJ
                 </h3>
@@ -625,7 +625,7 @@ export default function AdminDJsPage() {
                 </p>
               </div>
 
-              <form onSubmit={handleInvite} className="space-y-4">
+              <form onSubmit={handleInvite} className="space-y-6">
                 <div>
                   <label className="label">Email *</label>
                   <input

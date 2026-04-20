@@ -43,8 +43,9 @@ const config: Config = {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {
-        'widest': '0.25em',
-        'super-wide': '0.4em',
+        'widest': '0.15em',
+        'super-wide': '0.25em',
+        'wide': '0.1em',
       },
     },
   },

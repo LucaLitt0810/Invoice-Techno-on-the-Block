@@ -105,7 +105,7 @@ export default function SettingsPage() {
           <div className="card-header border-b border-dark-500">
             <h3 className="text-lg font-medium text-white uppercase tracking-wider">Account Information</h3>
           </div>
-          <div className="card-body space-y-4">
+          <div className="card-body space-y-6">
             <p className="text-gray-400">
               Manage your account settings through the Supabase dashboard.
             </p>

@@ -274,8 +274,8 @@ export default function DJUnavailabilityPage() {
               className="fixed inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setShowModal(false)}
             />
-            <div className="relative bg-dark-800 border border-dark-500 max-w-md w-full p-6">
-              <div className="flex items-center justify-between mb-6">
+            <div className="relative bg-dark-800 border border-dark-500 max-w-md w-full p-8">
+              <div className="flex items-center justify-between mb-8">
                 <h3 className="text-lg font-medium text-white uppercase tracking-wider">
                   Add Unavailability
                 </h3>
@@ -287,7 +287,7 @@ export default function DJUnavailabilityPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="label">Type *</label>
                   <select
@@ -302,7 +302,7 @@ export default function DJUnavailabilityPage() {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="label">Start Date *</label>
                     <input

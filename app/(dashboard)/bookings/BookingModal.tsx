@@ -165,9 +165,9 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
           className="fixed inset-0 bg-black/80 backdrop-blur-sm"
           onClick={onClose}
         />
-        <div className="relative bg-dark-800 border border-dark-500 max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div className="relative bg-dark-800 border border-dark-500 max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-8">
             <h3 className="text-lg font-medium text-white uppercase tracking-wider">
               {booking ? 'Edit Booking' : userRole === 'dj' ? 'New Booking for Me' : 'New Booking'}
             </h3>
@@ -179,7 +179,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* DJ Selection - Hidden for DJs, they can only book themselves */}
             {userRole === 'dj' ? (
               <div>
@@ -226,7 +226,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
             </div>
 
             {/* Date/Time */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="label">Start Date & Time *</label>
                 <input
@@ -250,7 +250,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
             </div>
 
             {/* Location & Customer */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="label">Location</label>
                 <input
@@ -299,7 +299,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
             </div>
 
             {/* Fee, Provision & Status */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
                 <label className="label">Fee (€)</label>
                 <input
@@ -344,7 +344,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
 
             {/* Recurring Event - Only for new bookings */}
             {!booking && (
-              <div className="border border-dark-500 rounded p-4 space-y-4">
+              <div className="border border-dark-500 rounded p-4 space-y-6">
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -359,7 +359,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
                 </div>
                 
                 {formData.is_recurring && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pl-6">
                     <div>
                       <label className="label">Repeat Pattern *</label>
                       <select

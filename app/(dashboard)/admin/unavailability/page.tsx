@@ -259,22 +259,22 @@ export default function AdminUnavailabilityPage() {
           <table className="min-w-full divide-y divide-dark-500">
             <thead className="bg-dark-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   DJ
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Type
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Start
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   End
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Reason
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -293,24 +293,24 @@ export default function AdminUnavailabilityPage() {
                   .filter(u => !selectedDJ || u.dj_id === selectedDJ)
                   .map((u) => (
                     <tr key={u.id} className="hover:bg-dark-700/50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 whitespace-nowrap">
                         <div className="text-sm font-medium text-white">{u.dj?.name}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border ${getTypeColor(u.type)}`}>
                           {getTypeLabel(u.type)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 whitespace-nowrap">
                         <div className="text-sm text-gray-400">{formatDateTime(u.start_date)}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 whitespace-nowrap">
                         <div className="text-sm text-gray-400">{formatDateTime(u.end_date)}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 whitespace-nowrap">
                         <div className="text-sm text-gray-400">{u.reason || '-'}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-6 py-5 whitespace-nowrap text-sm">
                         <button
                           onClick={() => handleDelete(u.id)}
                           className="text-gray-400 hover:text-red-400"
@@ -335,8 +335,8 @@ export default function AdminUnavailabilityPage() {
               className="fixed inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setShowModal(false)}
             />
-            <div className="relative bg-dark-800 border border-dark-500 max-w-md w-full p-6">
-              <div className="flex items-center justify-between mb-6">
+            <div className="relative bg-dark-800 border border-dark-500 max-w-md w-full p-8">
+              <div className="flex items-center justify-between mb-8">
                 <h3 className="text-lg font-medium text-white uppercase tracking-wider">
                   Add Unavailability
                 </h3>
@@ -348,7 +348,7 @@ export default function AdminUnavailabilityPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="label">DJ *</label>
                   <select
@@ -378,7 +378,7 @@ export default function AdminUnavailabilityPage() {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="label">Start Date *</label>
                     <input
