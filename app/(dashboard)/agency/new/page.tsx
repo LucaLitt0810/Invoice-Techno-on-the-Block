@@ -64,6 +64,7 @@ export default function NewAgencyLeadPage() {
       // Step 2: Create agency lead linked to customer and user
       const leadData = {
         user_id: user.id,
+        user_email: user.email,
         company_name: formData.company_name,
         contact_person: formData.contact_person || null,
         email: formData.email,

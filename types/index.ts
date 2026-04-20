@@ -168,6 +168,7 @@ export const AGENCY_STATUS_OPTIONS = [
 export type AgencyLead = {
   id: string;
   user_id: string;
+  user_email: string | null;
   company_name: string;
   contact_person: string | null;
   email: string;

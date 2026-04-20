@@ -120,6 +120,7 @@ export default function AgencyPage() {
               <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Company</th>
               <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Contact</th>
               <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Created By</th>
               <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
               <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Created</th>
               <th className="table-cell text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
@@ -128,7 +129,7 @@ export default function AgencyPage() {
           <tbody>
             {filteredLeads.length === 0 ? (
               <tr>
-                <td colSpan={6} className="table-cell text-center text-gray-500 py-8">
+                <td colSpan={7} className="table-cell text-center text-gray-500 py-8">
                   {searchQuery ? 'No leads match your search.' : 'No leads yet. Create your first lead to get started.'}
                 </td>
               </tr>
@@ -149,6 +150,9 @@ export default function AgencyPage() {
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(lead.status)}`}>
                       {getStatusLabel(lead.status)}
                     </span>
+                  </td>
+                  <td className="table-cell text-gray-400 text-sm">
+                    {lead.user_email || 'Unknown'}
                   </td>
                   <td className="table-cell">
                     {lead.customer ? (

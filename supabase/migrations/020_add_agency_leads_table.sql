@@ -2,6 +2,7 @@
 CREATE TABLE agency_leads (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_email TEXT,
   company_name TEXT NOT NULL,
   contact_person TEXT,
   email TEXT NOT NULL,
