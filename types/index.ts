@@ -100,6 +100,7 @@ export type InvoiceItem = {
   price: number;
   total: number;
   unit: string | null;
+  service_date: string | null;
   created_at: string;
 };
 

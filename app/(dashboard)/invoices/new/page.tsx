@@ -16,6 +16,7 @@ interface InvoiceItem {
   price: number;
   total: number;
   unit?: string;
+  service_date?: string;
 }
 
 export default function NewInvoicePage() {
@@ -48,7 +49,7 @@ export default function NewInvoicePage() {
   });
 
   const [items, setItems] = useState<InvoiceItem[]>([
-    { description: '', quantity: 1, price: 0, total: 0, unit: 'piece' },
+    { description: '', quantity: 1, price: 0, total: 0, unit: 'piece', service_date: formatDateInput(today) },
   ]);
 
   // Modals state
@@ -225,7 +226,7 @@ export default function NewInvoicePage() {
   };
 
   const addItem = () => {
-    setItems([...items, { description: '', quantity: 1, price: 0, total: 0, unit: 'piece' }]);
+    setItems([...items, { description: '', quantity: 1, price: 0, total: 0, unit: 'piece', service_date: formatDateInput(today) }]);
   };
 
   const removeItem = (index: number) => {
@@ -298,7 +299,7 @@ export default function NewInvoicePage() {
         customer_id: formData.customer_id,
         invoice_number: newInvoiceNumber,
         invoice_date: formData.invoice_date,
-        service_date: formData.service_date || null,
+        service_date: null,
         due_date: formData.due_date,
         status,
         subtotal,
@@ -344,13 +345,22 @@ export default function NewInvoicePage() {
         price: item.price,
         total: item.total,
         unit: item.unit || null,
+        service_date: item.service_date || null,
       }));
 
-      const { error: itemsError } = await supabase
+      let itemsResult = await supabase
         .from('invoice_items')
         .insert(invoiceItems);
 
-      if (itemsError) throw itemsError;
+      // If service_date column doesn't exist in invoice_items, retry without it
+      if (itemsResult.error && itemsResult.error.message?.includes('service_date')) {
+        const fallbackItems = invoiceItems.map(({ service_date, ...rest }) => rest);
+        itemsResult = await supabase
+          .from('invoice_items')
+          .insert(fallbackItems);
+      }
+
+      if (itemsResult.error) throw itemsResult.error;
 
       // Send email if status is 'sent'
       if (status === 'sent') {
@@ -498,7 +508,7 @@ export default function NewInvoicePage() {
           <div className="card-header border-b border-dark-500">
             <h3 className="text-lg font-medium text-white uppercase tracking-wider">Invoice Details</h3>
           </div>
-          <div className="card-body grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="card-body grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
               <label className="label">Invoice Date</label>
               <input
@@ -506,15 +516,6 @@ export default function NewInvoicePage() {
                 className="input bg-dark-800 border-dark-500 text-white"
                 value={formData.invoice_date}
                 onChange={(e) => setFormData({ ...formData, invoice_date: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="label">Service Date</label>
-              <input
-                type="date"
-                className="input bg-dark-800 border-dark-500 text-white"
-                value={formData.service_date}
-                onChange={(e) => setFormData({ ...formData, service_date: e.target.value })}
               />
             </div>
             <div>
@@ -539,7 +540,7 @@ export default function NewInvoicePage() {
               <div key={index} className="mb-4 p-4 border border-dark-500">
                 <div className="flex items-start gap-4">
                   <div className="flex-1 grid grid-cols-1 gap-6 sm:grid-cols-12">
-                    <div className="sm:col-span-4">
+                    <div className="sm:col-span-3">
                       <label className="label">Description</label>
                       <input
                         type="text"
@@ -549,7 +550,16 @@ export default function NewInvoicePage() {
                         placeholder="Item description"
                       />
                     </div>
-                    <div className="sm:col-span-3">
+                    <div className="sm:col-span-2">
+                      <label className="label">Service Date</label>
+                      <input
+                        type="date"
+                        className="input bg-dark-800 border-dark-500 text-white"
+                        value={item.service_date || ''}
+                        onChange={(e) => handleItemChange(index, 'service_date', e.target.value)}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
                       <label className="label">Product</label>
                       <select
                         className="input bg-dark-800 border-dark-500 text-white"

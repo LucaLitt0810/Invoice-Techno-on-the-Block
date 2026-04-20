@@ -102,14 +102,12 @@ export async function GET(
     
     page1.drawText('INVOICE NUMBER', { x: col1, y, size: 9, font });
     page1.drawText('INVOICE DATE', { x: col2, y, size: 9, font });
-    page1.drawText('SERVICE DATE', { x: col3, y, size: 9, font });
-    page1.drawText('DUE DATE', { x: col4, y, size: 9, font });
+    page1.drawText('DUE DATE', { x: col3, y, size: 9, font });
     
     y -= 12;
     page1.drawText(invoice.invoice_number, { x: col1, y, size: 11, font: fontBold });
     page1.drawText(formatDate(invoice.invoice_date), { x: col2, y, size: 11, font: fontBold });
-    page1.drawText(formatDate(invoice.service_date || invoice.invoice_date), { x: col3, y, size: 11, font: fontBold });
-    page1.drawText(formatDate(invoice.due_date), { x: col4, y, size: 11, font: fontBold });
+    page1.drawText(formatDate(invoice.due_date), { x: col3, y, size: 11, font: fontBold });
     
     // Divider - closer to values
     y -= 10;
@@ -145,7 +143,11 @@ export async function GET(
     // Table Rows with lines
     y -= 18;
     for (const item of invoice.items || []) {
-      page1.drawText((item.description || '').substring(0, 40), { x: descX, y, size: 10, font });
+      const hasDate = item.service_date && item.service_date !== invoice.invoice_date;
+      const descText = hasDate
+        ? `${formatDate(item.service_date)} — ${(item.description || '').substring(0, 30)}`
+        : (item.description || '').substring(0, 40);
+      page1.drawText(descText, { x: descX, y, size: 10, font });
       page1.drawText(String(item.quantity), { x: qtyX + 20, y, size: 10, font });
       page1.drawText(item.unit || 'piece', { x: unitX, y, size: 10, font });
       page1.drawText(`${formatNumber(item.price)} ${currency}`, { x: priceX - 10, y, size: 10, font });

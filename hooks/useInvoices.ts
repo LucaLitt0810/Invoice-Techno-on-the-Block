@@ -86,6 +86,8 @@ export function useInvoices({ companyId, status }: UseInvoicesProps = {}) {
           quantity: item.quantity,
           price: item.price,
           total: item.total,
+          unit: item.unit,
+          service_date: item.service_date,
         }));
 
         await supabase.from('invoice_items').insert(newItems);

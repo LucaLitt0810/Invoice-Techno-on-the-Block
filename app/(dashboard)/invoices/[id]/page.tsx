@@ -272,6 +272,7 @@ export default function InvoiceDetailPage() {
             <thead>
               <tr className="border-b border-dark-500">
                 <th className="text-left py-2 text-sm font-medium text-gray-400">Description</th>
+                <th className="text-left py-2 text-sm font-medium text-gray-400">Service Date</th>
                 <th className="text-right py-2 text-sm font-medium text-gray-400">Quantity</th>
                 <th className="text-right py-2 text-sm font-medium text-gray-400">Unit</th>
                 <th className="text-right py-2 text-sm font-medium text-gray-400">Price</th>
@@ -282,6 +283,7 @@ export default function InvoiceDetailPage() {
               {invoice.items?.map((item, index) => (
                 <tr key={index} className="border-b border-dark-500">
                   <td className="py-3 text-white">{item.description}</td>
+                  <td className="py-3 text-gray-400">{item.service_date ? formatDate(item.service_date) : '-'}</td>
                   <td className="py-3 text-right text-white">{item.quantity}</td>
                   <td className="py-3 text-right text-gray-400">{item.unit || 'pcs'}</td>
                   <td className="py-3 text-right text-white">{formatCurrency(item.price)}</td>
