@@ -34,7 +34,17 @@ const getNavigation = (role: string | undefined) => {
       { name: 'My Unavailability', href: '/bookings/unavailability', icon: ClockIcon },
     ];
   }
-  
+
+  // User role: limited access
+  if (role === 'user') {
+    return [
+      { name: 'Customers', href: '/customers', icon: UsersIcon },
+      { name: 'Coworkers', href: '/coworkers', icon: BuildingOfficeIcon },
+      { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
+      { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
+    ];
+  }
+
   // Admin/Manager: see everything
   return [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
