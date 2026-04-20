@@ -14,6 +14,7 @@ import {
   ShoppingBagIcon, 
   BuildingOfficeIcon, 
   ShieldCheckIcon,
+  BriefcaseIcon,
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
   PlusIcon,
@@ -43,6 +44,7 @@ const getNavigation = (role: string | undefined) => {
     { name: 'Customers', href: '/customers', icon: UsersIcon },
     { name: 'Coworkers', href: '/coworkers', icon: BuildingOfficeIcon },
     { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
+    { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
     { name: 'Admin', href: '/admin/users', icon: ShieldCheckIcon },
   ];
 };

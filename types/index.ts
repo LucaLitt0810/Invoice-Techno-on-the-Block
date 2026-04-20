@@ -156,3 +156,31 @@ export type EmailTemplate = {
   subject: string;
   body: string;
 };
+
+export type AgencyStatus = 'contacted' | 'negotiation' | 'closed';
+
+export const AGENCY_STATUS_OPTIONS = [
+  { value: 'contacted' as AgencyStatus, label: 'Angeschrieben', color: 'blue' },
+  { value: 'negotiation' as AgencyStatus, label: 'Verhandlungsphase', color: 'yellow' },
+  { value: 'closed' as AgencyStatus, label: 'Abgeschlossen', color: 'green' },
+];
+
+export type AgencyLead = {
+  id: string;
+  user_id: string;
+  company_name: string;
+  contact_person: string | null;
+  email: string;
+  phone: string | null;
+  street: string;
+  postal_code: string;
+  city: string;
+  country: string;
+  status: AgencyStatus;
+  notes: string | null;
+  customer_id: string | null;
+  created_at: string;
+  updated_at: string;
+  user?: { email: string; raw_user_meta_data?: { full_name?: string } };
+  customer?: Customer;
+};
