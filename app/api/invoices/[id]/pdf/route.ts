@@ -115,11 +115,10 @@ export async function GET(
     // Table Header with gray background
     y -= 35;
     const descX = 55;
-    const dateX = 245;
-    const qtyX = 325;
-    const unitX = 365;
-    const priceX = 415;
-    const totalX = 480;
+    const dateX = 290;
+    const qtyX = 370;
+    const unitX = 415;
+    const priceX = 475;
     
     // Gray background for header
     page1.drawRectangle({
@@ -135,7 +134,6 @@ export async function GET(
     page1.drawText('QTY', { x: qtyX, y, size: 9, font: fontBold });
     page1.drawText('UNIT', { x: unitX, y, size: 9, font: fontBold });
     page1.drawText('PRICE', { x: priceX, y, size: 9, font: fontBold });
-    page1.drawText('TOTAL', { x: totalX, y, size: 9, font: fontBold });
     
     // Line under header - directly below gray background
     y -= 5;
@@ -144,12 +142,12 @@ export async function GET(
     // Table Rows with lines
     y -= 18;
     for (const item of invoice.items || []) {
-      page1.drawText((item.description || '').substring(0, 35), { x: descX, y, size: 10, font });
-      page1.drawText(item.service_date ? formatDate(item.service_date) : '-', { x: dateX, y, size: 10, font });
+      const itemDate = item.service_date || invoice.service_date;
+      page1.drawText((item.description || '').substring(0, 40), { x: descX, y, size: 10, font });
+      page1.drawText(itemDate ? formatDate(itemDate) : '-', { x: dateX, y, size: 10, font });
       page1.drawText(String(item.quantity), { x: qtyX + 15, y, size: 10, font });
       page1.drawText(item.unit || 'piece', { x: unitX, y, size: 10, font });
       page1.drawText(`${formatNumber(item.price)} ${currency}`, { x: priceX - 10, y, size: 10, font });
-      page1.drawText(`${formatNumber(item.total)} ${currency}`, { x: totalX - 10, y, size: 10, font });
       // Line under each row
       y -= 14;
       page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 0.3 });
