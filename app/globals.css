@@ -247,3 +247,41 @@ input[type="datetime-local"]::-moz-calendar-picker-indicator {
 .fc .fc-list-event:hover td {
   @apply bg-dark-700;
 }
+
+/* Prevent calendar event text overflow */
+.fc .fc-event {
+  overflow: hidden;
+}
+
+.fc .fc-event-main {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.fc .fc-event-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+}
+
+.fc .fc-daygrid-event {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.fc .fc-event-time {
+  flex-shrink: 0;
+}
+
+.fc .fc-event-dot {
+  flex-shrink: 0;
+}
+
+.fc .fc-daygrid-event-harness {
+  overflow: hidden;
+}
