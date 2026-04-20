@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
-import { PlusIcon, TrashIcon, ShieldCheckIcon, EnvelopeIcon, UserGroupIcon, MusicalNoteIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, ShieldCheckIcon, EnvelopeIcon, UserGroupIcon, MusicalNoteIcon, CalendarIcon, KeyIcon } from '@heroicons/react/24/outline';
 
 interface AppUser {
   id: string;
@@ -234,6 +234,13 @@ export default function AdminUsersPage() {
           >
             <CalendarIcon className="-ml-1 mr-2 h-5 w-5" />
             Unavailability
+          </a>
+          <a
+            href="/passwords"
+            className="inline-flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-dark-700 text-sm font-medium uppercase tracking-wider transition-colors"
+          >
+            <KeyIcon className="-ml-1 mr-2 h-5 w-5" />
+            Passwords
           </a>
         </div>
       </div>
