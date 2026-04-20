@@ -82,6 +82,7 @@ export type Invoice = {
   currency: string;
   notes: string | null;
   terms: string | null;
+  ahv_waiver: boolean | null;
 
   created_at: string;
   updated_at: string;

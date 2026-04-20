@@ -40,8 +40,9 @@ export default function NewInvoicePage() {
     invoice_date: formatDateInput(today),
     service_date: formatDateInput(today),
     due_date: formatDateInput(twoWeeksLater),
-    tax_type: 'vat_19' as TaxType,
-    currency: 'EUR' as 'EUR' | 'CHF',
+    tax_type: 'no_vat' as TaxType,
+    currency: 'CHF' as 'EUR' | 'CHF',
+    ahv_waiver: false,
     notes: '',
     terms: 'Payment due within 14 days.',
   });
@@ -291,27 +292,47 @@ export default function NewInvoicePage() {
 
       if (numberError) throw numberError;
 
+      // Build invoice payload
+      const invoicePayload: any = {
+        company_id: formData.company_id,
+        customer_id: formData.customer_id,
+        invoice_number: newInvoiceNumber,
+        invoice_date: formData.invoice_date,
+        service_date: formData.service_date || null,
+        due_date: formData.due_date,
+        status,
+        subtotal,
+        tax,
+        tax_rate: taxRate,
+        total,
+        currency: formData.currency,
+        notes: formData.notes || null,
+        terms: formData.terms || null,
+      };
+
+      // Only include ahv_waiver if column exists (DB migration needed)
+      if (formData.ahv_waiver) {
+        invoicePayload.ahv_waiver = true;
+      }
+
       // Create invoice with the generated number
-      const { data: invoice, error: invoiceError } = await supabase
+      let invoiceResult = await supabase
         .from('invoices')
-        .insert({
-          company_id: formData.company_id,
-          customer_id: formData.customer_id,
-          invoice_number: newInvoiceNumber,
-          invoice_date: formData.invoice_date,
-          service_date: formData.service_date || null,
-          due_date: formData.due_date,
-          status,
-          subtotal,
-          tax,
-          tax_rate: taxRate,
-          total,
-          currency: formData.currency,
-          notes: formData.notes || null,
-          terms: formData.terms || null,
-        })
+        .insert(invoicePayload)
         .select()
         .single();
+
+      // If ahv_waiver column doesn't exist, retry without it
+      if (invoiceResult.error && invoiceResult.error.message?.includes('ahv_waiver')) {
+        delete invoicePayload.ahv_waiver;
+        invoiceResult = await supabase
+          .from('invoices')
+          .insert(invoicePayload)
+          .select()
+          .single();
+      }
+
+      const { data: invoice, error: invoiceError } = invoiceResult;
 
       if (invoiceError) throw invoiceError;
 
@@ -645,6 +666,29 @@ export default function NewInvoicePage() {
                 <p className="text-xl font-bold text-white">Total: {formatCurrency(total, formData.currency)}</p>
               </div>
             </div>
+
+            {/* AHV Waiver - only for No VAT */}
+            {formData.tax_type === 'no_vat' && (
+              <div className="mt-6 pt-6 border-t border-dark-500">
+                <div className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    id="ahv_waiver"
+                    className="h-5 w-5 mt-0.5 bg-dark-800 border-dark-500 rounded cursor-pointer"
+                    checked={formData.ahv_waiver}
+                    onChange={(e) =>
+                      setFormData({ ...formData, ahv_waiver: e.target.checked })
+                    }
+                  />
+                  <label htmlFor="ahv_waiver" className="text-sm text-gray-300 cursor-pointer select-none">
+                    <span className="font-medium text-white">AHV verzicht</span>
+                    <span className="block text-gray-500 mt-1">
+                      Self-employment: Social insurance contributions (AHV, IV, EO) are settled by the contractor
+                    </span>
+                  </label>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

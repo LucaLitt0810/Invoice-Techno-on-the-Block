@@ -315,6 +315,16 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
 
+          {/* AHV Waiver Notice */}
+          {invoice.ahv_waiver && (
+            <div className="mt-6 border border-yellow-500/30 bg-yellow-500/10 px-6 py-4">
+              <p className="text-sm text-yellow-400 font-medium">AHV verzicht</p>
+              <p className="text-sm text-yellow-400/80 mt-1">
+                Self-employment: Social insurance contributions (AHV, IV, EO) are settled by the contractor.
+              </p>
+            </div>
+          )}
+
           {/* Payment Instructions */}
           {(invoice.company?.iban || invoice.notes) && (
             <div className="mt-8 pt-8 border-t border-dark-500">

@@ -180,6 +180,14 @@ export async function GET(
     // Line below TOTAL
     y -= 12;
     page1.drawLine({ start: { x: labelX, y }, end: { x: 530, y }, thickness: 1 });
+
+    // AHV Waiver notice
+    if (invoice.ahv_waiver) {
+      y -= 30;
+      page1.drawText('AHV verzicht / Self-employment notice:', { x: 50, y, size: 9, font: fontBold });
+      y -= 14;
+      page1.drawText('Social insurance contributions (AHV, IV, EO) are settled by the contractor.', { x: 50, y, size: 9, font });
+    }
     
     // Notes section (if exists)
     if (invoice.notes) {
