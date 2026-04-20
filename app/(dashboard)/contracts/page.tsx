@@ -79,7 +79,7 @@ export default function ContractsPage() {
       gray: 'bg-gray-700 text-gray-400 border-gray-600',
     };
     return (
-      <span className={`inline-flex items-center px-2 py-1 text-[10px] font-medium uppercase tracking-wider border max-w-full truncate ${colors[typeInfo?.color || 'gray']}`} title={typeInfo?.label.split('(')[0].trim() || type}>
+      <span className={`inline-flex items-center px-2 py-1 text-[10px] font-medium uppercase tracking-wider border ${colors[typeInfo?.color || 'gray']}`}>
         {typeInfo?.label.split('(')[0].trim() || type}
       </span>
     );
@@ -154,71 +154,69 @@ export default function ContractsPage() {
       </div>
 
       {/* Contracts table */}
-      <div className="bg-dark-800 border border-dark-500 overflow-hidden" style={{ width: '100%', maxWidth: '100%' }}>
-        <div className="w-full">
-          <table className="w-full divide-y divide-dark-500" style={{ tableLayout: 'fixed' }}>
-            <thead className="bg-dark-700">
+      <div className="bg-dark-800 border border-dark-500 overflow-x-auto">
+        <table className="min-w-full divide-y divide-dark-500 whitespace-nowrap">
+          <thead className="bg-dark-700">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Number</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Title</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Fee</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-dark-500">
+            {filteredContracts.length === 0 ? (
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '12%' }}>Number</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '13%' }}>Type</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '24%' }}>Title</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '14%' }}>Customer</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '10%' }}>Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '10%' }}>Fee</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '10%' }}>Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '7%' }}>Actions</th>
+                <td colSpan={8} className="px-6 py-10 text-center text-gray-500">
+                  {searchQuery || typeFilter ? 'No contracts found matching your filters.' : 'No contracts yet. Create your first contract!'}
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-dark-500">
-              {filteredContracts.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-gray-500">
-                    {searchQuery || typeFilter ? 'No contracts found matching your filters.' : 'No contracts yet. Create your first contract!'}
+            ) : (
+              filteredContracts.map((contract) => (
+                <tr key={contract.id} className="hover:bg-dark-700/50">
+                  <td className="px-4 py-4 font-mono text-sm text-gray-400">
+                    {contract.contract_number}
+                  </td>
+                  <td className="px-4 py-4">
+                    {getTypeBadge(contract.contract_type)}
+                  </td>
+                  <td className="px-4 py-4 font-medium text-white">
+                    {contract.title}
+                  </td>
+                  <td className="px-4 py-4 text-gray-400">
+                    {contract.customer?.company_name}
+                  </td>
+                  <td className="px-4 py-4 text-gray-400">
+                    {contract.event_date ? formatDate(contract.event_date) : '-'}
+                  </td>
+                  <td className="px-4 py-4 text-white">
+                    {formatCurrency(contract.fee)}
+                  </td>
+                  <td className="px-4 py-4">
+                    {getStatusBadge(contract.status)}
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex items-center space-x-3">
+                      <Link href={`/contracts/${contract.id}`} className="text-gray-400 hover:text-white" title="View">
+                        <EyeIcon className="h-5 w-5" />
+                      </Link>
+                      <Link href={`/api/contracts/${contract.id}/pdf`} target="_blank" className="text-gray-400 hover:text-yellow-400" title="PDF">
+                        <DocumentTextIcon className="h-5 w-5" />
+                      </Link>
+                      <button onClick={() => handleDelete(contract.id)} className="text-gray-400 hover:text-red-400" title="Delete">
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              ) : (
-                filteredContracts.map((contract) => (
-                  <tr key={contract.id} className="hover:bg-dark-700/50">
-                    <td className="px-4 py-4 whitespace-nowrap font-mono text-sm text-gray-400 truncate" title={contract.contract_number}>
-                      {contract.contract_number}
-                    </td>
-                    <td className="px-4 py-4 overflow-hidden">
-                      {getTypeBadge(contract.contract_type)}
-                    </td>
-                    <td className="px-4 py-4 font-medium text-white truncate" title={contract.title}>
-                      {contract.title}
-                    </td>
-                    <td className="px-4 py-4 text-gray-400 truncate" title={contract.customer?.company_name}>
-                      {contract.customer?.company_name}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-gray-400 truncate">
-                      {contract.event_date ? formatDate(contract.event_date) : '-'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-white truncate">
-                      {formatCurrency(contract.fee)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap overflow-hidden">
-                      {getStatusBadge(contract.status)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-3">
-                        <Link href={`/contracts/${contract.id}`} className="text-gray-400 hover:text-white" title="View">
-                          <EyeIcon className="h-5 w-5" />
-                        </Link>
-                        <Link href={`/api/contracts/${contract.id}/pdf`} target="_blank" className="text-gray-400 hover:text-yellow-400" title="PDF">
-                          <DocumentTextIcon className="h-5 w-5" />
-                        </Link>
-                        <button onClick={() => handleDelete(contract.id)} className="text-gray-400 hover:text-red-400" title="Delete">
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
