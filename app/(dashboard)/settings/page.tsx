@@ -26,7 +26,7 @@ export default function SettingsPage() {
 
   const handleExport = (type: 'customers' | 'invoices' | 'payments', format: 'csv' | 'datev') => {
     if (!selectedCompany) {
-      toast.error('Please select a company first');
+      toast.error('Please select a coworker first');
       return;
     }
     
@@ -43,13 +43,13 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      {/* Company Selector */}
+      {/* Coworker Selector */}
       <div className="card bg-dark-800 border-dark-500">
         <div className="card-header border-b border-dark-500">
-          <h3 className="text-lg font-medium text-white uppercase tracking-wider">Select Company for Export</h3>
+          <h3 className="text-lg font-medium text-white uppercase tracking-wider">Select Coworker for Export</h3>
         </div>
         <div className="card-body">
-          <label className="label">Company</label>
+          <label className="label">Coworker</label>
           <select
             value={selectedCompany?.id || ''}
             onChange={(e) => {
@@ -58,7 +58,7 @@ export default function SettingsPage() {
             }}
             className="input bg-dark-800 border-dark-500 text-white w-full max-w-md"
           >
-            <option value="" className="bg-dark-800">Select company...</option>
+            <option value="" className="bg-dark-800">Select coworker...</option>
             {companies.map((company) => (
               <option key={company.id} value={company.id} className="bg-dark-800">
                 {company.name}
@@ -67,7 +67,7 @@ export default function SettingsPage() {
           </select>
           {companies.length === 0 && (
             <p className="text-sm text-yellow-400 mt-2">
-              No companies found. <Link href="/companies/new" className="underline">Create a company first</Link>.
+              No coworkers found. <Link href="/coworkers/new" className="underline">Create a coworker first</Link>.
             </p>
           )}
         </div>
@@ -111,10 +111,10 @@ export default function SettingsPage() {
             </p>
             <div className="flex space-x-4">
               <Link 
-                href="/companies" 
+                href="/coworkers" 
                 className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
               >
-                Manage Companies
+                Manage Coworkers
               </Link>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function SettingsPage() {
               {!selectedCompany && (
                 <div className="mb-6 p-4 bg-yellow-900/20 border border-yellow-800">
                   <p className="text-yellow-400 text-sm">
-                    Please select a company above to enable data export.
+                    Please select a coworker above to enable data export.
                   </p>
                 </div>
               )}

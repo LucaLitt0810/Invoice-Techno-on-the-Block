@@ -119,7 +119,7 @@ export default function NewInvoicePage() {
       setLoadingData(false);
     } catch (error) {
       console.error('Error fetching companies:', error);
-      toast.error('Failed to load companies');
+      toast.error('Failed to load coworkers');
       setLoadingData(false);
     }
   };
@@ -184,9 +184,9 @@ export default function NewInvoicePage() {
         email: '', phone: '', tax_number: '', vat_id: '',
         bank_name: '', iban: '', bic: '',
       });
-      toast.success('Company created successfully');
+      toast.success('Coworker created successfully');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create company');
+      toast.error(error.message || 'Failed to create coworker');
     } finally {
       setSavingCompany(false);
     }
@@ -263,7 +263,7 @@ export default function NewInvoicePage() {
     e.preventDefault();
     
     if (!formData.company_id) {
-      toast.error('Please select a company');
+      toast.error('Please select a coworker');
       return;
     }
 
@@ -367,10 +367,10 @@ export default function NewInvoicePage() {
   if (companies.length === 0) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-lg font-medium text-white uppercase tracking-wider">No Companies Found</h2>
-        <p className="mt-2 text-gray-400">Please create a company first.</p>
-        <Link href="/companies/new" className="mt-4 inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider">
-          Create Company
+        <h2 className="text-lg font-medium text-white uppercase tracking-wider">No Coworkers Found</h2>
+        <p className="mt-2 text-gray-400">Please create a coworker first.</p>
+        <Link href="/coworkers/new" className="mt-4 inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider">
+          Create Coworker
         </Link>
       </div>
     );
@@ -387,12 +387,12 @@ export default function NewInvoicePage() {
       </div>
 
       <form className="space-y-6">
-        {/* Company Selection */}
+        {/* Coworker Selection */}
         <div className="card bg-dark-800 border-dark-500">
           <div className="card-header border-b border-dark-500">
             <h3 className="text-lg font-medium text-white uppercase tracking-wider flex items-center">
               <BuildingOfficeIcon className="h-5 w-5 mr-2" />
-              Select Company
+              Select Coworker
             </h3>
           </div>
           <div className="card-body">
@@ -409,13 +409,13 @@ export default function NewInvoicePage() {
               }}
               required
             >
-              <option value="" className="bg-dark-800">Select a company...</option>
+              <option value="" className="bg-dark-800">Select a coworker...</option>
               {companies.map((company) => (
                 <option key={company.id} value={company.id} className="bg-dark-800">
                   {company.name} - {company.city}
                 </option>
               ))}
-              <option value="__new__" className="bg-blue-900 text-blue-200">+ New Company...</option>
+              <option value="__new__" className="bg-blue-900 text-blue-200">+ New Coworker...</option>
             </select>
 
             {selectedCompany && (
@@ -698,21 +698,21 @@ export default function NewInvoicePage() {
         </div>
       </form>
 
-      {/* New Company Modal */}
+      {/* New Coworker Modal */}
       {showCompanyModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowCompanyModal(false)} />
             <div className="relative bg-dark-800 border border-dark-500 max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-medium text-white uppercase tracking-wider">New Company</h3>
+                <h3 className="text-lg font-medium text-white uppercase tracking-wider">New Coworker</h3>
                 <button onClick={() => setShowCompanyModal(false)} className="text-gray-400 hover:text-white">
                   <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
               <form onSubmit={handleCreateCompany} className="space-y-4">
                 <div>
-                  <label className="label">Company Name *</label>
+                  <label className="label">Coworker Name *</label>
                   <input type="text" required className="input bg-dark-800 border-dark-500 text-white" value={newCompany.name} onChange={(e) => setNewCompany({...newCompany, name: e.target.value})} />
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -764,7 +764,7 @@ export default function NewInvoicePage() {
                 </div>
                 <div className="flex justify-end space-x-3 pt-4">
                   <button type="button" onClick={() => setShowCompanyModal(false)} className="px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider">Cancel</button>
-                  <button type="submit" disabled={savingCompany} className="px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50">{savingCompany ? 'Creating...' : 'Create Company'}</button>
+                  <button type="submit" disabled={savingCompany} className="px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50">{savingCompany ? 'Creating...' : 'Create Coworker'}</button>
                 </div>
               </form>
             </div>

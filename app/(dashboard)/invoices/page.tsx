@@ -130,7 +130,7 @@ export default function InvoicesPage() {
           <input
             type="text"
             className="input block w-full pl-10 bg-dark-800 border-dark-500 text-white"
-            placeholder="Search by invoice #, customer, or company..."
+            placeholder="Search by invoice #, customer, or coworker..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -152,7 +152,7 @@ export default function InvoicesPage() {
             <thead className="bg-dark-700">
               <tr>
                 <th className="table-header-cell">Invoice #</th>
-                <th className="table-header-cell">Company</th>
+                <th className="table-header-cell">Coworker</th>
                 <th className="table-header-cell">Customer</th>
                 <th className="table-header-cell">Date</th>
                 <th className="table-header-cell">Due Date</th>

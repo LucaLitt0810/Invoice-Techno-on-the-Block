@@ -79,11 +79,11 @@ export default function NewCompanyPage() {
 
       if (error) throw error;
 
-      toast.success('Company created successfully!');
-      router.push('/companies');
+      toast.success('Coworker created successfully!');
+      router.push('/coworkers');
     } catch (error: any) {
-      console.error('Error creating company:', error);
-      toast.error(error.message || 'Failed to create company');
+      console.error('Error creating coworker:', error);
+      toast.error(error.message || 'Failed to create coworker');
     } finally {
       setLoading(false);
     }
@@ -99,10 +99,10 @@ export default function NewCompanyPage() {
       <div className="md:flex md:items-center md:justify-between">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl">
-            New Company
+            New Coworker
           </h2>
           <p className="mt-1 text-sm text-gray-500">
-            Create a new company profile for invoicing.
+            Create a new coworker profile for invoicing.
           </p>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function NewCompanyPage() {
         <div className="card-body space-y-6">
           {/* Logo Upload */}
           <div>
-            <label className="label">Company Logo</label>
+            <label className="label">Coworker Logo</label>
             <div className="mt-2 flex items-center">
               {logoUrl ? (
                 <img src={logoUrl} alt="Logo preview" className="h-20 w-20 object-cover rounded-lg" />
@@ -138,10 +138,10 @@ export default function NewCompanyPage() {
             </div>
           </div>
 
-          {/* Company Name */}
+          {/* Coworker Name */}
           <div>
             <label htmlFor="name" className="label">
-              Company Name <span className="text-red-500">*</span>
+              Coworker Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -338,7 +338,7 @@ export default function NewCompanyPage() {
         </div>
 
         <div className="card-header border-t border-gray-200 flex items-center justify-end space-x-3">
-          <Link href="/companies" className="btn-secondary">
+          <Link href="/coworkers" className="btn-secondary">
             Cancel
           </Link>
           <button
@@ -346,7 +346,7 @@ export default function NewCompanyPage() {
             disabled={loading}
             className="btn-primary"
           >
-            {loading ? 'Creating...' : 'Create Company'}
+            {loading ? 'Creating...' : 'Create Coworker'}
           </button>
         </div>
       </form>

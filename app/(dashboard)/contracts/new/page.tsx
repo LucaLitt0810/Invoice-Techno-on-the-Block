@@ -85,7 +85,7 @@ export default function NewContractPage() {
     e.preventDefault();
     
     if (!formData.company_id || !formData.customer_id) {
-      toast.error('Please select company and customer');
+      toast.error('Please select coworker and customer');
       return;
     }
 
@@ -191,11 +191,11 @@ export default function NewContractPage() {
           </div>
         </div>
 
-        {/* Company & Customer */}
+        {/* Coworker & Customer */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div className="card bg-dark-800 border-dark-500">
             <div className="card-header border-b border-dark-500">
-              <h3 className="text-lg font-medium text-white uppercase tracking-wider">Your Company</h3>
+              <h3 className="text-lg font-medium text-white uppercase tracking-wider">Your Coworker</h3>
             </div>
             <div className="card-body">
               <select
@@ -204,7 +204,7 @@ export default function NewContractPage() {
                 onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
                 required
               >
-                <option value="">Select company...</option>
+                <option value="">Select coworker...</option>
                 {companies.map((c) => (
                   <option key={c.id} value={c.id} className="bg-dark-800">{c.name}</option>
                 ))}

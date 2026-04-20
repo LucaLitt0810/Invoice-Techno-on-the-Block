@@ -41,7 +41,7 @@ const getNavigation = (role: string | undefined) => {
     { name: 'Contracts', href: '/contracts', icon: DocumentCheckIcon },
     { name: 'Products', href: '/products', icon: ShoppingBagIcon },
     { name: 'Customers', href: '/customers', icon: UsersIcon },
-    { name: 'Companies', href: '/companies', icon: BuildingOfficeIcon },
+    { name: 'Coworkers', href: '/coworkers', icon: BuildingOfficeIcon },
     { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
     { name: 'Admin', href: '/admin/users', icon: ShieldCheckIcon },
   ];
@@ -210,7 +210,7 @@ export default function DashboardLayout({
 
           <div className="flex-1 px-4 flex justify-between">
             <div className="flex-1 flex items-center">
-              {/* Company Selector */}
+              {/* Coworker Selector */}
               {companies.length > 0 && (
                 <div className="relative">
                   <button
@@ -219,7 +219,7 @@ export default function DashboardLayout({
                     onClick={() => setCompanyDropdownOpen(!companyDropdownOpen)}
                   >
                     <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
-                    <span className="uppercase tracking-wider">{selectedCompany?.name || 'Select Company'}</span>
+                    <span className="uppercase tracking-wider">{selectedCompany?.name || 'Select Coworker'}</span>
                     <ChevronDownIcon className="h-4 w-4 text-gray-400" />
                   </button>
 
@@ -241,12 +241,12 @@ export default function DashboardLayout({
                         ))}
                         <div className="border-t border-dark-500">
                           <Link
-                            href="/companies/new"
+                            href="/coworkers/new"
                             className="flex items-center px-4 py-2 text-sm text-white hover:bg-dark-700 uppercase tracking-wider"
                             onClick={() => setCompanyDropdownOpen(false)}
                           >
                             <PlusIcon className="h-4 w-4 mr-2" />
-                            Add New Company
+                            Add New Coworker
                           </Link>
                         </div>
                       </div>

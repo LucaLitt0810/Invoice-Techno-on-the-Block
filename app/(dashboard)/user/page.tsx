@@ -196,7 +196,7 @@ export default function UserManagementPage() {
         </div>
         <div className="card-body">
           <p className="text-red-300/70 mb-4">
-            Once you delete your account, there is no going back. All your data including companies, customers, invoices, and products will be permanently deleted.
+            Once you delete your account, there is no going back. All your data including coworkers, customers, invoices, and products will be permanently deleted.
           </p>
           <button
             onClick={handleDeleteAccount}

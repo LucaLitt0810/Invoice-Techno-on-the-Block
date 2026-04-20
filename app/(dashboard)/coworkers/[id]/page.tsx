@@ -47,8 +47,8 @@ export default function EditCompanyPage() {
 
       if (error) throw error;
       if (!data) {
-        toast.error('Company not found');
-        router.push('/companies');
+        toast.error('Coworker not found');
+        router.push('/coworkers');
         return;
       }
 
@@ -70,7 +70,7 @@ export default function EditCompanyPage() {
       setLogoUrl(company.logo_url);
     } catch (error) {
       console.error('Error fetching company:', error);
-      toast.error('Failed to load company');
+      toast.error('Failed to load coworker');
     } finally {
       setLoading(false);
     }
@@ -121,11 +121,11 @@ export default function EditCompanyPage() {
 
       if (error) throw error;
 
-      toast.success('Company updated successfully!');
-      router.push('/companies');
+      toast.success('Coworker updated successfully!');
+      router.push('/coworkers');
     } catch (error: any) {
       console.error('Error updating company:', error);
-      toast.error(error.message || 'Failed to update company');
+      toast.error(error.message || 'Failed to update coworker');
     } finally {
       setSaving(false);
     }
@@ -150,18 +150,18 @@ export default function EditCompanyPage() {
       <div className="md:flex md:items-center md:justify-between">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold text-white uppercase tracking-tight">
-            Edit Company
+            Edit Coworker
           </h2>
           <p className="mt-1 text-sm text-gray-400">
-            Update the company profile.
+            Update the coworker profile.
           </p>
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4">
           <Link
-            href="/companies"
+            href="/coworkers"
             className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
           >
-            Back to Companies
+            Back to Coworkers
           </Link>
         </div>
       </div>
@@ -170,7 +170,7 @@ export default function EditCompanyPage() {
         <div className="card-body space-y-6">
           {/* Logo Upload */}
           <div>
-            <label className="label">Company Logo</label>
+            <label className="label">Coworker Logo</label>
             <div className="mt-2 flex items-center">
               {logoUrl ? (
                 <img src={logoUrl} alt="Logo preview" className="h-20 w-20 object-cover rounded-lg border border-dark-500" />
@@ -197,10 +197,10 @@ export default function EditCompanyPage() {
             </div>
           </div>
 
-          {/* Company Name */}
+          {/* Coworker Name */}
           <div>
             <label htmlFor="name" className="label">
-              Company Name <span className="text-red-500">*</span>
+              Coworker Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -398,7 +398,7 @@ export default function EditCompanyPage() {
 
         <div className="card-header border-t border-dark-500 flex items-center justify-end space-x-3">
           <Link
-            href="/companies"
+            href="/coworkers"
             className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
           >
             Cancel

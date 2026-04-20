@@ -210,7 +210,7 @@ export default function InvoiceDetailPage() {
       {/* Invoice Preview */}
       <div className="card bg-dark-800">
         <div className="p-8">
-          {/* Company & Customer Info */}
+          {/* Coworker & Customer Info */}
           <div className="flex justify-between mb-8">
             <div>
               {invoice.company?.logo_url && (

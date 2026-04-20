@@ -79,7 +79,7 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/customers') ||
       request.nextUrl.pathname.startsWith('/invoices') ||
       request.nextUrl.pathname.startsWith('/products') ||
-      request.nextUrl.pathname.startsWith('/companies') ||
+      request.nextUrl.pathname.startsWith('/coworkers') ||
       request.nextUrl.pathname.startsWith('/settings') ||
       request.nextUrl.pathname.startsWith('/admin') ||
       request.nextUrl.pathname.startsWith('/user')) {

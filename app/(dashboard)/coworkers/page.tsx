@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Company } from '@/types';
 import { PlusIcon, PencilIcon, TrashIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 
-export default function CompaniesPage() {
+export default function CoworkersPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
@@ -28,24 +28,24 @@ export default function CompaniesPage() {
       setCompanies(data || []);
     } catch (error) {
       console.error('Error fetching companies:', error);
-      toast.error('Failed to load companies');
+      toast.error('Failed to load coworkers');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this company? All associated data will be deleted.')) return;
+    if (!confirm('Are you sure you want to delete this coworker? All associated data will be deleted.')) return;
 
     try {
       const { error } = await supabase.from('companies').delete().eq('id', id);
       if (error) throw error;
       
       setCompanies((prev) => prev.filter((c) => c.id !== id));
-      toast.success('Company deleted successfully');
+      toast.success('Coworker deleted successfully');
     } catch (error) {
-      console.error('Error deleting company:', error);
-      toast.error('Failed to delete company');
+      console.error('Error deleting coworker:', error);
+      toast.error('Failed to delete coworker');
     }
   };
 
@@ -62,19 +62,19 @@ export default function CompaniesPage() {
       <div className="md:flex md:items-center md:justify-between">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold text-white uppercase tracking-tight">
-            Companies
+            Coworkers
           </h2>
           <p className="mt-1 text-sm text-gray-400">
-            Shared companies - all users can access and manage these.
+            Shared coworkers - all users can access and manage these.
           </p>
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4">
           <Link
-            href="/companies/new"
+            href="/coworkers/new"
             className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
           >
             <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
-            Add Company
+            Add Coworker
           </Link>
         </div>
       </div>
@@ -83,11 +83,11 @@ export default function CompaniesPage() {
         {companies.length === 0 ? (
           <div className="col-span-full text-center py-12 bg-dark-800 border border-dark-500">
             <BuildingOfficeIcon className="mx-auto h-12 w-12 text-gray-500" />
-            <h3 className="mt-2 text-sm font-medium text-white">No companies</h3>
-            <p className="mt-1 text-sm text-gray-400">Get started by creating a new company.</p>
+            <h3 className="mt-2 text-sm font-medium text-white">No coworkers</h3>
+            <p className="mt-1 text-sm text-gray-400">Get started by creating a new coworker.</p>
             <div className="mt-6">
-              <Link href="/companies/new" className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider">
-                Add Company
+              <Link href="/coworkers/new" className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider">
+                Add Coworker
               </Link>
             </div>
           </div>
@@ -115,7 +115,7 @@ export default function CompaniesPage() {
                   </div>
                   <div className="flex space-x-2">
                     <Link
-                      href={`/companies/${company.id}`}
+                      href={`/coworkers/${company.id}`}
                       className="text-gray-400 hover:text-white"
                     >
                       <PencilIcon className="h-5 w-5" />
