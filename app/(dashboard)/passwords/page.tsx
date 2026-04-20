@@ -11,11 +11,16 @@ import {
   XMarkIcon,
   KeyIcon,
   PencilIcon,
+  LockClosedIcon,
+  ArrowRightIcon,
+  CogIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { createClient } from '@/lib/supabase/client';
 
 interface PasswordEntry {
   id: string;
+  user_id: string;
   title: string;
   username: string;
   password: string;
@@ -24,15 +29,31 @@ interface PasswordEntry {
   created_at: string;
 }
 
-const STORAGE_KEY = 'totb_passwords';
+const LOCAL_STORAGE_KEY = 'totb_passwords';
+const MASTER_PIN_KEY = 'password_manager_pin';
 
 export default function PasswordsPage() {
+  const supabase = createClient();
+
+  // Lock screen state
+  const [isLocked, setIsLocked] = useState(true);
+  const [pinInput, setPinInput] = useState('');
+  const [masterPin, setMasterPin] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+
+  // Password entries state
   const [entries, setEntries] = useState<PasswordEntry[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<PasswordEntry | null>(null);
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
+  const [useLocalStorage, setUseLocalStorage] = useState(false);
+
+  // Settings modal
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [newPin, setNewPin] = useState('');
+  const [confirmNewPin, setConfirmNewPin] = useState('');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -42,58 +63,152 @@ export default function PasswordsPage() {
     notes: '',
   });
 
-  // Load from localStorage
+  // Initialize: get user and master PIN
   useEffect(() => {
+    const init = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+
+      if (user) {
+        const pin = user.user_metadata?.[MASTER_PIN_KEY];
+        if (!pin) {
+          // Set default PIN 123
+          await supabase.auth.updateUser({
+            data: { [MASTER_PIN_KEY]: '123' },
+          });
+          setMasterPin('123');
+        } else {
+          setMasterPin(pin);
+        }
+      }
+      setLoading(false);
+    };
+    init();
+  }, [supabase]);
+
+  // Load entries
+  const loadEntries = async () => {
+    if (!user) return;
+
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const { data, error } = await supabase
+        .from('password_entries')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        // Table likely doesn't exist, fallback to localStorage
+        console.warn('Supabase password_entries table not found, using localStorage fallback');
+        setUseLocalStorage(true);
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (stored) {
+          setEntries(JSON.parse(stored));
+        }
+      } else {
+        setEntries(data || []);
+        setUseLocalStorage(false);
+      }
+    } catch (e) {
+      console.error('Error loading entries:', e);
+      setUseLocalStorage(true);
+      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (stored) {
         setEntries(JSON.parse(stored));
       }
-    } catch (e) {
-      console.error('Error loading passwords:', e);
-    } finally {
-      setLoading(false);
     }
-  }, []);
-
-  // Save to localStorage
-  const saveEntries = (newEntries: PasswordEntry[]) => {
-    setEntries(newEntries);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newEntries));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Save entries (localStorage fallback)
+  const saveLocalEntries = (newEntries: PasswordEntry[]) => {
+    setEntries(newEntries);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newEntries));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.password) {
       toast.error('Title and password are required');
       return;
     }
 
+    if (!user) {
+      toast.error('Not authenticated');
+      return;
+    }
+
     if (editingEntry) {
-      const updated = entries.map((entry) =>
-        entry.id === editingEntry.id
-          ? { ...entry, ...formData }
-          : entry
-      );
-      saveEntries(updated);
-      toast.success('Password updated');
+      if (useLocalStorage) {
+        const updated = entries.map((entry) =>
+          entry.id === editingEntry.id
+            ? { ...entry, ...formData }
+            : entry
+        );
+        saveLocalEntries(updated);
+        toast.success('Password updated');
+      } else {
+        const { error } = await supabase
+          .from('password_entries')
+          .update({ ...formData })
+          .eq('id', editingEntry.id);
+
+        if (error) {
+          toast.error('Failed to update');
+          return;
+        }
+        await loadEntries();
+        toast.success('Password updated');
+      }
     } else {
-      const newEntry: PasswordEntry = {
-        id: crypto.randomUUID(),
+      const newEntry = {
+        user_id: user.id,
         ...formData,
-        created_at: new Date().toISOString(),
       };
-      saveEntries([newEntry, ...entries]);
-      toast.success('Password saved');
+
+      if (useLocalStorage) {
+        const entry: PasswordEntry = {
+          id: crypto.randomUUID(),
+          ...newEntry,
+          created_at: new Date().toISOString(),
+        };
+        saveLocalEntries([entry, ...entries]);
+        toast.success('Password saved');
+      } else {
+        const { error } = await supabase
+          .from('password_entries')
+          .insert(newEntry);
+
+        if (error) {
+          toast.error('Failed to save');
+          return;
+        }
+        await loadEntries();
+        toast.success('Password saved');
+      }
     }
 
     closeModal();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this entry?')) return;
-    saveEntries(entries.filter((e) => e.id !== id));
-    toast.success('Password deleted');
+
+    if (useLocalStorage) {
+      saveLocalEntries(entries.filter((e) => e.id !== id));
+      toast.success('Password deleted');
+    } else {
+      const { error } = await supabase
+        .from('password_entries')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        toast.error('Failed to delete');
+        return;
+      }
+      await loadEntries();
+      toast.success('Password deleted');
+    }
   };
 
   const openModal = (entry?: PasswordEntry) => {
@@ -128,6 +243,42 @@ export default function PasswordsPage() {
     setShowPassword((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleUnlock = () => {
+    if (pinInput === masterPin) {
+      setIsLocked(false);
+      setPinInput('');
+      loadEntries();
+    } else {
+      toast.error('Incorrect PIN');
+    }
+  };
+
+  const handleChangePin = async () => {
+    if (newPin.length < 3) {
+      toast.error('PIN must be at least 3 characters');
+      return;
+    }
+    if (newPin !== confirmNewPin) {
+      toast.error('PINs do not match');
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      data: { [MASTER_PIN_KEY]: newPin },
+    });
+
+    if (error) {
+      toast.error('Failed to update PIN');
+      return;
+    }
+
+    setMasterPin(newPin);
+    setNewPin('');
+    setConfirmNewPin('');
+    setSettingsOpen(false);
+    toast.success('PIN updated successfully');
+  };
+
   const filteredEntries = entries.filter(
     (entry) =>
       entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -139,6 +290,46 @@ export default function PasswordsPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
+      </div>
+    );
+  }
+
+  // Lock Screen
+  if (isLocked) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="bg-dark-800 border border-dark-500 p-10 max-w-md w-full text-center">
+          <LockClosedIcon className="mx-auto h-16 w-16 text-white mb-6" />
+          <h2 className="text-2xl font-bold text-white uppercase tracking-tight mb-2">
+            Password Manager
+          </h2>
+          <p className="text-sm text-gray-400 mb-8">
+            Enter your PIN to access your passwords.
+          </p>
+
+          <div className="space-y-4">
+            <input
+              type="password"
+              className="input bg-dark-800 border-dark-500 text-white w-full text-center text-lg tracking-widest"
+              placeholder="••••"
+              value={pinInput}
+              onChange={(e) => setPinInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
+              autoFocus
+            />
+            <button
+              onClick={handleUnlock}
+              className="w-full inline-flex items-center justify-center px-4 py-3 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+            >
+              <ArrowRightIcon className="mr-2 h-5 w-5" />
+              Unlock
+            </button>
+          </div>
+
+          <p className="mt-6 text-xs text-gray-500">
+            Default PIN: <span className="text-gray-300 font-mono">123</span>
+          </p>
+        </div>
       </div>
     );
   }
@@ -155,7 +346,14 @@ export default function PasswordsPage() {
             Securely store and manage your passwords.
           </p>
         </div>
-        <div className="mt-4 flex md:mt-0 md:ml-4">
+        <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="inline-flex items-center px-4 py-2 border border-dark-500 text-gray-400 hover:border-white hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+            title="Change PIN"
+          >
+            <CogIcon className="h-5 w-5" />
+          </button>
           <button
             onClick={() => openModal()}
             className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
@@ -166,13 +364,17 @@ export default function PasswordsPage() {
         </div>
       </div>
 
-      {/* Security Notice */}
-      <div className="border border-yellow-500/30 bg-yellow-500/10 px-6 py-4">
-        <p className="text-sm text-yellow-400">
-          <strong>Security Notice:</strong> Passwords are stored locally in your browser. 
-          For production use, consider adding encryption or moving storage to a secure backend.
-        </p>
-      </div>
+      {/* Storage mode notice */}
+      {useLocalStorage && (
+        <div className="border border-yellow-500/30 bg-yellow-500/10 px-6 py-4">
+          <p className="text-sm text-yellow-400">
+            <strong>Local Storage Mode:</strong> The password_entries table was not found in your database. 
+            Passwords are being stored locally. To enable cloud sync, create a Supabase table named 
+            <code className="bg-yellow-500/20 px-1 py-0.5 rounded mx-1">password_entries</code>
+            with columns: id, user_id, title, username, password, url, notes, created_at.
+          </p>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative">
@@ -329,7 +531,7 @@ export default function PasswordsPage() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Entry Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
@@ -338,7 +540,6 @@ export default function PasswordsPage() {
               onClick={closeModal}
             />
             <div className="relative bg-dark-800 border border-dark-500 max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
-              {/* Header */}
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-lg font-medium text-white uppercase tracking-wider">
                   {editingEntry ? 'Edit Password' : 'New Password'}
@@ -420,7 +621,6 @@ export default function PasswordsPage() {
                   />
                 </div>
 
-                {/* Actions */}
                 <div className="flex justify-end items-center pt-6 space-x-3">
                   <button
                     type="button"
@@ -437,6 +637,71 @@ export default function PasswordsPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal - Change PIN */}
+      {settingsOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={() => setSettingsOpen(false)}
+            />
+            <div className="relative bg-dark-800 border border-dark-500 max-w-md w-full p-8">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-lg font-medium text-white uppercase tracking-wider">
+                  Change PIN
+                </h3>
+                <button
+                  onClick={() => setSettingsOpen(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="label">New PIN</label>
+                  <input
+                    type="password"
+                    className="input bg-dark-800 border-dark-500 text-white w-full text-center text-lg tracking-widest"
+                    value={newPin}
+                    onChange={(e) => setNewPin(e.target.value)}
+                    placeholder="••••"
+                  />
+                </div>
+                <div>
+                  <label className="label">Confirm New PIN</label>
+                  <input
+                    type="password"
+                    className="input bg-dark-800 border-dark-500 text-white w-full text-center text-lg tracking-widest"
+                    value={confirmNewPin}
+                    onChange={(e) => setConfirmNewPin(e.target.value)}
+                    placeholder="••••"
+                  />
+                </div>
+
+                <div className="flex justify-end items-center pt-6 space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setSettingsOpen(false)}
+                    className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleChangePin}
+                    className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+                  >
+                    Update PIN
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
