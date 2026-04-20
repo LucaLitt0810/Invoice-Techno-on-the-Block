@@ -25,6 +25,8 @@ export interface Booking {
   end_date: string;
   location: string | null;
   client_name: string | null;
+  customer_id: string | null;
+  customer?: { id: string; company_name: string; contact_person: string | null };
   fee: number;
   provision: number;
   status: BookingStatus;

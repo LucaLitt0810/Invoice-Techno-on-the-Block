@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { Booking, DJ, BOOKING_STATUS_OPTIONS, RecurrencePattern } from '@/types/bookings';
+import { Customer } from '@/types';
 import { formatDateInput, formatDateTimeInput } from '@/lib/utils/helpers';
 import toast from 'react-hot-toast';
 import { XMarkIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { createClient } from '@/lib/supabase/client';
 
 interface BookingModalProps {
   booking: Booking | null;
@@ -24,6 +26,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
     end_date: '',
     location: '',
     client_name: '',
+    customer_id: '',
     fee: 0,
     provision: 0,
     status: 'request' as const,
@@ -32,8 +35,10 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
     recurrence_pattern: '' as RecurrencePattern | '',
     recurrence_end_date: '',
   });
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const supabase = createClient();
 
   // Set DJ automatically for DJs when modal opens
   useEffect(() => {
@@ -41,6 +46,22 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
       setFormData(prev => ({ ...prev, dj_id: currentDJId }));
     }
   }, [userRole, currentDJId, booking]);
+
+  // Fetch customers on mount
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .order('company_name', { ascending: true });
+      if (error) {
+        console.error('Error fetching customers:', error);
+      } else {
+        setCustomers(data || []);
+      }
+    };
+    fetchCustomers();
+  }, [supabase]);
 
   useEffect(() => {
     if (booking) {
@@ -51,6 +72,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
         end_date: formatDateTimeInput(new Date(booking.end_date)),
         location: booking.location || '',
         client_name: booking.client_name || '',
+        customer_id: booking.customer_id || '',
         fee: booking.fee,
         provision: booking.provision || 0,
         status: booking.status,
@@ -64,12 +86,12 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
     } else if (initialDate) {
       const start = new Date(initialDate);
       const end = new Date(start.getTime() + 4 * 60 * 60 * 1000); // Default 4 hours
-      setFormData({
-        ...formData,
+      setFormData(prev => ({
+        ...prev,
         dj_id: userRole === 'dj' && currentDJId ? currentDJId : '',
         start_date: formatDateTimeInput(start),
         end_date: formatDateTimeInput(end),
-      });
+      }));
     }
   }, [booking, initialDate, userRole, currentDJId]);
 
@@ -227,7 +249,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
               </div>
             </div>
 
-            {/* Location & Client */}
+            {/* Location & Customer */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="label">Location</label>
@@ -240,15 +262,40 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
                 />
               </div>
               <div>
-                <label className="label">Client Name</label>
-                <input
-                  type="text"
+                <label className="label">Customer</label>
+                <select
                   className="input bg-dark-800 border-dark-500 text-white w-full"
-                  value={formData.client_name}
-                  onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                  placeholder="Client name"
-                />
+                  value={formData.customer_id}
+                  onChange={(e) => {
+                    const customerId = e.target.value;
+                    const selectedCustomer = customers.find(c => c.id === customerId);
+                    setFormData({
+                      ...formData,
+                      customer_id: customerId,
+                      client_name: selectedCustomer ? selectedCustomer.company_name : formData.client_name,
+                    });
+                  }}
+                >
+                  <option value="">Select Customer...</option>
+                  {customers.map((customer) => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.company_name}
+                    </option>
+                  ))}
+                </select>
               </div>
+            </div>
+
+            {/* Client Name */}
+            <div>
+              <label className="label">Client Name</label>
+              <input
+                type="text"
+                className="input bg-dark-800 border-dark-500 text-white w-full"
+                value={formData.client_name}
+                onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                placeholder="Client name"
+              />
             </div>
 
             {/* Fee, Provision & Status */}

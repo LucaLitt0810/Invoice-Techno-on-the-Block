@@ -17,7 +17,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const { dj_id, event_name, start_date, end_date, location, client_name, fee, provision, status, notes } = body;
+    const { dj_id, event_name, start_date, end_date, location, client_name, customer_id, fee, provision, status, notes } = body;
     
     // Check for conflicts if date changed
     if (dj_id && start_date && end_date) {
@@ -42,6 +42,7 @@ export async function PUT(
         end_date,
         location,
         client_name,
+        customer_id: customer_id || null,
         fee,
         provision: provision || 0,
         status,

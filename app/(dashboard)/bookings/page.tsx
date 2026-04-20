@@ -454,7 +454,7 @@ export default function BookingsPage() {
                           <div className="text-sm text-gray-400">{booking.location || '-'}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-400">{booking.client_name || '-'}</div>
+                          <div className="text-sm text-gray-400">{booking.customer?.company_name || booking.client_name || '-'}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-white">€{booking.fee?.toFixed(2) || '0.00'}</div>
