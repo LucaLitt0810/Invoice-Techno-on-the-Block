@@ -93,12 +93,11 @@ export async function GET(
     y = 505;
     page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
-    // Invoice Info Row (4 columns, centered) - very compact
+    // Invoice Info Row (3 columns, evenly spaced)
     y = 490;
     const col1 = 50;
-    const col2 = 165;
-    const col3 = 300;
-    const col4 = 435;
+    const col2 = 210;
+    const col3 = 370;
     
     page1.drawText('INVOICE NUMBER', { x: col1, y, size: 9, font });
     page1.drawText('INVOICE DATE', { x: col2, y, size: 9, font });
@@ -115,11 +114,12 @@ export async function GET(
     
     // Table Header with gray background
     y -= 35;
-    const descX = 60;
-    const qtyX = 280;
-    const unitX = 340;
-    const priceX = 400;
-    const totalX = 470;
+    const descX = 55;
+    const dateX = 245;
+    const qtyX = 325;
+    const unitX = 365;
+    const priceX = 415;
+    const totalX = 480;
     
     // Gray background for header
     page1.drawRectangle({
@@ -131,6 +131,7 @@ export async function GET(
     });
     
     page1.drawText('DESCRIPTION', { x: descX, y, size: 9, font: fontBold });
+    page1.drawText('DATE', { x: dateX, y, size: 9, font: fontBold });
     page1.drawText('QTY', { x: qtyX, y, size: 9, font: fontBold });
     page1.drawText('UNIT', { x: unitX, y, size: 9, font: fontBold });
     page1.drawText('PRICE', { x: priceX, y, size: 9, font: fontBold });
@@ -143,12 +144,9 @@ export async function GET(
     // Table Rows with lines
     y -= 18;
     for (const item of invoice.items || []) {
-      const hasDate = item.service_date && item.service_date !== invoice.invoice_date;
-      const descText = hasDate
-        ? `${formatDate(item.service_date)} — ${(item.description || '').substring(0, 30)}`
-        : (item.description || '').substring(0, 40);
-      page1.drawText(descText, { x: descX, y, size: 10, font });
-      page1.drawText(String(item.quantity), { x: qtyX + 20, y, size: 10, font });
+      page1.drawText((item.description || '').substring(0, 35), { x: descX, y, size: 10, font });
+      page1.drawText(item.service_date ? formatDate(item.service_date) : '-', { x: dateX, y, size: 10, font });
+      page1.drawText(String(item.quantity), { x: qtyX + 15, y, size: 10, font });
       page1.drawText(item.unit || 'piece', { x: unitX, y, size: 10, font });
       page1.drawText(`${formatNumber(item.price)} ${currency}`, { x: priceX - 10, y, size: 10, font });
       page1.drawText(`${formatNumber(item.total)} ${currency}`, { x: totalX - 10, y, size: 10, font });
