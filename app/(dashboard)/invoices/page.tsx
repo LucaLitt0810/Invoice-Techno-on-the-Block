@@ -11,6 +11,7 @@ import {
   PlusIcon, 
   MagnifyingGlassIcon, 
   EyeIcon, 
+  PencilIcon,
   TrashIcon, 
   BuildingOfficeIcon,
   DocumentTextIcon
@@ -192,6 +193,9 @@ export default function InvoicesPage() {
                       <div className="flex items-center space-x-3">
                         <Link href={`/invoices/${invoice.id}`} className="text-gray-400 hover:text-white" title="View">
                           <EyeIcon className="h-5 w-5" />
+                        </Link>
+                        <Link href={`/invoices/${invoice.id}/edit`} className="text-gray-400 hover:text-blue-400" title="Edit">
+                          <PencilIcon className="h-5 w-5" />
                         </Link>
                         <Link href={`/api/invoices/${invoice.id}/pdf`} target="_blank" className="text-gray-400 hover:text-yellow-400" title="PDF">
                           <DocumentTextIcon className="h-5 w-5" />
