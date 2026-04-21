@@ -93,20 +93,25 @@ export async function GET(
     y = 505;
     page1.drawLine({ start: { x: 50, y }, end: { x: 530, y }, thickness: 1 });
     
-    // Invoice Info Row (3 columns, evenly spaced)
+    // Invoice Info Row (3 columns, evenly spaced, centered)
     y = 490;
-    const col1 = 50;
-    const col2 = 210;
-    const col3 = 370;
+    const col1Center = 130;
+    const col2Center = 290;
+    const col3Center = 450;
     
-    page1.drawText('INVOICE NUMBER', { x: col1, y, size: 9, font });
-    page1.drawText('INVOICE DATE', { x: col2, y, size: 9, font });
-    page1.drawText('DUE DATE', { x: col3, y, size: 9, font });
+    const centerText = (text: string, cx: number, size: number, f: typeof font) => {
+      const tw = f.widthOfTextAtSize(text, size);
+      return cx - tw / 2;
+    };
+    
+    page1.drawText('INVOICE NUMBER', { x: centerText('INVOICE NUMBER', col1Center, 9, font), y, size: 9, font });
+    page1.drawText('INVOICE DATE', { x: centerText('INVOICE DATE', col2Center, 9, font), y, size: 9, font });
+    page1.drawText('DUE DATE', { x: centerText('DUE DATE', col3Center, 9, font), y, size: 9, font });
     
     y -= 12;
-    page1.drawText(invoice.invoice_number, { x: col1, y, size: 11, font: fontBold });
-    page1.drawText(formatDate(invoice.invoice_date), { x: col2, y, size: 11, font: fontBold });
-    page1.drawText(formatDate(invoice.due_date), { x: col3, y, size: 11, font: fontBold });
+    page1.drawText(invoice.invoice_number, { x: centerText(invoice.invoice_number, col1Center, 11, fontBold), y, size: 11, font: fontBold });
+    page1.drawText(formatDate(invoice.invoice_date), { x: centerText(formatDate(invoice.invoice_date), col2Center, 11, fontBold), y, size: 11, font: fontBold });
+    page1.drawText(formatDate(invoice.due_date), { x: centerText(formatDate(invoice.due_date), col3Center, 11, fontBold), y, size: 11, font: fontBold });
     
     // Divider - closer to values
     y -= 10;
