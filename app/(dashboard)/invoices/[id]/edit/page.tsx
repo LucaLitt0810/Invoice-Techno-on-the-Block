@@ -156,7 +156,6 @@ export default function EditInvoicePage() {
         invoice_date: formData.invoice_date,
         due_date: formData.due_date,
         tax_rate: taxRate,
-        tax_type: formData.tax_type,
         subtotal,
         tax,
         total,
@@ -167,23 +166,29 @@ export default function EditInvoicePage() {
         ahv_waiver: formData.ahv_waiver,
       };
 
-      const { error: invoiceError } = await supabase
+      let invoiceResult = await supabase
         .from('invoices')
         .update(updatePayload)
         .eq('id', params.id);
 
-      if (invoiceError) {
-        if (invoiceError.message?.includes('ahv_waiver')) {
+      // Retry without columns that may not exist in DB
+      if (invoiceResult.error) {
+        const msg = invoiceResult.error.message || '';
+        if (msg.includes('ahv_waiver')) {
           delete updatePayload.ahv_waiver;
-          const { error: retryError } = await supabase
+        }
+        if (msg.includes('tax_type')) {
+          delete updatePayload.tax_type;
+        }
+        if (msg.includes('ahv_waiver') || msg.includes('tax_type')) {
+          invoiceResult = await supabase
             .from('invoices')
             .update(updatePayload)
             .eq('id', params.id);
-          if (retryError) throw retryError;
-        } else {
-          throw invoiceError;
         }
       }
+
+      if (invoiceResult.error) throw invoiceResult.error;
 
       // Delete old items and insert new ones
       const { error: deleteError } = await supabase
