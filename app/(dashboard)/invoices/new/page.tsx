@@ -12,8 +12,8 @@ import { COUNTRIES, generateCustomerNumber } from '@/lib/utils/helpers';
 
 interface InvoiceItem {
   description: string;
-  quantity: number;
-  price: number;
+  quantity: number | string;
+  price: number | string;
   total: number;
   unit?: string;
   service_date?: string;
@@ -152,9 +152,10 @@ export default function NewInvoicePage() {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     
-    // Total equals price (quantity is independent/descriptive only)
+    // Recalculate total when price changes
     if (field === 'price') {
-      newItems[index].total = Number(newItems[index].price.toFixed(2));
+      const priceNum = typeof value === 'string' ? parseFloat(value) || 0 : value;
+      newItems[index].total = Number(priceNum.toFixed(2));
     }
     
     setItems(newItems);
@@ -341,8 +342,8 @@ export default function NewInvoicePage() {
       const invoiceItems = items.map((item) => ({
         invoice_id: invoice.id,
         description: item.description,
-        quantity: item.quantity,
-        price: item.price,
+        quantity: typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity,
+        price: typeof item.price === 'string' ? parseFloat(item.price) || 0 : item.price,
         total: item.total,
         unit: item.unit || null,
         service_date: item.service_date || null,
@@ -603,7 +604,7 @@ export default function NewInvoicePage() {
                         step="0.01"
                         className="input bg-dark-800 border-dark-500 text-white"
                         value={item.quantity}
-                        onChange={(e) => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
+                        onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
                       />
                     </div>
                     <div className="sm:col-span-2">
@@ -614,7 +615,7 @@ export default function NewInvoicePage() {
                         step="0.01"
                         className="input bg-dark-800 border-dark-500 text-white"
                         value={item.price}
-                        onChange={(e) => handleItemChange(index, 'price', parseFloat(e.target.value) || 0)}
+                        onChange={(e) => handleItemChange(index, 'price', e.target.value)}
                       />
                     </div>
                   </div>
