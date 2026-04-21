@@ -358,6 +358,13 @@ export default function NewInvoicePage() {
         itemsResult = await supabase
           .from('invoice_items')
           .insert(fallbackItems);
+        
+        if (!itemsResult.error) {
+          toast.error(
+            'Warning: service_date column missing in invoice_items. Please run the DB migration. Dates were not saved.',
+            { duration: 6000 }
+          );
+        }
       }
 
       if (itemsResult.error) throw itemsResult.error;
