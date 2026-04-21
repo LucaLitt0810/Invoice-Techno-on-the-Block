@@ -187,6 +187,15 @@ export default function EditCompanyPage() {
               >
                 {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
               </button>
+              {logoUrl && (
+                <button
+                  type="button"
+                  onClick={() => setLogoUrl(null)}
+                  className="ml-3 inline-flex items-center px-4 py-2 border border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+                >
+                  Delete Logo
+                </button>
+              )}
               <input
                 ref={fileInputRef}
                 type="file"
