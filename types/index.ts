@@ -157,6 +157,59 @@ export type EmailTemplate = {
   body: string;
 };
 
+export type Department = {
+  id: string;
+  name: string;
+  created_at: string;
+};
+
+export type EmployeeEntryType = 'positive' | 'negative' | 'warning' | 'training' | 'termination' | 'entry' | 'contract';
+
+export const ENTRY_TYPE_OPTIONS = [
+  { value: 'positive' as EmployeeEntryType, label: 'Positiver Eintrag', color: 'green' },
+  { value: 'negative' as EmployeeEntryType, label: 'Negativer Eintrag', color: 'red' },
+  { value: 'warning' as EmployeeEntryType, label: 'Abmahnung', color: 'orange' },
+  { value: 'training' as EmployeeEntryType, label: 'Schulung', color: 'blue' },
+  { value: 'termination' as EmployeeEntryType, label: 'Kündigung', color: 'purple' },
+  { value: 'entry' as EmployeeEntryType, label: 'Eintritt', color: 'teal' },
+  { value: 'contract' as EmployeeEntryType, label: 'Vertrag', color: 'indigo' },
+];
+
+export type Employee = {
+  id: string;
+  department_id: string | null;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string | null;
+  street: string;
+  postal_code: string;
+  city: string;
+  country: string;
+  entry_date: string;
+  nda_link: string | null;
+  job_desc_link: string | null;
+  data_storage_link: string | null;
+  bank_name: string | null;
+  iban: string | null;
+  bic: string | null;
+  created_at: string;
+  updated_at: string;
+  department?: Department;
+};
+
+export type EmployeeEntry = {
+  id: string;
+  employee_id: string;
+  type: EmployeeEntryType;
+  title: string;
+  description: string | null;
+  entry_date: string;
+  created_by: string | null;
+  created_at: string;
+  user?: { email: string };
+};
+
 export type AgencyStatus = 'contacted' | 'negotiation' | 'closed';
 
 export const AGENCY_STATUS_OPTIONS = [
