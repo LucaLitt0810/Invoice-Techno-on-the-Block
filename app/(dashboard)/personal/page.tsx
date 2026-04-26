@@ -5,7 +5,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { Employee, Department } from '@/types';
-import { PlusIcon, MagnifyingGlassIcon, TrashIcon, FolderIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, TrashIcon, FolderIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, CalendarIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
 export default function PersonalPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -69,7 +69,7 @@ export default function PersonalPage() {
   };
 
   const handleDeleteDepartment = async (id: string, name: string) => {
-    if (!confirm(`Delete department "${name}"? Employees in this department will be unassigned.`)) return;
+    if (!confirm(`Delete department "${name}"?`)) return;
 
     try {
       const { error } = await (supabase.from('departments') as any).delete().eq('id', id);
@@ -85,15 +85,14 @@ export default function PersonalPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this employee?')) return;
+  const handleDeleteEmployee = async (id: string) => {
+    if (!confirm('Delete this employee?')) return;
 
     try {
       const { error } = await (supabase.from('employees') as any).delete().eq('id', id);
       if (error) throw error;
-
       setEmployees((prev) => prev.filter((e) => e.id !== id));
-      toast.success('Employee deleted successfully');
+      toast.success('Employee deleted');
     } catch (error) {
       console.error('Error deleting employee:', error);
       toast.error('Failed to delete employee');
@@ -119,6 +118,7 @@ export default function PersonalPage() {
 
   return (
     <div className="space-y-8">
+      {/* Header */}
       <div className="md:flex md:items-center md:justify-between">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Personal</h2>
@@ -135,7 +135,21 @@ export default function PersonalPage() {
         </div>
       </div>
 
-      {/* Departments */}
+      {/* Search */}
+      <div className="relative max-w-md">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
+        </div>
+        <input
+          type="text"
+          className="input block w-full pl-10"
+          placeholder="Search by name or email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      {/* Department Navigation */}
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={() => setActiveDept('all')}
@@ -196,67 +210,70 @@ export default function PersonalPage() {
         </form>
       )}
 
-      {/* Search */}
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
+      {/* Employee Cards Grid */}
+      {filteredEmployees.length === 0 ? (
+        <div className="text-center py-16 text-gray-500">
+          {searchQuery || activeDept !== 'all' ? 'No employees match your criteria.' : 'No employees yet. Create your first employee!'}
         </div>
-        <input
-          type="text"
-          className="input block w-full pl-10"
-          placeholder="Search by name or email..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      {/* Employees Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full">
-          <thead>
-            <tr className="border-b border-dark-500">
-              <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Name</th>
-              <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Department</th>
-              <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
-              <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Entry Date</th>
-              <th className="table-cell text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredEmployees.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="table-cell text-center text-gray-500 py-8">
-                  {searchQuery || activeDept !== 'all' ? 'No employees match your criteria.' : 'No employees yet. Create your first employee!'}
-                </td>
-              </tr>
-            ) : (
-              filteredEmployees.map((emp) => (
-                <tr key={emp.id} className="border-b border-dark-500 hover:bg-dark-800/50">
-                  <td className="table-cell">
-                    <Link href={`/personal/${emp.id}`} className="text-white font-medium hover:underline">
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredEmployees.map((emp) => (
+            <div key={emp.id} className="card bg-dark-800 border-dark-500 flex flex-col">
+              {/* Card Header */}
+              <div className="p-6 pb-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">
                       {emp.first_name} {emp.last_name}
-                    </Link>
-                  </td>
-                  <td className="table-cell text-gray-400">{emp.department?.name || '-'}</td>
-                  <td className="table-cell text-gray-400">{emp.email}</td>
-                  <td className="table-cell text-gray-400">
-                    {new Date(emp.entry_date).toLocaleDateString('de-DE')}
-                  </td>
-                  <td className="table-cell text-right">
-                    <button
-                      onClick={() => handleDelete(emp.id)}
-                      className="text-red-400 hover:text-red-300 transition-colors"
-                      title="Delete employee"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                    </h3>
+                    <p className="text-sm text-gray-400 mt-1">{emp.department?.name || 'No Department'}</p>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteEmployee(emp.id)}
+                    className="text-gray-600 hover:text-red-400 transition-colors"
+                    title="Delete employee"
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Card Body */}
+              <div className="px-6 py-2 space-y-3 flex-1">
+                <div className="flex items-center text-sm text-gray-300">
+                  <EnvelopeIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0" />
+                  <span className="truncate">{emp.email}</span>
+                </div>
+                {emp.phone && (
+                  <div className="flex items-center text-sm text-gray-300">
+                    <PhoneIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0" />
+                    <span>{emp.phone}</span>
+                  </div>
+                )}
+                <div className="flex items-start text-sm text-gray-300">
+                  <MapPinIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0 mt-0.5" />
+                  <span>{emp.street}, {emp.postal_code} {emp.city}</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CalendarIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0" />
+                  <span>Since {new Date(emp.entry_date).toLocaleDateString('de-DE')}</span>
+                </div>
+              </div>
+
+              {/* Card Footer */}
+              <div className="p-6 pt-4">
+                <Link
+                  href={`/personal/${emp.id}`}
+                  className="flex items-center justify-center w-full px-4 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
+                >
+                  View Profile
+                  <ArrowRightIcon className="ml-2 h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
