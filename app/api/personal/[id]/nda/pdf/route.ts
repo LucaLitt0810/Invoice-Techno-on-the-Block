@@ -252,14 +252,21 @@ export async function GET(
     drawSpacer(30);
 
     // ==================== SIGNATURES ====================
+    // Ensure signatures fit on one page - force new page if not enough space
+    const sigBlockHeight = 180;
+    if (y - sigBlockHeight < bottomMargin) {
+      drawFooter(page);
+      page = pdfDoc.addPage([width, height]);
+      y = height - margin;
+    }
+
     drawHLine();
     drawSpacer(8);
 
-    drawLine(`Pratteln, ${today}`, 10, false, mediumGray);
-    drawSpacer(30);
+    page.drawText(`Pratteln, ${today}`, { x: margin, y, size: 10, font, color: mediumGray });
+    y -= 30;
 
     // Signature boxes
-    const sigY = y;
     const boxWidth = 220;
     const boxHeight = 70;
     const gap = 40;
@@ -267,7 +274,7 @@ export async function GET(
     // Left box - Verein
     page.drawRectangle({
       x: margin,
-      y: sigY - boxHeight,
+      y: y - boxHeight,
       width: boxWidth,
       height: boxHeight,
       borderWidth: 0.5,
@@ -277,7 +284,7 @@ export async function GET(
     // Right box - Vertragsnehmer
     page.drawRectangle({
       x: margin + boxWidth + gap,
-      y: sigY - boxHeight,
+      y: y - boxHeight,
       width: boxWidth,
       height: boxHeight,
       borderWidth: 0.5,
@@ -287,25 +294,31 @@ export async function GET(
     // Labels inside boxes
     page.drawText('Unterschrift Verein', {
       x: margin + 10,
-      y: sigY - boxHeight + 14,
+      y: y - boxHeight + 14,
       size: 8,
       font,
       color: mediumGray,
     });
     page.drawText('Unterschrift Vertragsnehmer', {
       x: margin + boxWidth + gap + 10,
-      y: sigY - boxHeight + 14,
+      y: y - boxHeight + 14,
       size: 8,
       font,
       color: mediumGray,
     });
 
-    // Names below boxes
-    y = sigY - boxHeight - 18;
-    drawLine('Ben Littmann & Alina Littmann', 10, true);
+    // Names directly below boxes (same page guaranteed)
+    y -= boxHeight + 14;
+    page.drawText('Ben Littmann & Alina Littmann', {
+      x: margin,
+      y,
+      size: 10,
+      font: fontBold,
+      color: accentColor,
+    });
     page.drawText(fullName, {
       x: margin + boxWidth + gap,
-      y: y + 18,
+      y,
       size: 10,
       font: fontBold,
       color: accentColor,
