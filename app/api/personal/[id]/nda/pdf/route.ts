@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -26,17 +26,25 @@ export async function GET(
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const page = pdfDoc.addPage([595.28, 841.89]);
-    const { width, height } = page.getSize();
+    const width = 595.28;
+    const height = 841.89;
     const margin = 60;
     const textWidth = width - margin * 2;
+    const bottomMargin = 60;
 
+    let page = pdfDoc.addPage([width, height]);
     let y = height - margin;
 
     const fullName = `${employee.first_name} ${employee.last_name}`;
     const today = new Date().toLocaleDateString('de-DE');
 
-    // Helper: draw text with word wrap
+    const checkPage = (neededSpace: number) => {
+      if (y - neededSpace < bottomMargin) {
+        page = pdfDoc.addPage([width, height]);
+        y = height - margin;
+      }
+    };
+
     const drawTextWrapped = (text: string, size: number, isBold = false, lineHeight?: number) => {
       const f = isBold ? fontBold : font;
       const lh = lineHeight || size * 1.35;
@@ -47,6 +55,7 @@ export async function GET(
         const testLine = line + (line ? ' ' : '') + word;
         const testWidth = f.widthOfTextAtSize(testLine, size);
         if (testWidth > textWidth && line) {
+          checkPage(lh);
           page.drawText(line, { x: margin, y, size, font: f });
           y -= lh;
           line = word;
@@ -55,22 +64,26 @@ export async function GET(
         }
       }
       if (line) {
+        checkPage(lh);
         page.drawText(line, { x: margin, y, size, font: f });
         y -= lh;
       }
     };
 
     const drawLine = (text: string, size: number, isBold = false) => {
+      checkPage(size * 1.5);
       const f = isBold ? fontBold : font;
       page.drawText(text, { x: margin, y, size, font: f });
       y -= size * 1.5;
     };
 
     const drawSpacer = (amount: number) => {
+      checkPage(amount);
       y -= amount;
     };
 
     const drawHR = () => {
+      checkPage(14);
       page.drawLine({ start: { x: margin, y }, end: { x: width - margin, y }, thickness: 0.5 });
       y -= 14;
     };
@@ -90,6 +103,7 @@ export async function GET(
     drawSpacer(6);
 
     // EMPLOYEE NAME
+    checkPage(12);
     page.drawText(fullName, { x: margin, y, size: 10, font: fontBold });
     y -= 12;
     drawLine('nachstehend "Vertragsnehmer"', 10, true);
