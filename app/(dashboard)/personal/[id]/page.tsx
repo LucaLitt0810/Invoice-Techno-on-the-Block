@@ -169,21 +169,6 @@ export default function EmployeeDetailPage() {
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
           <Link
-            href={`/personal/${employee.id}/nda/sign`}
-            className="inline-flex items-center px-4 py-2 border border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
-          >
-            <PencilSquareIcon className="-ml-1 mr-2 h-5 w-5" />
-            {employee.signature_verein && employee.signature_vertragsnehmer ? 'Signatures Edit' : 'Sign NDA'}
-          </Link>
-          <Link
-            href={`/api/personal/${employee.id}/nda/pdf`}
-            target="_blank"
-            className="inline-flex items-center px-4 py-2 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
-          >
-            <DocumentTextIcon className="-ml-1 mr-2 h-5 w-5" />
-            NDA PDF
-          </Link>
-          <Link
             href={`/personal/${employee.id}/edit`}
             className="inline-flex items-center px-4 py-2 border border-white text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
           >
@@ -232,16 +217,35 @@ export default function EmployeeDetailPage() {
           <div className="card-body space-y-4">
             <h3 className="text-lg font-medium text-white">Google Drive Documents</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {employee.nda_link ? (
-                <a href={employee.nda_link} target="_blank" rel="noopener noreferrer" className="flex items-center p-4 border border-dark-500 rounded-sm hover:border-white transition-colors">
-                  <span className="text-white text-sm flex-1">NDA / Verschwiegenheitsvertrag</span>
-                  <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-400" />
-                </a>
-              ) : (
-                <div className="flex items-center p-4 border border-dark-500 rounded-sm">
-                  <span className="text-gray-500 text-sm">NDA / Verschwiegenheitsvertrag</span>
+              <div className="space-y-3">
+                {employee.nda_link ? (
+                  <a href={employee.nda_link} target="_blank" rel="noopener noreferrer" className="flex items-center p-4 border border-dark-500 rounded-sm hover:border-white transition-colors">
+                    <span className="text-white text-sm flex-1">NDA / Verschwiegenheitsvertrag</span>
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-400" />
+                  </a>
+                ) : (
+                  <div className="flex items-center p-4 border border-dark-500 rounded-sm">
+                    <span className="text-gray-500 text-sm">NDA / Verschwiegenheitsvertrag</span>
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <Link
+                    href={`/personal/${employee.id}/nda/sign`}
+                    className="flex-1 flex items-center justify-center px-3 py-2 border border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors text-xs font-medium uppercase tracking-wider"
+                  >
+                    <PencilSquareIcon className="mr-1.5 h-4 w-4" />
+                    {employee.signature_verein && employee.signature_vertragsnehmer ? 'Signatures Edit' : 'Sign NDA'}
+                  </Link>
+                  <Link
+                    href={`/api/personal/${employee.id}/nda/pdf`}
+                    target="_blank"
+                    className="flex-1 flex items-center justify-center px-3 py-2 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-colors text-xs font-medium uppercase tracking-wider"
+                  >
+                    <DocumentTextIcon className="mr-1.5 h-4 w-4" />
+                    NDA PDF
+                  </Link>
                 </div>
-              )}
+              </div>
               {employee.job_desc_link ? (
                 <a href={employee.job_desc_link} target="_blank" rel="noopener noreferrer" className="flex items-center p-4 border border-dark-500 rounded-sm hover:border-white transition-colors">
                   <span className="text-white text-sm flex-1">Stellenbeschreibung</span>
