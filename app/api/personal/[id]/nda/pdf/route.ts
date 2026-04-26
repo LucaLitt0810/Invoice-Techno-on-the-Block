@@ -36,7 +36,25 @@ export async function GET(
     let y = height - margin;
 
     const fullName = `${employee.first_name} ${employee.last_name}`;
-    const today = new Date().toLocaleDateString('de-DE');
+    const sigOrt = employee.signature_ort || 'Pratteln';
+    const sigDatum = employee.signature_datum
+      ? new Date(employee.signature_datum).toLocaleDateString('de-DE')
+      : new Date().toLocaleDateString('de-DE');
+
+    // Helper to embed signature images
+    const embedSignature = async (base64Data: string | null) => {
+      if (!base64Data) return null;
+      try {
+        const base64 = base64Data.replace(/^data:image\/png;base64,/, '');
+        const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+        return await pdfDoc.embedPng(bytes);
+      } catch {
+        return null;
+      }
+    };
+
+    const sigVereinImg = await embedSignature(employee.signature_verein);
+    const sigVertragsnehmerImg = await embedSignature(employee.signature_vertragsnehmer);
 
     // Colors
     const darkGray = rgb(0.2, 0.2, 0.2);
@@ -263,13 +281,35 @@ export async function GET(
     drawHLine();
     drawSpacer(8);
 
-    page.drawText(`Pratteln, ${today}`, { x: margin, y, size: 10, font, color: mediumGray });
+    page.drawText(`${sigOrt}, ${sigDatum}`, { x: margin, y, size: 10, font, color: mediumGray });
     y -= 30;
 
     // Signature boxes
     const boxWidth = 220;
     const boxHeight = 70;
     const gap = 40;
+
+    if (sigVereinImg) {
+      // Draw signature image for Verein
+      const imgDims = sigVereinImg.scale(0.3);
+      page.drawImage(sigVereinImg, {
+        x: margin + 5,
+        y: y - boxHeight + 5,
+        width: Math.min(imgDims.width, boxWidth - 10),
+        height: Math.min(imgDims.height, boxHeight - 20),
+      });
+    }
+
+    if (sigVertragsnehmerImg) {
+      // Draw signature image for Vertragsnehmer
+      const imgDims = sigVertragsnehmerImg.scale(0.3);
+      page.drawImage(sigVertragsnehmerImg, {
+        x: margin + boxWidth + gap + 5,
+        y: y - boxHeight + 5,
+        width: Math.min(imgDims.width, boxWidth - 10),
+        height: Math.min(imgDims.height, boxHeight - 20),
+      });
+    }
 
     // Left box - Verein
     page.drawRectangle({
@@ -291,21 +331,25 @@ export async function GET(
       borderColor: lightGray,
     });
 
-    // Labels inside boxes
-    page.drawText('Unterschrift Verein', {
-      x: margin + 10,
-      y: y - boxHeight + 14,
-      size: 8,
-      font,
-      color: mediumGray,
-    });
-    page.drawText('Unterschrift Vertragsnehmer', {
-      x: margin + boxWidth + gap + 10,
-      y: y - boxHeight + 14,
-      size: 8,
-      font,
-      color: mediumGray,
-    });
+    // Labels inside boxes (only if no signature)
+    if (!sigVereinImg) {
+      page.drawText('Unterschrift Verein', {
+        x: margin + 10,
+        y: y - boxHeight + 14,
+        size: 8,
+        font,
+        color: mediumGray,
+      });
+    }
+    if (!sigVertragsnehmerImg) {
+      page.drawText('Unterschrift Vertragsnehmer', {
+        x: margin + boxWidth + gap + 10,
+        y: y - boxHeight + 14,
+        size: 8,
+        font,
+        color: mediumGray,
+      });
+    }
 
     // Names directly below boxes (same page guaranteed)
     y -= boxHeight + 14;

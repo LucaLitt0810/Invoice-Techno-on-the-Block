@@ -6,7 +6,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { Employee, EmployeeEntry, ENTRY_TYPE_OPTIONS } from '@/types';
-import { ArrowLeftIcon, PencilIcon, TrashIcon, ArrowTopRightOnSquareIcon, PlusIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, PencilIcon, TrashIcon, ArrowTopRightOnSquareIcon, PlusIcon, DocumentTextIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 
 const TYPE_COLORS: Record<string, string> = {
   green: 'bg-green-900/30 text-green-400 border-green-800',
@@ -168,6 +168,13 @@ export default function EmployeeDetailPage() {
           <p className="text-sm text-gray-400">{employee.department?.name || 'No department'}</p>
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
+          <Link
+            href={`/personal/${employee.id}/nda/sign`}
+            className="inline-flex items-center px-4 py-2 border border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+          >
+            <PencilSquareIcon className="-ml-1 mr-2 h-5 w-5" />
+            {employee.signature_verein && employee.signature_vertragsnehmer ? 'Signatures Edit' : 'Sign NDA'}
+          </Link>
           <Link
             href={`/api/personal/${employee.id}/nda/pdf`}
             target="_blank"

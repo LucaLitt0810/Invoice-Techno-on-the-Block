@@ -193,6 +193,10 @@ export type Employee = {
   bank_name: string | null;
   iban: string | null;
   bic: string | null;
+  signature_verein: string | null;
+  signature_vertragsnehmer: string | null;
+  signature_ort: string | null;
+  signature_datum: string | null;
   created_at: string;
   updated_at: string;
   department?: Department;
