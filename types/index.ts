@@ -171,7 +171,6 @@ export const ENTRY_TYPE_OPTIONS = [
   { value: 'warning' as EmployeeEntryType, label: 'Abmahnung', color: 'orange' },
   { value: 'training' as EmployeeEntryType, label: 'Schulung', color: 'blue' },
   { value: 'termination' as EmployeeEntryType, label: 'Kündigung', color: 'purple' },
-  { value: 'entry' as EmployeeEntryType, label: 'Eintritt', color: 'teal' },
   { value: 'contract' as EmployeeEntryType, label: 'Vertrag', color: 'indigo' },
 ];
 
