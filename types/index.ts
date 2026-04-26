@@ -229,6 +229,7 @@ export type Meeting = {
   notes: string | null;
   decisions: string | null;
   action_items: string | null;
+  protocol: string | null;
   status: MeetingStatus;
   created_by: string | null;
   created_at: string;

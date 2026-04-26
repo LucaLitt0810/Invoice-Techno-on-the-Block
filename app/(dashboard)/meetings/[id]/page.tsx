@@ -189,6 +189,14 @@ export default function MeetingDetailPage() {
             </div>
           </div>
         )}
+        {meeting.protocol && (
+          <div className="card bg-dark-800 md:col-span-2">
+            <div className="card-body">
+              <h3 className="text-lg font-medium text-white mb-4">Protokoll</h3>
+              <p className="text-gray-300 whitespace-pre-wrap">{meeting.protocol}</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

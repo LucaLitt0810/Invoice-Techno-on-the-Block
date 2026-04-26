@@ -24,6 +24,7 @@ export default function EditMeetingPage() {
     notes: '',
     decisions: '',
     action_items: '',
+    protocol: '',
     status: 'planned' as Meeting['status'],
   });
 
@@ -56,6 +57,7 @@ export default function EditMeetingPage() {
         notes: m.notes || '',
         decisions: m.decisions || '',
         action_items: m.action_items || '',
+        protocol: m.protocol || '',
         status: m.status,
       });
     } catch (error) {
@@ -83,6 +85,7 @@ export default function EditMeetingPage() {
         notes: formData.notes || null,
         decisions: formData.decisions || null,
         action_items: formData.action_items || null,
+        protocol: formData.protocol || null,
       };
 
       const { error } = await (supabase.from('meetings') as any)
@@ -175,6 +178,11 @@ export default function EditMeetingPage() {
           <div className="space-y-6 pt-6 border-t border-dark-500">
             <h3 className="text-lg font-medium text-white">Action Items</h3>
             <textarea className="input min-h-[120px]" value={formData.action_items} onChange={(e) => handleChange('action_items', e.target.value)} />
+          </div>
+
+          <div className="space-y-6 pt-6 border-t border-dark-500">
+            <h3 className="text-lg font-medium text-white">Protokoll</h3>
+            <textarea className="input min-h-[200px]" value={formData.protocol} onChange={(e) => handleChange('protocol', e.target.value)} placeholder="Meeting protocol / minutes..." />
           </div>
         </div>
 

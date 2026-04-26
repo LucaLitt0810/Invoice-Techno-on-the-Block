@@ -22,6 +22,7 @@ export default function NewMeetingPage() {
     notes: '',
     decisions: '',
     action_items: '',
+    protocol: '',
     status: 'planned' as 'planned' | 'in_progress' | 'completed' | 'cancelled',
   });
 
@@ -44,6 +45,7 @@ export default function NewMeetingPage() {
         notes: formData.notes || null,
         decisions: formData.decisions || null,
         action_items: formData.action_items || null,
+        protocol: formData.protocol || null,
         created_by: user?.id || null,
       };
 
@@ -135,6 +137,12 @@ export default function NewMeetingPage() {
           <div className="space-y-6 pt-6 border-t border-dark-500">
             <h3 className="text-lg font-medium text-white">Action Items</h3>
             <textarea className="input min-h-[120px]" value={formData.action_items} onChange={(e) => handleChange('action_items', e.target.value)} placeholder="Tasks and follow-ups..." />
+          </div>
+
+          {/* Protocol */}
+          <div className="space-y-6 pt-6 border-t border-dark-500">
+            <h3 className="text-lg font-medium text-white">Protokoll</h3>
+            <textarea className="input min-h-[200px]" value={formData.protocol} onChange={(e) => handleChange('protocol', e.target.value)} placeholder="Meeting protocol / minutes..." />
           </div>
         </div>
 
