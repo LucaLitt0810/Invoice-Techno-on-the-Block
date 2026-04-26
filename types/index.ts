@@ -210,6 +210,32 @@ export type EmployeeEntry = {
   user?: { email: string };
 };
 
+export type MeetingStatus = 'planned' | 'in_progress' | 'completed' | 'cancelled';
+
+export const MEETING_STATUS_OPTIONS = [
+  { value: 'planned' as MeetingStatus, label: 'Geplant', color: 'blue' },
+  { value: 'in_progress' as MeetingStatus, label: 'Laufend', color: 'yellow' },
+  { value: 'completed' as MeetingStatus, label: 'Abgeschlossen', color: 'green' },
+  { value: 'cancelled' as MeetingStatus, label: 'Abgesagt', color: 'red' },
+];
+
+export type Meeting = {
+  id: string;
+  title: string;
+  meeting_date: string;
+  location: string | null;
+  attendees: string | null;
+  agenda: string | null;
+  notes: string | null;
+  decisions: string | null;
+  action_items: string | null;
+  status: MeetingStatus;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  user?: { email: string };
+};
+
 export type AgencyStatus = 'contacted' | 'negotiation' | 'closed';
 
 export const AGENCY_STATUS_OPTIONS = [
