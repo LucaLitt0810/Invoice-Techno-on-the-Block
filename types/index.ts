@@ -196,6 +196,10 @@ export type Employee = {
   signature_vertragsnehmer: string | null;
   signature_ort: string | null;
   signature_datum: string | null;
+  consent_signature_verein: string | null;
+  consent_signature_vertragsnehmer: string | null;
+  consent_signature_ort: string | null;
+  consent_signature_datum: string | null;
   created_at: string;
   updated_at: string;
   department?: Department;

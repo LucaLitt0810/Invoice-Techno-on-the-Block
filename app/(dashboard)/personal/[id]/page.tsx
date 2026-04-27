@@ -256,16 +256,35 @@ export default function EmployeeDetailPage() {
                   <span className="text-gray-500 text-sm">Stellenbeschreibung</span>
                 </div>
               )}
-              {employee.data_storage_link ? (
-                <a href={employee.data_storage_link} target="_blank" rel="noopener noreferrer" className="flex items-center p-4 border border-dark-500 rounded-sm hover:border-white transition-colors">
-                  <span className="text-white text-sm flex-1">Speicherung Pers. Daten</span>
-                  <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-400" />
-                </a>
-              ) : (
-                <div className="flex items-center p-4 border border-dark-500 rounded-sm">
-                  <span className="text-gray-500 text-sm">Speicherung Pers. Daten</span>
+              <div className="space-y-3">
+                {employee.data_storage_link ? (
+                  <a href={employee.data_storage_link} target="_blank" rel="noopener noreferrer" className="flex items-center p-4 border border-dark-500 rounded-sm hover:border-white transition-colors">
+                    <span className="text-white text-sm flex-1">Speicherung Pers. Daten</span>
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-400" />
+                  </a>
+                ) : (
+                  <div className="flex items-center p-4 border border-dark-500 rounded-sm">
+                    <span className="text-gray-500 text-sm">Speicherung Pers. Daten</span>
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <Link
+                    href={`/personal/${employee.id}/consent/sign`}
+                    className="flex-1 flex items-center justify-center px-3 py-2 border border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors text-xs font-medium uppercase tracking-wider"
+                  >
+                    <PencilSquareIcon className="mr-1.5 h-4 w-4" />
+                    {employee.consent_signature_verein && employee.consent_signature_vertragsnehmer ? 'Signatures Edit' : 'Sign Consent'}
+                  </Link>
+                  <Link
+                    href={`/api/personal/${employee.id}/consent/pdf`}
+                    target="_blank"
+                    className="flex-1 flex items-center justify-center px-3 py-2 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-colors text-xs font-medium uppercase tracking-wider"
+                  >
+                    <DocumentTextIcon className="mr-1.5 h-4 w-4" />
+                    Consent PDF
+                  </Link>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
