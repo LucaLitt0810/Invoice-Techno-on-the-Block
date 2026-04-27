@@ -255,6 +255,46 @@ export const AGENCY_STATUS_OPTIONS = [
   { value: 'closed' as AgencyStatus, label: 'Abgeschlossen', color: 'green' },
 ];
 
+export type Category = {
+  id: string;
+  name: string;
+  type: 'income' | 'expense';
+  color: string;
+  created_at: string;
+};
+
+export type Receipt = {
+  id: string;
+  file_data: string | null;
+  file_name: string | null;
+  extracted_date: string | null;
+  extracted_amount: number | null;
+  extracted_vendor: string | null;
+  manual_date: string | null;
+  manual_amount: number | null;
+  manual_vendor: string | null;
+  notes: string | null;
+  status: 'unprocessed' | 'reviewed' | 'assigned';
+  transaction_id: string | null;
+  created_at: string;
+};
+
+export type Transaction = {
+  id: string;
+  type: 'income' | 'expense';
+  date: string;
+  amount: number;
+  description: string | null;
+  category_id: string | null;
+  receipt_id: string | null;
+  invoice_id: string | null;
+  status: 'open' | 'assigned' | 'completed';
+  created_at: string;
+  category?: Category;
+  receipt?: Receipt;
+  invoice?: Invoice;
+};
+
 export type AgencyLead = {
   id: string;
   user_id: string;

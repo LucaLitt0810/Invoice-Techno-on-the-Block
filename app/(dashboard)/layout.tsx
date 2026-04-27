@@ -23,7 +23,8 @@ import {
   Bars3Icon,
   DocumentCheckIcon,
   CalendarIcon,
-  ClockIcon
+  ClockIcon,
+  BanknotesIcon
 } from '@heroicons/react/24/outline';
 
 // Navigation based on role
@@ -57,6 +58,7 @@ const getNavigation = (role: string | undefined) => {
     { name: 'Coworkers', href: '/coworkers', icon: BuildingOfficeIcon },
     { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
     { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
+    { name: 'Bookkeeping', href: '/bookkeeping', icon: BanknotesIcon },
     { name: 'Personal', href: '/personal', icon: UserGroupIcon },
     { name: 'Meetings', href: '/meetings', icon: CalendarDaysIcon },
     { name: 'Admin', href: '/admin/users', icon: ShieldCheckIcon },
