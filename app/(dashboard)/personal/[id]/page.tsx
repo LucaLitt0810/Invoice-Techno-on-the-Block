@@ -322,7 +322,7 @@ export default function EmployeeDetailPage() {
                 </label>
                 {employee.nda_pdf ? (
                   <div className="flex items-center justify-between p-3 border border-green-500/30 rounded-sm bg-green-900/10">
-                    <a href={employee.nda_pdf} target="_blank" rel="noopener noreferrer" className="text-sm text-green-400 hover:text-green-300 flex items-center">
+                    <a href={`/api/personal/${employee.id}/document?field=nda_pdf`} target="_blank" rel="noopener noreferrer" className="text-sm text-green-400 hover:text-green-300 flex items-center">
                       <DocumentTextIcon className="mr-2 h-4 w-4" />
                       PDF uploaded — View
                     </a>
@@ -420,7 +420,7 @@ export default function EmployeeDetailPage() {
                 </label>
                 {employee.job_desc_pdf ? (
                   <div className="flex items-center justify-between p-3 border border-green-500/30 rounded-sm bg-green-900/10">
-                    <a href={employee.job_desc_pdf} target="_blank" rel="noopener noreferrer" className="text-sm text-green-400 hover:text-green-300 flex items-center">
+                    <a href={`/api/personal/${employee.id}/document?field=job_desc_pdf`} target="_blank" rel="noopener noreferrer" className="text-sm text-green-400 hover:text-green-300 flex items-center">
                       <DocumentTextIcon className="mr-2 h-4 w-4" />
                       PDF uploaded — View
                     </a>
@@ -497,7 +497,7 @@ export default function EmployeeDetailPage() {
                 </label>
                 {employee.data_storage_pdf ? (
                   <div className="flex items-center justify-between p-3 border border-green-500/30 rounded-sm bg-green-900/10">
-                    <a href={employee.data_storage_pdf} target="_blank" rel="noopener noreferrer" className="text-sm text-green-400 hover:text-green-300 flex items-center">
+                    <a href={`/api/personal/${employee.id}/document?field=data_storage_pdf`} target="_blank" rel="noopener noreferrer" className="text-sm text-green-400 hover:text-green-300 flex items-center">
                       <DocumentTextIcon className="mr-2 h-4 w-4" />
                       PDF uploaded — View
                     </a>
