@@ -6,7 +6,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { Employee, EmployeeEntry, ENTRY_TYPE_OPTIONS } from '@/types';
-import { ArrowLeftIcon, PencilIcon, TrashIcon, ArrowTopRightOnSquareIcon, PlusIcon, DocumentTextIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, PencilIcon, TrashIcon, ArrowTopRightOnSquareIcon, PlusIcon, DocumentTextIcon, PencilSquareIcon, CloudArrowUpIcon, LinkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const TYPE_COLORS: Record<string, string> = {
   green: 'bg-green-900/30 text-green-400 border-green-800',
@@ -35,6 +35,9 @@ export default function EmployeeDetailPage() {
     entry_date: new Date().toISOString().split('T')[0],
   });
 
+  const [linkInputs, setLinkInputs] = useState({ nda: '', jobDesc: '', dataStorage: '' });
+  const [uploading, setUploading] = useState<string | null>(null);
+
   useEffect(() => {
     if (params.id) fetchEmployee();
   }, [params.id]);
@@ -55,6 +58,11 @@ export default function EmployeeDetailPage() {
       }
 
       setEmployee(data);
+      setLinkInputs({
+        nda: data.nda_link || '',
+        jobDesc: data.job_desc_link || '',
+        dataStorage: data.data_storage_link || '',
+      });
 
       const { data: entryData, error: entryError } = await supabase
         .from('employee_entries')
@@ -69,6 +77,62 @@ export default function EmployeeDetailPage() {
       toast.error('Failed to load employee');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateLink = async (field: 'nda_link' | 'job_desc_link' | 'data_storage_link', value: string) => {
+    try {
+      const { error } = await (supabase.from('employees') as any)
+        .update({ [field]: value || null })
+        .eq('id', params.id);
+      if (error) throw error;
+      toast.success('Link saved');
+      fetchEmployee();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save link');
+    }
+  };
+
+  const handleUploadPdf = async (field: 'nda_pdf' | 'job_desc_pdf' | 'data_storage_pdf', file: File) => {
+    if (file.type !== 'application/pdf') {
+      toast.error('Please upload a PDF file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('PDF must be smaller than 5MB');
+      return;
+    }
+    setUploading(field);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target?.result as string;
+        const { error } = await (supabase.from('employees') as any)
+          .update({ [field]: base64 })
+          .eq('id', params.id);
+        if (error) throw error;
+        toast.success('PDF uploaded');
+        fetchEmployee();
+      };
+      reader.readAsDataURL(file);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to upload PDF');
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const handleDeletePdf = async (field: 'nda_pdf' | 'job_desc_pdf' | 'data_storage_pdf') => {
+    if (!confirm('Delete this PDF?')) return;
+    try {
+      const { error } = await (supabase.from('employees') as any)
+        .update({ [field]: null })
+        .eq('id', params.id);
+      if (error) throw error;
+      toast.success('PDF deleted');
+      fetchEmployee();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete PDF');
     }
   };
 
@@ -214,76 +278,279 @@ export default function EmployeeDetailPage() {
 
         {/* Documents */}
         <div className="card bg-dark-800 md:col-span-2">
-          <div className="card-body space-y-4">
-            <h3 className="text-lg font-medium text-white">Google Drive Documents</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-3">
-                {employee.nda_link ? (
-                  <a href={employee.nda_link} target="_blank" rel="noopener noreferrer" className="flex items-center p-4 border border-dark-500 rounded-sm hover:border-white transition-colors">
-                    <span className="text-white text-sm flex-1">NDA / Verschwiegenheitsvertrag</span>
-                    <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-400" />
-                  </a>
-                ) : (
-                  <div className="flex items-center p-4 border border-dark-500 rounded-sm">
-                    <span className="text-gray-500 text-sm">NDA / Verschwiegenheitsvertrag</span>
-                  </div>
-                )}
-                <div className="flex gap-3">
-                  <Link
-                    href={`/personal/${employee.id}/nda/sign`}
-                    className="flex-1 flex items-center justify-center px-3 py-2 border border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors text-xs font-medium uppercase tracking-wider"
+          <div className="card-body space-y-6">
+            <h3 className="text-lg font-medium text-white">Documents</h3>
+
+            {/* NDA */}
+            <div className="border border-dark-500 rounded-sm p-4 space-y-4">
+              <h4 className="text-sm font-medium text-white uppercase tracking-wider">NDA / Verschwiegenheitsvertrag</h4>
+
+              {/* Google Drive Link */}
+              <div className="space-y-2">
+                <label className="text-xs text-gray-500 uppercase flex items-center gap-1.5">
+                  <LinkIcon className="h-3 w-3" /> Google Drive Link
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    className="input flex-1 text-sm"
+                    placeholder="https://drive.google.com/..."
+                    value={linkInputs.nda}
+                    onChange={(e) => setLinkInputs((p) => ({ ...p, nda: e.target.value }))}
+                  />
+                  <button
+                    onClick={() => handleUpdateLink('nda_link', linkInputs.nda)}
+                    className="px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-xs font-medium uppercase tracking-wider"
                   >
-                    <PencilSquareIcon className="mr-1.5 h-4 w-4" />
-                    {employee.signature_verein && employee.signature_vertragsnehmer ? 'Signatures Edit' : 'Sign NDA'}
-                  </Link>
-                  <Link
-                    href={`/api/personal/${employee.id}/nda/pdf`}
-                    target="_blank"
-                    className="flex-1 flex items-center justify-center px-3 py-2 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-colors text-xs font-medium uppercase tracking-wider"
-                  >
-                    <DocumentTextIcon className="mr-1.5 h-4 w-4" />
-                    NDA PDF
-                  </Link>
+                    Save
+                  </button>
                 </div>
+                {employee.nda_link && (
+                  <a href={employee.nda_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-xs text-blue-400 hover:text-blue-300">
+                    <ArrowTopRightOnSquareIcon className="mr-1 h-3 w-3" />
+                    Open Link
+                  </a>
+                )}
               </div>
-              {employee.job_desc_link ? (
-                <a href={employee.job_desc_link} target="_blank" rel="noopener noreferrer" className="flex items-center p-4 border border-dark-500 rounded-sm hover:border-white transition-colors">
-                  <span className="text-white text-sm flex-1">Stellenbeschreibung</span>
-                  <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-400" />
-                </a>
-              ) : (
-                <div className="flex items-center p-4 border border-dark-500 rounded-sm">
-                  <span className="text-gray-500 text-sm">Stellenbeschreibung</span>
-                </div>
-              )}
-              <div className="space-y-3">
-                {employee.data_storage_link ? (
-                  <a href={employee.data_storage_link} target="_blank" rel="noopener noreferrer" className="flex items-center p-4 border border-dark-500 rounded-sm hover:border-white transition-colors">
-                    <span className="text-white text-sm flex-1">Speicherung Pers. Daten</span>
-                    <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-400" />
-                  </a>
+
+              <div className="h-px bg-dark-500" />
+
+              {/* PDF Upload */}
+              <div className="space-y-2">
+                <label className="text-xs text-gray-500 uppercase flex items-center gap-1.5">
+                  <CloudArrowUpIcon className="h-3 w-3" /> PDF Upload
+                </label>
+                {employee.nda_pdf ? (
+                  <div className="flex items-center justify-between p-3 border border-green-500/30 rounded-sm bg-green-900/10">
+                    <a href={employee.nda_pdf} target="_blank" rel="noopener noreferrer" className="text-sm text-green-400 hover:text-green-300 flex items-center">
+                      <DocumentTextIcon className="mr-2 h-4 w-4" />
+                      PDF uploaded — View
+                    </a>
+                    <button
+                      onClick={() => handleDeletePdf('nda_pdf')}
+                      className="text-red-400 hover:text-red-300 p-1"
+                      title="Delete PDF"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
                 ) : (
-                  <div className="flex items-center p-4 border border-dark-500 rounded-sm">
-                    <span className="text-gray-500 text-sm">Speicherung Pers. Daten</span>
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      id="nda-pdf-upload"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadPdf('nda_pdf', file);
+                        e.target.value = '';
+                      }}
+                    />
+                    <label
+                      htmlFor="nda-pdf-upload"
+                      className={`flex-1 flex items-center justify-center px-3 py-2 border border-dark-500 text-gray-400 hover:border-white hover:text-white transition-colors text-xs font-medium uppercase tracking-wider cursor-pointer ${uploading === 'nda_pdf' ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                      {uploading === 'nda_pdf' ? 'Uploading...' : 'Choose PDF'}
+                    </label>
                   </div>
                 )}
-                <div className="flex gap-3">
-                  <Link
-                    href={`/personal/${employee.id}/consent/sign`}
-                    className="flex-1 flex items-center justify-center px-3 py-2 border border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors text-xs font-medium uppercase tracking-wider"
+              </div>
+
+              <div className="h-px bg-dark-500" />
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <Link
+                  href={`/personal/${employee.id}/nda/sign`}
+                  className="flex-1 flex items-center justify-center px-3 py-2 border border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors text-xs font-medium uppercase tracking-wider"
+                >
+                  <PencilSquareIcon className="mr-1.5 h-4 w-4" />
+                  {employee.signature_verein && employee.signature_vertragsnehmer ? 'Signatures Edit' : 'Sign NDA'}
+                </Link>
+                <Link
+                  href={`/api/personal/${employee.id}/nda/pdf`}
+                  target="_blank"
+                  className="flex-1 flex items-center justify-center px-3 py-2 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-colors text-xs font-medium uppercase tracking-wider"
+                >
+                  <DocumentTextIcon className="mr-1.5 h-4 w-4" />
+                  NDA PDF
+                </Link>
+              </div>
+            </div>
+
+            {/* Job Description */}
+            <div className="border border-dark-500 rounded-sm p-4 space-y-4">
+              <h4 className="text-sm font-medium text-white uppercase tracking-wider">Stellenbeschreibung</h4>
+
+              {/* Google Drive Link */}
+              <div className="space-y-2">
+                <label className="text-xs text-gray-500 uppercase flex items-center gap-1.5">
+                  <LinkIcon className="h-3 w-3" /> Google Drive Link
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    className="input flex-1 text-sm"
+                    placeholder="https://drive.google.com/..."
+                    value={linkInputs.jobDesc}
+                    onChange={(e) => setLinkInputs((p) => ({ ...p, jobDesc: e.target.value }))}
+                  />
+                  <button
+                    onClick={() => handleUpdateLink('job_desc_link', linkInputs.jobDesc)}
+                    className="px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-xs font-medium uppercase tracking-wider"
                   >
-                    <PencilSquareIcon className="mr-1.5 h-4 w-4" />
-                    {employee.consent_signature_verein && employee.consent_signature_vertragsnehmer ? 'Signatures Edit' : 'Sign Consent'}
-                  </Link>
-                  <Link
-                    href={`/api/personal/${employee.id}/consent/pdf`}
-                    target="_blank"
-                    className="flex-1 flex items-center justify-center px-3 py-2 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-colors text-xs font-medium uppercase tracking-wider"
-                  >
-                    <DocumentTextIcon className="mr-1.5 h-4 w-4" />
-                    Consent PDF
-                  </Link>
+                    Save
+                  </button>
                 </div>
+                {employee.job_desc_link && (
+                  <a href={employee.job_desc_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-xs text-blue-400 hover:text-blue-300">
+                    <ArrowTopRightOnSquareIcon className="mr-1 h-3 w-3" />
+                    Open Link
+                  </a>
+                )}
+              </div>
+
+              <div className="h-px bg-dark-500" />
+
+              {/* PDF Upload */}
+              <div className="space-y-2">
+                <label className="text-xs text-gray-500 uppercase flex items-center gap-1.5">
+                  <CloudArrowUpIcon className="h-3 w-3" /> PDF Upload
+                </label>
+                {employee.job_desc_pdf ? (
+                  <div className="flex items-center justify-between p-3 border border-green-500/30 rounded-sm bg-green-900/10">
+                    <a href={employee.job_desc_pdf} target="_blank" rel="noopener noreferrer" className="text-sm text-green-400 hover:text-green-300 flex items-center">
+                      <DocumentTextIcon className="mr-2 h-4 w-4" />
+                      PDF uploaded — View
+                    </a>
+                    <button
+                      onClick={() => handleDeletePdf('job_desc_pdf')}
+                      className="text-red-400 hover:text-red-300 p-1"
+                      title="Delete PDF"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      id="job-desc-pdf-upload"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadPdf('job_desc_pdf', file);
+                        e.target.value = '';
+                      }}
+                    />
+                    <label
+                      htmlFor="job-desc-pdf-upload"
+                      className={`flex-1 flex items-center justify-center px-3 py-2 border border-dark-500 text-gray-400 hover:border-white hover:text-white transition-colors text-xs font-medium uppercase tracking-wider cursor-pointer ${uploading === 'job_desc_pdf' ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                      {uploading === 'job_desc_pdf' ? 'Uploading...' : 'Choose PDF'}
+                    </label>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Data Storage Consent */}
+            <div className="border border-dark-500 rounded-sm p-4 space-y-4">
+              <h4 className="text-sm font-medium text-white uppercase tracking-wider">Speicherung Pers. Daten</h4>
+
+              {/* Google Drive Link */}
+              <div className="space-y-2">
+                <label className="text-xs text-gray-500 uppercase flex items-center gap-1.5">
+                  <LinkIcon className="h-3 w-3" /> Google Drive Link
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    className="input flex-1 text-sm"
+                    placeholder="https://drive.google.com/..."
+                    value={linkInputs.dataStorage}
+                    onChange={(e) => setLinkInputs((p) => ({ ...p, dataStorage: e.target.value }))}
+                  />
+                  <button
+                    onClick={() => handleUpdateLink('data_storage_link', linkInputs.dataStorage)}
+                    className="px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-xs font-medium uppercase tracking-wider"
+                  >
+                    Save
+                  </button>
+                </div>
+                {employee.data_storage_link && (
+                  <a href={employee.data_storage_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-xs text-blue-400 hover:text-blue-300">
+                    <ArrowTopRightOnSquareIcon className="mr-1 h-3 w-3" />
+                    Open Link
+                  </a>
+                )}
+              </div>
+
+              <div className="h-px bg-dark-500" />
+
+              {/* PDF Upload */}
+              <div className="space-y-2">
+                <label className="text-xs text-gray-500 uppercase flex items-center gap-1.5">
+                  <CloudArrowUpIcon className="h-3 w-3" /> PDF Upload
+                </label>
+                {employee.data_storage_pdf ? (
+                  <div className="flex items-center justify-between p-3 border border-green-500/30 rounded-sm bg-green-900/10">
+                    <a href={employee.data_storage_pdf} target="_blank" rel="noopener noreferrer" className="text-sm text-green-400 hover:text-green-300 flex items-center">
+                      <DocumentTextIcon className="mr-2 h-4 w-4" />
+                      PDF uploaded — View
+                    </a>
+                    <button
+                      onClick={() => handleDeletePdf('data_storage_pdf')}
+                      className="text-red-400 hover:text-red-300 p-1"
+                      title="Delete PDF"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      id="data-storage-pdf-upload"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadPdf('data_storage_pdf', file);
+                        e.target.value = '';
+                      }}
+                    />
+                    <label
+                      htmlFor="data-storage-pdf-upload"
+                      className={`flex-1 flex items-center justify-center px-3 py-2 border border-dark-500 text-gray-400 hover:border-white hover:text-white transition-colors text-xs font-medium uppercase tracking-wider cursor-pointer ${uploading === 'data_storage_pdf' ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                      {uploading === 'data_storage_pdf' ? 'Uploading...' : 'Choose PDF'}
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              <div className="h-px bg-dark-500" />
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <Link
+                  href={`/personal/${employee.id}/consent/sign`}
+                  className="flex-1 flex items-center justify-center px-3 py-2 border border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors text-xs font-medium uppercase tracking-wider"
+                >
+                  <PencilSquareIcon className="mr-1.5 h-4 w-4" />
+                  {employee.consent_signature_verein && employee.consent_signature_vertragsnehmer ? 'Signatures Edit' : 'Sign Consent'}
+                </Link>
+                <Link
+                  href={`/api/personal/${employee.id}/consent/pdf`}
+                  target="_blank"
+                  className="flex-1 flex items-center justify-center px-3 py-2 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-colors text-xs font-medium uppercase tracking-wider"
+                >
+                  <DocumentTextIcon className="mr-1.5 h-4 w-4" />
+                  Consent PDF
+                </Link>
               </div>
             </div>
           </div>

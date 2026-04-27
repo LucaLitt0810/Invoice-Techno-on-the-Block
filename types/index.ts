@@ -187,8 +187,11 @@ export type Employee = {
   country: string;
   entry_date: string;
   nda_link: string | null;
+  nda_pdf: string | null;
   job_desc_link: string | null;
+  job_desc_pdf: string | null;
   data_storage_link: string | null;
+  data_storage_pdf: string | null;
   bank_name: string | null;
   iban: string | null;
   bic: string | null;
