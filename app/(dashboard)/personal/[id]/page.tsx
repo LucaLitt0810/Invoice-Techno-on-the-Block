@@ -37,6 +37,7 @@ export default function EmployeeDetailPage() {
 
   const [linkInputs, setLinkInputs] = useState({ nda: '', jobDesc: '', dataStorage: '' });
   const [uploading, setUploading] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'documents'>('overview');
 
   useEffect(() => {
     if (params.id) fetchEmployee();
@@ -249,35 +250,138 @@ export default function EmployeeDetailPage() {
         </div>
       </div>
 
-      {/* Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Personal Info */}
-        <div className="card bg-dark-800">
-          <div className="card-body space-y-4">
-            <h3 className="text-lg font-medium text-white">Personal Information</h3>
-            <dl className="space-y-3">
-              <div><dt className="text-xs text-gray-500 uppercase">Email</dt><dd className="text-white">{employee.email}</dd></div>
-              <div><dt className="text-xs text-gray-500 uppercase">Phone</dt><dd className="text-white">{employee.phone || '-'}</dd></div>
-              <div><dt className="text-xs text-gray-500 uppercase">Address</dt><dd className="text-white">{employee.street}, {employee.postal_code} {employee.city}, {employee.country}</dd></div>
-              <div><dt className="text-xs text-gray-500 uppercase">Entry Date</dt><dd className="text-white">{new Date(employee.entry_date).toLocaleDateString('de-DE')}</dd></div>
-            </dl>
+      {/* Tabs */}
+      <div className="flex border-b border-dark-500">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`px-6 py-3 text-sm font-medium uppercase tracking-wider transition-colors ${
+            activeTab === 'overview'
+              ? 'text-white border-b-2 border-white'
+              : 'text-gray-500 hover:text-gray-300'
+          }`}
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('documents')}
+          className={`px-6 py-3 text-sm font-medium uppercase tracking-wider transition-colors ${
+            activeTab === 'documents'
+              ? 'text-white border-b-2 border-white'
+              : 'text-gray-500 hover:text-gray-300'
+          }`}
+        >
+          Documents
+        </button>
+      </div>
+
+      {activeTab === 'overview' && (
+        <div className="space-y-8">
+          {/* Info Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Personal Info */}
+            <div className="card bg-dark-800">
+              <div className="card-body space-y-4">
+                <h3 className="text-lg font-medium text-white">Personal Information</h3>
+                <dl className="space-y-3">
+                  <div><dt className="text-xs text-gray-500 uppercase">Email</dt><dd className="text-white">{employee.email}</dd></div>
+                  <div><dt className="text-xs text-gray-500 uppercase">Phone</dt><dd className="text-white">{employee.phone || '-'}</dd></div>
+                  <div><dt className="text-xs text-gray-500 uppercase">Address</dt><dd className="text-white">{employee.street}, {employee.postal_code} {employee.city}, {employee.country}</dd></div>
+                  <div><dt className="text-xs text-gray-500 uppercase">Entry Date</dt><dd className="text-white">{new Date(employee.entry_date).toLocaleDateString('de-DE')}</dd></div>
+                </dl>
+              </div>
+            </div>
+
+            {/* Bank Details */}
+            <div className="card bg-dark-800">
+              <div className="card-body space-y-4">
+                <h3 className="text-lg font-medium text-white">Bank Details</h3>
+                <dl className="space-y-3">
+                  <div><dt className="text-xs text-gray-500 uppercase">Bank Name</dt><dd className="text-white">{employee.bank_name || '-'}</dd></div>
+                  <div><dt className="text-xs text-gray-500 uppercase">IBAN</dt><dd className="text-white">{employee.iban || '-'}</dd></div>
+                  <div><dt className="text-xs text-gray-500 uppercase">BIC</dt><dd className="text-white">{employee.bic || '-'}</dd></div>
+                </dl>
+              </div>
+            </div>
+          </div>
+
+          {/* Entries / Logs */}
+          <div className="card bg-dark-800">
+            <div className="card-body space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-white">Logs</h3>
+                <button
+                  onClick={() => setShowEntryForm(!showEntryForm)}
+                  className="inline-flex items-center px-3 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
+                >
+                  <PlusIcon className="-ml-1 mr-2 h-4 w-4" />
+                  {showEntryForm ? 'Cancel' : 'Add Entry'}
+                </button>
+              </div>
+
+              {showEntryForm && (
+                <form onSubmit={handleAddEntry} className="p-4 border border-dark-500 rounded-sm space-y-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div>
+                      <label className="label">Type</label>
+                      <select className="input" value={entryForm.type} onChange={(e) => setEntryForm((p) => ({ ...p, type: e.target.value as EmployeeEntry['type'] }))}>
+                        {ENTRY_TYPE_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value} className="bg-dark-800">{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="label">Title *</label>
+                      <input type="text" className="input" value={entryForm.title} onChange={(e) => setEntryForm((p) => ({ ...p, title: e.target.value }))} required />
+                    </div>
+                    <div>
+                      <label className="label">Date</label>
+                      <input type="date" className="input" value={entryForm.entry_date} onChange={(e) => setEntryForm((p) => ({ ...p, entry_date: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="label">Description</label>
+                    <textarea className="input min-h-[80px]" value={entryForm.description} onChange={(e) => setEntryForm((p) => ({ ...p, description: e.target.value }))} placeholder="Details..." />
+                  </div>
+                  <div className="flex justify-end">
+                    <button type="submit" disabled={savingEntry} className="px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50">
+                      {savingEntry ? 'Saving...' : 'Save Entry'}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              <div className="space-y-3">
+                {entries.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">No logs yet.</p>
+                ) : (
+                  entries.map((entry) => (
+                    <div key={entry.id} className="p-4 border border-dark-500 rounded-sm">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getTypeColor(entry.type)}`}>
+                              {getTypeLabel(entry.type)}
+                            </span>
+                            <span className="text-sm text-gray-500">{new Date(entry.entry_date).toLocaleDateString('de-DE')}</span>
+                          </div>
+                          <h4 className="text-white font-medium">{entry.title}</h4>
+                          {entry.description && <p className="text-gray-400 text-sm mt-1">{entry.description}</p>}
+                        </div>
+                        <button onClick={() => handleDeleteEntry(entry.id)} className="text-red-400 hover:text-red-300 ml-4">
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Bank Details */}
+      {activeTab === 'documents' && (
         <div className="card bg-dark-800">
-          <div className="card-body space-y-4">
-            <h3 className="text-lg font-medium text-white">Bank Details</h3>
-            <dl className="space-y-3">
-              <div><dt className="text-xs text-gray-500 uppercase">Bank Name</dt><dd className="text-white">{employee.bank_name || '-'}</dd></div>
-              <div><dt className="text-xs text-gray-500 uppercase">IBAN</dt><dd className="text-white">{employee.iban || '-'}</dd></div>
-              <div><dt className="text-xs text-gray-500 uppercase">BIC</dt><dd className="text-white">{employee.bic || '-'}</dd></div>
-            </dl>
-          </div>
-        </div>
-
-        {/* Documents */}
-        <div className="card bg-dark-800 md:col-span-2">
           <div className="card-body space-y-6">
             <h3 className="text-lg font-medium text-white">Documents</h3>
 
@@ -555,81 +659,7 @@ export default function EmployeeDetailPage() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Entries / Logs */}
-      <div className="card bg-dark-800">
-        <div className="card-body space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-white">Logs</h3>
-            <button
-              onClick={() => setShowEntryForm(!showEntryForm)}
-              className="inline-flex items-center px-3 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
-            >
-              <PlusIcon className="-ml-1 mr-2 h-4 w-4" />
-              {showEntryForm ? 'Cancel' : 'Add Entry'}
-            </button>
-          </div>
-
-          {showEntryForm && (
-            <form onSubmit={handleAddEntry} className="p-4 border border-dark-500 rounded-sm space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div>
-                  <label className="label">Type</label>
-                  <select className="input" value={entryForm.type} onChange={(e) => setEntryForm((p) => ({ ...p, type: e.target.value as EmployeeEntry['type'] }))}>
-                    {ENTRY_TYPE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value} className="bg-dark-800">{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="label">Title *</label>
-                  <input type="text" className="input" value={entryForm.title} onChange={(e) => setEntryForm((p) => ({ ...p, title: e.target.value }))} required />
-                </div>
-                <div>
-                  <label className="label">Date</label>
-                  <input type="date" className="input" value={entryForm.entry_date} onChange={(e) => setEntryForm((p) => ({ ...p, entry_date: e.target.value }))} />
-                </div>
-              </div>
-              <div>
-                <label className="label">Description</label>
-                <textarea className="input min-h-[80px]" value={entryForm.description} onChange={(e) => setEntryForm((p) => ({ ...p, description: e.target.value }))} placeholder="Details..." />
-              </div>
-              <div className="flex justify-end">
-                <button type="submit" disabled={savingEntry} className="px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50">
-                  {savingEntry ? 'Saving...' : 'Save Entry'}
-                </button>
-              </div>
-            </form>
-          )}
-
-          <div className="space-y-3">
-            {entries.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">No logs yet.</p>
-            ) : (
-              entries.map((entry) => (
-                <div key={entry.id} className="p-4 border border-dark-500 rounded-sm">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getTypeColor(entry.type)}`}>
-                          {getTypeLabel(entry.type)}
-                        </span>
-                        <span className="text-sm text-gray-500">{new Date(entry.entry_date).toLocaleDateString('de-DE')}</span>
-                      </div>
-                      <h4 className="text-white font-medium">{entry.title}</h4>
-                      {entry.description && <p className="text-gray-400 text-sm mt-1">{entry.description}</p>}
-                    </div>
-                    <button onClick={() => handleDeleteEntry(entry.id)} className="text-red-400 hover:text-red-300 ml-4">
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
