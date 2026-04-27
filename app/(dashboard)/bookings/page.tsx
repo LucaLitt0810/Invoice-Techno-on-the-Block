@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -36,6 +37,8 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
   const [showUnavailability, setShowUnavailability] = useState(true);
+  const searchParams = useSearchParams();
+  const prefillCustomerId = searchParams.get('customer_id');
   const [userRole, setUserRole] = useState<string>('user');
   const [currentDJId, setCurrentDJId] = useState<string>('');
   
@@ -68,6 +71,15 @@ export default function BookingsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  // Auto-open modal when coming from customer detail with customer_id
+  useEffect(() => {
+    if (prefillCustomerId) {
+      setSelectedBooking(null);
+      setSelectedDate(new Date());
+      setModalOpen(true);
+    }
+  }, [prefillCustomerId]);
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -495,6 +507,7 @@ export default function BookingsPage() {
           djs={djs}
           userRole={userRole}
           currentDJId={currentDJId}
+          prefillCustomerId={prefillCustomerId}
           onClose={() => setModalOpen(false)}
           onSaved={handleBookingSaved}
         />

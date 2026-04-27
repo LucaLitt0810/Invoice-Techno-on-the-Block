@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
@@ -11,8 +11,11 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function NewAgencyLeadPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefillCustomerId = searchParams.get('customer_id');
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
+  const [prefillCustomer, setPrefillCustomer] = useState<{ company_name: string; contact_person: string | null; email: string; phone: string | null; street: string; postal_code: string; city: string; country: string } | null>(null);
 
   const [formData, setFormData] = useState({
     company_name: '',
@@ -27,6 +30,34 @@ export default function NewAgencyLeadPage() {
     notes: '',
   });
 
+  // Load prefill customer data
+  useEffect(() => {
+    if (prefillCustomerId) {
+      supabase
+        .from('customers')
+        .select('*')
+        .eq('id', prefillCustomerId)
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            setPrefillCustomer(data);
+            setFormData({
+              company_name: data.company_name,
+              contact_person: data.contact_person || '',
+              email: data.email,
+              phone: data.phone || '',
+              street: data.street,
+              postal_code: data.postal_code,
+              city: data.city,
+              country: data.country,
+              status: 'contacted',
+              notes: '',
+            });
+          }
+        });
+    }
+  }, [prefillCustomerId]);
+
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -40,26 +71,31 @@ export default function NewAgencyLeadPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Step 1: Create customer from lead data
-      const customerData = {
-        company_name: formData.company_name,
-        contact_person: formData.contact_person || null,
-        email: formData.email,
-        phone: formData.phone || null,
-        street: formData.street,
-        postal_code: formData.postal_code,
-        city: formData.city,
-        country: formData.country,
-        customer_number: generateCustomerNumber(),
-      };
+      let customerId = prefillCustomerId;
 
-      const { data: customer, error: customerError } = await supabase
-        .from('customers')
-        .insert(customerData)
-        .select()
-        .single();
+      // Step 1: Create customer only if not prefilled
+      if (!customerId) {
+        const customerData = {
+          company_name: formData.company_name,
+          contact_person: formData.contact_person || null,
+          email: formData.email,
+          phone: formData.phone || null,
+          street: formData.street,
+          postal_code: formData.postal_code,
+          city: formData.city,
+          country: formData.country,
+          customer_number: generateCustomerNumber(),
+        };
 
-      if (customerError) throw customerError;
+        const { data: customer, error: customerError } = await supabase
+          .from('customers')
+          .insert(customerData)
+          .select()
+          .single();
+
+        if (customerError) throw customerError;
+        customerId = customer.id;
+      }
 
       // Step 2: Create agency lead linked to customer and user
       const leadData = {
@@ -75,7 +111,7 @@ export default function NewAgencyLeadPage() {
         country: formData.country,
         status: formData.status,
         notes: formData.notes || null,
-        customer_id: customer.id,
+        customer_id: customerId,
       };
 
       const { error: leadError } = await supabase

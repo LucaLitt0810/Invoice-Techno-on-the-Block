@@ -5,7 +5,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { Customer } from '@/types';
-import { PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -120,7 +120,9 @@ export default function CustomersPage() {
                 filteredCustomers.map((customer) => (
                   <tr key={customer.id} className="hover:bg-dark-700/50">
                     <td className="table-cell font-medium text-white">
-                      {customer.company_name}
+                      <Link href={`/customers/${customer.id}`} className="hover:text-blue-400 transition-colors">
+                        {customer.company_name}
+                      </Link>
                     </td>
                     <td className="table-cell text-gray-400">
                       {customer.contact_person || '-'}
@@ -135,10 +137,10 @@ export default function CustomersPage() {
                     </td>
                     <td className="table-cell">
                       <div className="flex items-center space-x-3">
-                        <Link href={`/customers/${customer.id}`} className="text-gray-400 hover:text-white">
-                          <PencilIcon className="h-5 w-5" />
+                        <Link href={`/customers/${customer.id}`} className="text-gray-400 hover:text-white" title="View">
+                          <EyeIcon className="h-5 w-5" />
                         </Link>
-                        <button onClick={() => handleDelete(customer.id)} className="text-gray-400 hover:text-red-400">
+                        <button onClick={() => handleDelete(customer.id)} className="text-gray-400 hover:text-red-400" title="Delete">
                           <TrashIcon className="h-5 w-5" />
                         </button>
                       </div>

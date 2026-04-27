@@ -14,11 +14,12 @@ interface BookingModalProps {
   djs: DJ[];
   userRole: string;
   currentDJId?: string;
+  prefillCustomerId?: string | null;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export default function BookingModal({ booking, initialDate, djs, userRole, currentDJId, onClose, onSaved }: BookingModalProps) {
+export default function BookingModal({ booking, initialDate, djs, userRole, currentDJId, prefillCustomerId, onClose, onSaved }: BookingModalProps) {
   const [formData, setFormData] = useState({
     dj_id: '',
     event_name: '',
@@ -91,9 +92,10 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
         dj_id: userRole === 'dj' && currentDJId ? currentDJId : '',
         start_date: formatDateTimeInput(start),
         end_date: formatDateTimeInput(end),
+        customer_id: prefillCustomerId || '',
       }));
     }
-  }, [booking, initialDate, userRole, currentDJId]);
+  }, [booking, initialDate, userRole, currentDJId, prefillCustomerId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

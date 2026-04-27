@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
@@ -21,6 +21,8 @@ interface InvoiceItem {
 
 export default function NewInvoicePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefillCustomerId = searchParams.get('customer_id');
   const supabase = createClient();
   
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -108,6 +110,17 @@ export default function NewInvoicePage() {
       setSelectedCompany(company || null);
     }
   }, [formData.company_id, companies]);
+
+  // Prefill customer from URL param
+  useEffect(() => {
+    if (prefillCustomerId && customers.length > 0) {
+      const customer = customers.find((c) => c.id === prefillCustomerId);
+      if (customer) {
+        setSelectedCustomer(customer);
+        setFormData((prev) => ({ ...prev, customer_id: prefillCustomerId }));
+      }
+    }
+  }, [prefillCustomerId, customers]);
 
   const fetchCompanies = async () => {
     try {

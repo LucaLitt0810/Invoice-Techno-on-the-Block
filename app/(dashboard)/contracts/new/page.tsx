@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
@@ -12,6 +12,8 @@ import { ArrowLeftIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 export default function NewContractPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefillCustomerId = searchParams.get('customer_id');
   const supabase = createClient();
   
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -64,6 +66,13 @@ export default function NewContractPage() {
       }));
     }
   }, [formData.contract_type]);
+
+  // Prefill customer from URL param
+  useEffect(() => {
+    if (prefillCustomerId && customers.length > 0) {
+      setFormData((prev) => ({ ...prev, customer_id: prefillCustomerId }));
+    }
+  }, [prefillCustomerId, customers]);
 
   const fetchData = async () => {
     try {
