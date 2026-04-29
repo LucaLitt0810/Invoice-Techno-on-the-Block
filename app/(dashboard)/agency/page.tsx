@@ -55,13 +55,24 @@ export default function AgencyPage() {
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Load bookings without customer join (FK may not exist in DB)
+      const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
-        .select('*, dj:djs(*), customer:customers(*)')
+        .select('*, dj:djs(*)')
         .order('start_date', { ascending: false });
 
-      if (error) throw error;
-      setBookings(data || []);
+      if (bookingsError) throw bookingsError;
+
+      // Load customers separately and merge
+      const { data: customersData } = await supabase.from('customers').select('id, company_name');
+      const customerMap = new Map(customersData?.map((c: any) => [c.id, c]) || []);
+
+      const merged = (bookingsData || []).map((b: any) => ({
+        ...b,
+        customer: b.customer_id ? customerMap.get(b.customer_id) || null : null,
+      }));
+
+      setBookings(merged);
     } catch (error) {
       console.error('Error fetching bookings:', error);
       toast.error('Failed to load bookings');
