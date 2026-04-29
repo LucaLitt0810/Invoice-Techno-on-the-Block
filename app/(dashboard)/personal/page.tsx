@@ -100,10 +100,8 @@ export default function PersonalPage() {
         return;
       }
 
-      const headers = lines[0].split(',').map((h) => h.trim().toLowerCase().replace(/^"|"$/g, ''));
-      const getIdx = (name: string) => headers.indexOf(name);
-
-      const rows = lines.slice(1).map((line) => {
+      // Parse CSV with quote handling
+      const parseRow = (line: string): string[] => {
         const cells: string[] = [];
         let cell = '';
         let inQuotes = false;
@@ -118,22 +116,33 @@ export default function PersonalPage() {
           }
         }
         cells.push(cell.trim());
-        return cells;
-      });
+        return cells.map((c) => c.replace(/^"|"$/g, ''));
+      };
 
-      const firstNameIdx = getIdx('first_name');
-      const lastNameIdx = getIdx('last_name');
-      const emailIdx = getIdx('email');
-      const phoneIdx = getIdx('phone');
-      const streetIdx = getIdx('street');
-      const postalCodeIdx = getIdx('postal_code');
-      const cityIdx = getIdx('city');
-      const countryIdx = getIdx('country');
-      const entryDateIdx = getIdx('entry_date');
-      const deptIdx = getIdx('department');
+      const headers = parseRow(lines[0]).map((h) => h.toLowerCase().trim());
+      const getIdx = (...names: string[]) => {
+        for (const name of names) {
+          const idx = headers.indexOf(name);
+          if (idx !== -1) return idx;
+        }
+        return -1;
+      };
+
+      const rows = lines.slice(1).map(parseRow);
+
+      // Support both English and German column names + your Google Sheet format
+      const firstNameIdx = getIdx('first_name', 'vorname');
+      const lastNameIdx = getIdx('last_name', 'nachname');
+      const emailIdx = getIdx('email', 'email adresse');
+      const phoneIdx = getIdx('phone', 'telefon nummer');
+      const addressIdx = getIdx('melde adresse', 'address', 'adresse');
+      const deptIdx = getIdx('department', 'welche abteilung', 'abteilung');
+      const bankNameIdx = getIdx('bank name', 'bank_name');
+      const ibanIdx = getIdx('iban');
+      const bicIdx = getIdx('bic');
 
       if (firstNameIdx === -1 || lastNameIdx === -1 || emailIdx === -1) {
-        toast.error('CSV must have at least: first_name, last_name, email columns');
+        toast.error('CSV must have at least: first_name / Vorname, last_name / Nachname, email / Email Adresse columns');
         return;
       }
 
@@ -147,9 +156,9 @@ export default function PersonalPage() {
       let skipped = 0;
 
       for (const cells of rows) {
-        const firstName = cells[firstNameIdx]?.replace(/^"|"$/g, '');
-        const lastName = cells[lastNameIdx]?.replace(/^"|"$/g, '');
-        const email = cells[emailIdx]?.replace(/^"|"$/g, '');
+        const firstName = cells[firstNameIdx]?.trim();
+        const lastName = cells[lastNameIdx]?.trim();
+        const email = cells[emailIdx]?.trim();
         if (!firstName || !lastName || !email) {
           skipped++;
           continue;
@@ -157,13 +166,12 @@ export default function PersonalPage() {
 
         // Handle department
         let deptId: string | null = null;
-        const deptName = deptIdx >= 0 ? cells[deptIdx]?.replace(/^"|"$/g, '') : null;
+        const deptName = deptIdx >= 0 ? cells[deptIdx]?.trim() : null;
         if (deptName) {
           const key = deptName.toLowerCase();
           if (deptMap.has(key)) {
             deptId = deptMap.get(key)!;
           } else {
-            // Create department
             const { data: newDept } = await supabase
               .from('departments')
               .insert({ name: deptName })
@@ -177,18 +185,37 @@ export default function PersonalPage() {
           }
         }
 
-        const entryDateRaw = entryDateIdx >= 0 ? cells[entryDateIdx]?.replace(/^"|"$/g, '') : '';
-        let entryDate = entryDateRaw;
-        if (entryDate) {
-          // Try to parse various date formats
-          const d = new Date(entryDate);
-          if (!isNaN(d.getTime())) {
-            entryDate = d.toISOString().split('T')[0];
+        // Parse address: "Street, PLZ City" or "Street, PLZ City, Country"
+        let street = '';
+        let postalCode = '';
+        let city = '';
+        let country = 'DE';
+
+        const addressRaw = addressIdx >= 0 ? cells[addressIdx]?.trim() : '';
+        if (addressRaw) {
+          const parts = addressRaw.split(',').map((p) => p.trim());
+          if (parts.length >= 2) {
+            street = parts[0];
+            // Last part might be country if it looks like a country code
+            const lastPart = parts[parts.length - 1];
+            if (/^(DE|CH|AT|FR|US|UK|IT|ES|NL|BE|LU|PL|CZ|HU|SI|SK|HR|RS|BA|MK|ME|AL|BG|RO|MD|UA|BY|EE|LV|LT|FI|SE|NO|DK|IS|IE|PT|GR|CY|MT|LI|MC|AD|SM|VA|JE|GG|IM|AX|FO|GL|AQ|BV|HM|SJ)$/.test(lastPart.toUpperCase())) {
+              country = lastPart.toUpperCase();
+              parts.pop();
+            }
+            // Second-to-last or remaining middle part: PLZ + City
+            if (parts.length >= 2) {
+              const plzCity = parts[parts.length - 1];
+              const plzMatch = plzCity.match(/^(\d{4,5})\s+(.+)$/);
+              if (plzMatch) {
+                postalCode = plzMatch[1];
+                city = plzMatch[2];
+              } else {
+                city = plzCity;
+              }
+            }
           } else {
-            entryDate = new Date().toISOString().split('T')[0];
+            street = addressRaw;
           }
-        } else {
-          entryDate = new Date().toISOString().split('T')[0];
         }
 
         const payload = {
@@ -196,12 +223,15 @@ export default function PersonalPage() {
           first_name: firstName,
           last_name: lastName,
           email,
-          phone: (phoneIdx >= 0 ? cells[phoneIdx]?.replace(/^"|"$/g, '') : '') || null,
-          street: (streetIdx >= 0 ? cells[streetIdx]?.replace(/^"|"$/g, '') : '') || '',
-          postal_code: (postalCodeIdx >= 0 ? cells[postalCodeIdx]?.replace(/^"|"$/g, '') : '') || '',
-          city: (cityIdx >= 0 ? cells[cityIdx]?.replace(/^"|"$/g, '') : '') || '',
-          country: (countryIdx >= 0 ? cells[countryIdx]?.replace(/^"|"$/g, '') : '') || 'DE',
-          entry_date: entryDate,
+          phone: (phoneIdx >= 0 ? cells[phoneIdx]?.trim() : '') || null,
+          street: street || '',
+          postal_code: postalCode || '',
+          city: city || '',
+          country: country || 'DE',
+          entry_date: new Date().toISOString().split('T')[0],
+          bank_name: (bankNameIdx >= 0 ? cells[bankNameIdx]?.trim() : '') || null,
+          iban: (ibanIdx >= 0 ? cells[ibanIdx]?.trim() : '') || null,
+          bic: (bicIdx >= 0 ? cells[bicIdx]?.trim() : '') || null,
         };
 
         const { error } = await (supabase.from('employees') as any).insert(payload);
@@ -292,8 +322,8 @@ export default function PersonalPage() {
               </button>
             </div>
             <p className="text-sm text-gray-400">
-              Export your Google Sheet as CSV. Required columns: <strong>first_name, last_name, email</strong>.<br />
-              Optional: phone, street, postal_code, city, country, entry_date, department
+              Export your Google Sheet as CSV. Required columns: <strong>Vorname, Nachname, Email Adresse</strong>.<br />
+              Optional: Telefon Nummer, Melde Adresse (Straße, PLZ Stadt), Welche Abteilung, Bank Name, IBAN, BIC
             </p>
             <div className="flex gap-3">
               <input
