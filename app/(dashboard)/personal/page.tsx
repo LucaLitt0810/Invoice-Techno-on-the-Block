@@ -5,7 +5,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { Employee, Department } from '@/types';
-import { PlusIcon, MagnifyingGlassIcon, TrashIcon, FolderIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, CalendarIcon, ArrowRightIcon, CloudArrowUpIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, TrashIcon, FolderIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, CalendarIcon, ArrowRightIcon, CloudArrowUpIcon, XMarkIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 
 export default function PersonalPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -17,6 +17,9 @@ export default function PersonalPage() {
   const [showDeptForm, setShowDeptForm] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [showAttendanceForm, setShowAttendanceForm] = useState(false);
+  const [attEvent, setAttEvent] = useState('');
+  const [attDate, setAttDate] = useState(new Date().toISOString().split('T')[0]);
   const supabase = createClient();
 
   useEffect(() => {
@@ -293,7 +296,21 @@ export default function PersonalPage() {
           <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Personal</h2>
           <p className="mt-1 text-sm text-gray-400">Manage employees, departments, and HR records.</p>
         </div>
-        <div className="mt-4 flex md:mt-0 md:ml-4 gap-3">
+        <div className="mt-4 flex md:mt-0 md:ml-4 gap-3 flex-wrap">
+          <button
+            onClick={() => setShowAttendanceForm(true)}
+            className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
+          >
+            <ClipboardDocumentListIcon className="-ml-1 mr-2 h-5 w-5" />
+            Anwesenheitsliste
+          </button>
+          <Link
+            href="/personal/material"
+            className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
+          >
+            <WrenchScrewdriverIcon className="-ml-1 mr-2 h-5 w-5" />
+            Materialliste
+          </Link>
           <button
             onClick={() => setShowImport(true)}
             className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
@@ -341,6 +358,45 @@ export default function PersonalPage() {
                 <CloudArrowUpIcon className="mr-2 h-5 w-5" />
                 {importing ? 'Importing...' : 'Select CSV File'}
               </label>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Attendance List Modal */}
+      {showAttendanceForm && (
+        <div className="card bg-dark-800 border border-white/20">
+          <div className="card-body space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-white">Anwesenheitsliste generieren</h3>
+              <button onClick={() => setShowAttendanceForm(false)} className="text-gray-400 hover:text-white">
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex flex-wrap items-end gap-3">
+              <div>
+                <label className="mb-1 block text-xs text-gray-400">Event Name</label>
+                <input type="text" value={attEvent} onChange={(e) => setAttEvent(e.target.value)}
+                  placeholder="z.B. Outdoor Basel"
+                  className="input w-64" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-gray-400">Datum</label>
+                <input type="date" value={attDate} onChange={(e) => setAttDate(e.target.value)}
+                  className="input w-40" />
+              </div>
+              <button
+                onClick={() => {
+                  const event = attEvent || 'Event';
+                  const date = attDate ? new Date(attDate).toLocaleDateString('de-DE') : new Date().toLocaleDateString('de-DE');
+                  window.open(`/api/personal/attendance/pdf?event=${encodeURIComponent(event)}&date=${encodeURIComponent(date)}`, '_blank');
+                  setShowAttendanceForm(false);
+                }}
+                className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+              >
+                <DocumentArrowDownIcon className="mr-2 h-5 w-5" />
+                PDF herunterladen
+              </button>
             </div>
           </div>
         </div>

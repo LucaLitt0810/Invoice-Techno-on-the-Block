@@ -220,6 +220,30 @@ export type EmployeeEntry = {
   user?: { email: string };
 };
 
+export type Material = {
+  id: string;
+  name: string;
+  description: string | null;
+  quantity: number;
+  unit: string;
+  created_at: string;
+};
+
+export type MaterialAssignment = {
+  id: string;
+  material_id: string;
+  employee_id: string;
+  quantity: number;
+  issued_at: string;
+  returned_at: string | null;
+  issue_signature: string | null;
+  return_signature: string | null;
+  notes: string | null;
+  created_at: string;
+  material?: Material;
+  employee?: Employee;
+};
+
 export type MeetingStatus = 'planned' | 'in_progress' | 'completed' | 'cancelled';
 
 export const MEETING_STATUS_OPTIONS = [
