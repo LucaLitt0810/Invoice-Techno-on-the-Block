@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
@@ -14,6 +14,8 @@ import {
   CloudArrowUpIcon,
   DocumentTextIcon,
   EyeIcon,
+  CameraIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 
 export default function ReceiptsPage() {
@@ -23,9 +25,25 @@ export default function ReceiptsPage() {
   const [uploading, setUploading] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unprocessed' | 'reviewed' | 'assigned'>('all');
 
+  // Scanner state
+  const [scanning, setScanning] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
   useEffect(() => {
     fetchReceipts();
   }, [filter]);
+
+  useEffect(() => {
+    if (scanning && !capturedImage) {
+      startCamera();
+    }
+    return () => {
+      stopCamera();
+    };
+  }, [scanning, capturedImage]);
 
   const fetchReceipts = async () => {
     setLoading(true);
@@ -40,6 +58,71 @@ export default function ReceiptsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+    } catch (err) {
+      toast.error('Could not access camera. Please allow camera permissions.');
+      setScanning(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const capture = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0);
+    const imageData = canvas.toDataURL('image/jpeg', 0.9);
+    setCapturedImage(imageData);
+    stopCamera();
+  };
+
+  const saveScannedReceipt = async () => {
+    if (!capturedImage) return;
+    setUploading(true);
+    try {
+      const { error } = await (supabase.from('receipts') as any).insert({
+        file_data: capturedImage,
+        file_name: `scan_${new Date().toISOString().replace(/[:.]/g, '-')}.jpg`,
+        status: 'unprocessed',
+      });
+      if (error) throw error;
+      toast.success('Receipt scanned and saved');
+      closeScanner();
+      fetchReceipts();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save scanned receipt');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const closeScanner = () => {
+    stopCamera();
+    setScanning(false);
+    setCapturedImage(null);
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,13 +214,101 @@ export default function ReceiptsPage() {
           />
           <label
             htmlFor="receipt-upload"
-            className={`inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider cursor-pointer ${uploading ? 'opacity-50' : ''}`}
+            className={`inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider cursor-pointer ${uploading ? 'opacity-50' : ''}`}
           >
             <CloudArrowUpIcon className="mr-2 h-5 w-5" />
-            {uploading ? 'Uploading...' : 'Upload Receipt'}
+            {uploading ? 'Uploading...' : 'Upload'}
           </label>
+          <button
+            onClick={() => setScanning(true)}
+            className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+          >
+            <CameraIcon className="mr-2 h-5 w-5" />
+            Scan
+          </button>
         </div>
       </div>
+
+      {/* Scanner Overlay */}
+      {scanning && (
+        <div className="fixed inset-0 z-50 bg-black flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-dark-500">
+            <h3 className="text-lg font-medium text-white uppercase tracking-wider">
+              {capturedImage ? 'Review Scan' : 'Scan Receipt'}
+            </h3>
+            <button
+              onClick={closeScanner}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 flex items-center justify-center p-6">
+            {!capturedImage ? (
+              <div className="relative w-full max-w-lg aspect-[3/4] bg-dark-800 rounded-sm overflow-hidden">
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-cover"
+                  playsInline
+                  muted
+                />
+                {/* Corner guides */}
+                <div className="absolute inset-4 border-2 border-white/30 rounded-sm pointer-events-none">
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white" />
+                </div>
+                <p className="absolute bottom-8 left-0 right-0 text-center text-white text-sm bg-black/50 py-2">
+                  Position receipt within the frame
+                </p>
+              </div>
+            ) : (
+              <div className="relative w-full max-w-lg aspect-[3/4] bg-dark-800 rounded-sm overflow-hidden">
+                <img src={capturedImage} alt="Captured receipt" className="w-full h-full object-contain" />
+              </div>
+            )}
+          </div>
+
+          {/* Controls */}
+          <div className="px-6 py-6 border-t border-dark-500 flex justify-center gap-4">
+            {!capturedImage ? (
+              <button
+                onClick={capture}
+                className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center hover:bg-white/10 transition-colors"
+              >
+                <div className="w-16 h-16 rounded-full bg-white" />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setCapturedImage(null);
+                    startCamera();
+                  }}
+                  className="px-6 py-3 border border-dark-500 text-gray-300 hover:text-white hover:border-white transition-colors text-sm font-medium uppercase tracking-wider"
+                >
+                  <ArrowPathIcon className="mr-2 h-4 w-4 inline" />
+                  Retake
+                </button>
+                <button
+                  onClick={saveScannedReceipt}
+                  disabled={uploading}
+                  className="px-6 py-3 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50"
+                >
+                  {uploading ? 'Saving...' : 'Save Receipt'}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Hidden canvas for capture */}
+          <canvas ref={canvasRef} className="hidden" />
+        </div>
+      )}
 
       {/* Filter */}
       <div className="flex gap-2">
