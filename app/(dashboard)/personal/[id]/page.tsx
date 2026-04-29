@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
-import { Employee, EmployeeEntry, ENTRY_TYPE_OPTIONS } from '@/types';
+import { Employee, EmployeeEntry, ENTRY_TYPE_OPTIONS, Department } from '@/types';
 import { ArrowLeftIcon, PencilIcon, TrashIcon, ArrowTopRightOnSquareIcon, PlusIcon, DocumentTextIcon, PencilSquareIcon, CloudArrowUpIcon, LinkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const TYPE_COLORS: Record<string, string> = {
@@ -24,6 +24,7 @@ export default function EmployeeDetailPage() {
   const supabase = createClient();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [entries, setEntries] = useState<EmployeeEntry[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEntryForm, setShowEntryForm] = useState(false);
   const [savingEntry, setSavingEntry] = useState(false);
@@ -41,7 +42,13 @@ export default function EmployeeDetailPage() {
 
   useEffect(() => {
     if (params.id) fetchEmployee();
+    fetchDepartments();
   }, [params.id]);
+
+  const fetchDepartments = async () => {
+    const { data } = await supabase.from('departments').select('*').order('name');
+    setDepartments(data || []);
+  };
 
   const fetchEmployee = async () => {
     try {
@@ -230,7 +237,17 @@ export default function EmployeeDetailPage() {
           <h2 className="text-2xl font-bold text-white uppercase tracking-tight">
             {employee.first_name} {employee.last_name}
           </h2>
-          <p className="text-sm text-gray-400">{employee.department?.name || 'No department'}</p>
+          <p className="text-sm text-gray-400">
+            {employee.department?.name || 'Keine Abteilung'}
+            {(employee.secondary_department_ids || []).length > 0 && (
+              <span className="text-gray-500">
+                {' + '}{(employee.secondary_department_ids || [])
+                  .map((id) => departments.find((d) => d.id === id)?.name)
+                  .filter(Boolean)
+                  .join(', ')}
+              </span>
+            )}
+          </p>
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
           <Link

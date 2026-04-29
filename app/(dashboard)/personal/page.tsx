@@ -276,7 +276,9 @@ export default function PersonalPage() {
       emp.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       emp.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       emp.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDept = activeDept === 'all' || emp.department_id === activeDept;
+    const matchesDept = activeDept === 'all' ||
+      emp.department_id === activeDept ||
+      (emp.secondary_department_ids || []).includes(activeDept);
     return matchesSearch && matchesDept;
   });
 
@@ -486,7 +488,7 @@ export default function PersonalPage() {
         /* Filtered or search results — flat grid */
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredEmployees.map((emp) => (
-            <EmployeeCard key={emp.id} emp={emp} onDelete={handleDeleteEmployee} />
+            <EmployeeCard key={emp.id} emp={emp} onDelete={handleDeleteEmployee} departments={departments} />
           ))}
         </div>
       ) : (
@@ -516,7 +518,7 @@ export default function PersonalPage() {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {emps.map((emp) => (
-                    <EmployeeCard key={emp.id} emp={emp} onDelete={handleDeleteEmployee} />
+                    <EmployeeCard key={emp.id} emp={emp} onDelete={handleDeleteEmployee} departments={departments} />
                   ))}
                 </div>
               </div>
@@ -528,7 +530,7 @@ export default function PersonalPage() {
   );
 }
 
-function EmployeeCard({ emp, onDelete }: { emp: Employee; onDelete: (id: string) => void }) {
+function EmployeeCard({ emp, onDelete, departments }: { emp: Employee; onDelete: (id: string) => void; departments: Department[] }) {
   return (
     <div className="card bg-dark-800 border-dark-500 flex flex-col">
       <div className="p-6 pb-4">
@@ -537,7 +539,17 @@ function EmployeeCard({ emp, onDelete }: { emp: Employee; onDelete: (id: string)
             <h3 className="text-xl font-bold text-white">
               {emp.first_name} {emp.last_name}
             </h3>
-            <p className="text-sm text-gray-400 mt-1">{emp.department?.name || 'No Department'}</p>
+            <p className="text-sm text-gray-400 mt-1">
+              {emp.department?.name || 'Keine Abteilung'}
+              {(emp.secondary_department_ids || []).length > 0 && (
+                <span className="text-gray-500">
+                  {' + '}{(emp.secondary_department_ids || [])
+                    .map((id) => departments.find((d) => d.id === id)?.name)
+                    .filter(Boolean)
+                    .join(', ')}
+                </span>
+              )}
+            </p>
           </div>
           <button
             onClick={() => onDelete(emp.id)}

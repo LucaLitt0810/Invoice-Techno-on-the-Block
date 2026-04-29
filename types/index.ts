@@ -177,6 +177,7 @@ export const ENTRY_TYPE_OPTIONS = [
 export type Employee = {
   id: string;
   department_id: string | null;
+  secondary_department_ids: string[] | null;
   first_name: string;
   last_name: string;
   email: string;

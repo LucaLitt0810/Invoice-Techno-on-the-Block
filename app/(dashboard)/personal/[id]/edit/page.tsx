@@ -19,6 +19,7 @@ export default function EditEmployeePage() {
 
   const [formData, setFormData] = useState({
     department_id: '',
+    secondary_department_ids: [] as string[],
     first_name: '',
     last_name: '',
     email: '',
@@ -64,6 +65,7 @@ export default function EditEmployeePage() {
       const emp = data as Employee;
       setFormData({
         department_id: emp.department_id || '',
+        secondary_department_ids: emp.secondary_department_ids || [],
         first_name: emp.first_name,
         last_name: emp.last_name,
         email: emp.email,
@@ -100,6 +102,7 @@ export default function EditEmployeePage() {
       const updateData = {
         ...formData,
         department_id: formData.department_id || null,
+        secondary_department_ids: formData.secondary_department_ids.length > 0 ? formData.secondary_department_ids : [],
         phone: formData.phone || null,
         nda_link: formData.nda_link || null,
         job_desc_link: formData.job_desc_link || null,
@@ -168,13 +171,47 @@ export default function EditEmployeePage() {
                 <input type="tel" className="input" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} />
               </div>
               <div>
-                <label className="label">Department</label>
+                <label className="label">Hauptabteilung</label>
                 <select className="input" value={formData.department_id} onChange={(e) => handleChange('department_id', e.target.value)}>
-                  <option value="" className="bg-dark-800">Select department...</option>
+                  <option value="" className="bg-dark-800">Abteilung waehlen...</option>
                   {departments.map((d) => (
                     <option key={d.id} value={d.id} className="bg-dark-800">{d.name}</option>
                   ))}
                 </select>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label">Nebenabteilungen</label>
+                <div className="flex flex-wrap gap-2">
+                  {departments.map((d) => {
+                    const selected = formData.secondary_department_ids.includes(d.id);
+                    return (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => {
+                          if (d.id === formData.department_id) return;
+                          setFormData((prev) => ({
+                            ...prev,
+                            secondary_department_ids: selected
+                              ? prev.secondary_department_ids.filter((id) => id !== d.id)
+                              : [...prev.secondary_department_ids, d.id],
+                          }));
+                        }}
+                        className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                          d.id === formData.department_id
+                            ? 'border-gray-600 bg-gray-800 text-gray-500 cursor-not-allowed'
+                            : selected
+                            ? 'border-[#d0ff59] bg-[#d0ff59]/10 text-[#d0ff59]'
+                            : 'border-white/10 bg-[#0a0a0a] text-gray-400 hover:border-white/30 hover:text-white'
+                        }`}
+                        disabled={d.id === formData.department_id}
+                        title={d.id === formData.department_id ? 'Bereits Hauptabteilung' : ''}
+                      >
+                        {d.name}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <div>
                 <label className="label">Entry Date *</label>
