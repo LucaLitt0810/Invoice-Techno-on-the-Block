@@ -42,7 +42,6 @@ const getNavigation = (role: string | undefined) => {
   if (role === 'user') {
     return [
       { name: 'Customers', href: '/customers', icon: UsersIcon },
-      { name: 'Coworkers', href: '/coworkers', icon: BuildingOfficeIcon },
       { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
     ];
   }
