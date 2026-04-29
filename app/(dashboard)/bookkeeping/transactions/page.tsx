@@ -116,7 +116,7 @@ export default function TransactionsPage() {
 
       const { data, error } = await (supabase.from('transactions') as any)
         .insert(payload)
-        .select('*, category:categories(*), receipt:receipts(*)')
+        .select('*, category:categories(*)')
         .single();
 
       if (error) throw error;
