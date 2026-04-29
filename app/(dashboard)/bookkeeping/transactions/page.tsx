@@ -51,7 +51,7 @@ export default function TransactionsPage() {
       const [year, month] = filterMonth.split('-');
       let query = supabase
         .from('transactions')
-        .select('*, category:categories(*), receipt:receipts(*)')
+        .select('*, category:categories(*)')
         .gte('date', `${year}-${month}-01`)
         .lte('date', `${year}-${month}-${new Date(parseInt(year), parseInt(month), 0).getDate()}`)
         .order('date', { ascending: false });
@@ -59,9 +59,26 @@ export default function TransactionsPage() {
       if (filterType !== 'all') query = query.eq('type', filterType);
       if (filterCategory) query = query.eq('category_id', filterCategory);
 
-      const { data, error } = await query;
-      if (error) throw error;
-      setTransactions(data || []);
+      const { data: txData, error: txError } = await query;
+      if (txError) throw txError;
+
+      // Load receipts separately to avoid ambiguous FK join
+      const receiptIds = (txData || []).map((t: any) => t.receipt_id).filter(Boolean);
+      let receiptMap = new Map();
+      if (receiptIds.length > 0) {
+        const { data: receiptData } = await supabase
+          .from('receipts')
+          .select('*')
+          .in('id', receiptIds);
+        receiptMap = new Map(receiptData?.map((r: any) => [r.id, r]) || []);
+      }
+
+      const merged = (txData || []).map((t: any) => ({
+        ...t,
+        receipt: t.receipt_id ? receiptMap.get(t.receipt_id) || null : null,
+      }));
+
+      setTransactions(merged);
     } catch (error: any) {
       toast.error(error.message || 'Failed to load transactions');
     } finally {

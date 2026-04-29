@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const supabase = createClient();
     let query = supabase
       .from('transactions')
-      .select('*, category:categories(*), receipt:receipts(*)')
+      .select('*, category:categories(*)')
       .order('date', { ascending: false });
 
     if (type) query = query.eq('type', type);
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await (supabase.from('transactions') as any)
       .insert(body)
-      .select('*, category:categories(*), receipt:receipts(*)')
+      .select('*, category:categories(*)')
       .single();
 
     if (error) throw error;
