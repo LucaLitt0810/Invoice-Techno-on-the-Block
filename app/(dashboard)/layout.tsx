@@ -33,7 +33,7 @@ const getNavigation = (role: string | undefined) => {
   if (role === 'dj') {
     return [
       { name: 'DJ-Dashboard', href: '/dashboard', icon: HomeIcon },
-      { name: 'My Bookings', href: '/bookings', icon: CalendarIcon },
+      { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
       { name: 'My Unavailability', href: '/bookings/unavailability', icon: ClockIcon },
     ];
   }
@@ -43,7 +43,6 @@ const getNavigation = (role: string | undefined) => {
     return [
       { name: 'Customers', href: '/customers', icon: UsersIcon },
       { name: 'Coworkers', href: '/coworkers', icon: BuildingOfficeIcon },
-      { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
       { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
     ];
   }
@@ -56,7 +55,6 @@ const getNavigation = (role: string | undefined) => {
     { name: 'Products', href: '/products', icon: ShoppingBagIcon },
     { name: 'Customers', href: '/customers', icon: UsersIcon },
     { name: 'Coworkers', href: '/coworkers', icon: BuildingOfficeIcon },
-    { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
     { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
     { name: 'Bookkeeping', href: '/bookkeeping', icon: BanknotesIcon },
     { name: 'Personal', href: '/personal', icon: UserGroupIcon },
