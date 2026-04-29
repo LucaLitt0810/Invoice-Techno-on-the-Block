@@ -38,117 +38,129 @@ export async function GET(request: NextRequest) {
 
     const width = 841.89; // Landscape A4
     const height = 595.28;
-    const margin = 40;
+    const margin = 36;
+    const usableWidth = width - margin * 2;
+
+    const colWidths = [140, 200, 130, 130, 120];
+    const rowHeight = 28;
+    const headerHeight = 26;
+
+    const headers = ['Name', 'Gegenstaende', 'Unterschrift Ausgabe', 'Unterschrift Abgabe', 'Notizen'];
+
+    const matList = (materials || []).map((m: any) => `${m.name} (${m.quantity} ${m.unit})`).join(' | ');
 
     let page = pdfDoc.addPage([width, height]);
+    let y = height - margin;
 
-    // Header
-    page.drawRectangle({
-      x: margin,
-      y: height - margin - 45,
-      width: width - margin * 2,
-      height: 40,
-      color: rgb(0.12, 0.12, 0.12),
-    });
-
-    page.drawText('TECHNO ON THE BLOCK', {
-      x: margin + 12,
-      y: height - margin - 22,
-      size: 14,
-      font: fontBold,
-      color: rgb(1, 1, 1),
-    });
-    page.drawText('Vereinshausstrasse 10, 4133 Pratteln', {
-      x: margin + 12,
-      y: height - margin - 35,
-      size: 7,
-      font,
-      color: rgb(0.7, 0.7, 0.7),
-    });
-
-    // Title
-    page.drawText('MATERIALLISTE', {
-      x: margin,
-      y: height - margin - 70,
-      size: 18,
-      font: fontBold,
-      color: rgb(0.12, 0.12, 0.12),
-    });
-
-    page.drawText(`Event: ${eventName}  |  Datum: ${eventDate}`, {
-      x: margin,
-      y: height - margin - 88,
-      size: 9,
-      font,
-      color: rgb(0.4, 0.4, 0.4),
-    });
-
-    // Materials legend
-    let matY = height - margin - 105;
-    page.drawText('Verfügbare Materialien:', {
-      x: margin,
-      y: matY,
-      size: 8,
-      font: fontBold,
-      color: rgb(0.3, 0.3, 0.3),
-    });
-    matY -= 14;
-
-    const matList = (materials || []).map((m: any) => `${m.name} (${m.quantity} ${m.unit})`).join('  |  ');
-    page.drawText(matList.substring(0, 180), {
-      x: margin,
-      y: matY,
-      size: 7,
-      font,
-      color: rgb(0.4, 0.4, 0.4),
-    });
-    if (matList.length > 180) {
-      matY -= 11;
-      page.drawText(matList.substring(180, 360), {
+    // ===== HEADER (every page) =====
+    const drawPageHeader = (p: typeof page) => {
+      let py = height - margin;
+      p.drawRectangle({
         x: margin,
-        y: matY,
+        y: py - 36,
+        width: usableWidth,
+        height: 36,
+        color: rgb(0.12, 0.12, 0.12),
+      });
+      p.drawText('TECHNO ON THE BLOCK', {
+        x: margin + 10,
+        y: py - 20,
+        size: 13,
+        font: fontBold,
+        color: rgb(1, 1, 1),
+      });
+      p.drawText('Vereinshausstrasse 10, 4133 Pratteln', {
+        x: margin + 10,
+        y: py - 32,
         size: 7,
+        font,
+        color: rgb(0.7, 0.7, 0.7),
+      });
+      py -= 50;
+
+      p.drawText('MATERIALLISTE', {
+        x: margin,
+        y: py,
+        size: 16,
+        font: fontBold,
+        color: rgb(0.12, 0.12, 0.12),
+      });
+      py -= 16;
+
+      p.drawText(`Event: ${eventName}  |  Datum: ${eventDate}`, {
+        x: margin,
+        y: py,
+        size: 8,
         font,
         color: rgb(0.4, 0.4, 0.4),
       });
-    }
+      py -= 12;
 
-    // Table
-    const tableTop = matY - 18;
-    const colWidths = [150, 180, 120, 120, 120];
-    const rowHeight = 36;
-    const headerHeight = 30;
+      if (matList) {
+        p.drawText('Materialien:', {
+          x: margin,
+          y: py,
+          size: 7,
+          font: fontBold,
+          color: rgb(0.3, 0.3, 0.3),
+        });
+        py -= 10;
+        p.drawText(matList.substring(0, 200), {
+          x: margin,
+          y: py,
+          size: 6,
+          font,
+          color: rgb(0.4, 0.4, 0.4),
+        });
+        if (matList.length > 200) {
+          py -= 9;
+          p.drawText(matList.substring(200, 400), {
+            x: margin,
+            y: py,
+            size: 6,
+            font,
+            color: rgb(0.4, 0.4, 0.4),
+          });
+        }
+        py -= 16;
+      } else {
+        py -= 10;
+      }
 
-    const headers = ['Name', 'Gegenstände', 'Unterschrift Ausgabe', 'Unterschrift Abgabe', 'Notizen'];
+      return py;
+    };
 
-    const drawHeader = (p: typeof page, yPos: number) => {
+    // ===== TABLE HEADER =====
+    const drawTableHeader = (p: typeof page, py: number) => {
       p.drawRectangle({
         x: margin,
-        y: yPos - headerHeight,
-        width: width - margin * 2,
+        y: py - headerHeight,
+        width: usableWidth,
         height: headerHeight,
         color: rgb(0.18, 0.18, 0.18),
       });
 
-      let x = margin + 8;
+      let x = margin + 6;
       for (let i = 0; i < headers.length; i++) {
         p.drawText(headers[i], {
           x,
-          y: yPos - headerHeight + 10,
+          y: py - headerHeight + 8,
           size: 8,
           font: fontBold,
           color: rgb(1, 1, 1),
         });
         x += colWidths[i];
       }
+      return py - headerHeight;
     };
 
-    const drawRow = (p: typeof page, yPos: number, emp: any, index: number) => {
+    // ===== TABLE ROW =====
+    const drawRow = (p: typeof page, py: number, emp: any, index: number) => {
       const bg = index % 2 === 0 ? rgb(0.97, 0.97, 0.97) : rgb(1, 1, 1);
       p.drawRectangle({
         x: margin,
-        y: yPos - rowHeight,
-        width: width - margin * 2,
+        y: py - rowHeight,
+        width: usableWidth,
         height: rowHeight,
         color: bg,
       });
@@ -158,97 +170,103 @@ export async function GET(request: NextRequest) {
       for (let i = 0; i < colWidths.length; i++) {
         x += colWidths[i];
         p.drawLine({
-          start: { x, y: yPos },
-          end: { x, y: yPos - rowHeight },
+          start: { x, y: py },
+          end: { x, y: py - rowHeight },
           thickness: 0.3,
-          color: rgb(0.85, 0.85, 0.85),
+          color: rgb(0.8, 0.8, 0.8),
         });
       }
 
       // Name
       const fullName = `${emp.last_name}, ${emp.first_name}`;
       p.drawText(fullName, {
-        x: margin + 8,
-        y: yPos - rowHeight + 12,
+        x: margin + 6,
+        y: py - rowHeight + 10,
         size: 9,
         font,
-        color: rgb(0.2, 0.2, 0.2),
+        color: rgb(0.15, 0.15, 0.15),
       });
 
-      // Assigned materials for this employee
+      // Assigned materials
       const empAssignments = (assignments || []).filter((a: any) => a.employee_id === emp.id && !a.returned_at);
       const matText = empAssignments.length > 0
         ? empAssignments.map((a: any) => `${a.material?.name} (${a.quantity})`).join(', ')
         : '';
 
-      // Wrap text for materials column
-      const maxMatWidth = colWidths[1] - 16;
-      const words = matText.split(' ');
-      let line = '';
-      let lineY = yPos - rowHeight + 12;
-      for (const word of words) {
-        const test = line + (line ? ' ' : '') + word;
-        if (font.widthOfTextAtSize(test, 8) > maxMatWidth && line) {
-          p.drawText(line, { x: margin + colWidths[0] + 8, y: lineY, size: 8, font, color: rgb(0.3, 0.3, 0.3) });
-          lineY -= 10;
-          line = word;
-        } else {
-          line = test;
+      if (matText) {
+        const maxW = colWidths[1] - 12;
+        const words = matText.split(' ');
+        let line = '';
+        let lineY = py - rowHeight + 10;
+        for (const word of words) {
+          const test = line + (line ? ' ' : '') + word;
+          if (font.widthOfTextAtSize(test, 7) > maxW && line) {
+            p.drawText(line, { x: margin + colWidths[0] + 6, y: lineY, size: 7, font, color: rgb(0.3, 0.3, 0.3) });
+            lineY -= 9;
+            line = word;
+          } else {
+            line = test;
+          }
         }
-      }
-      if (line) {
-        p.drawText(line, { x: margin + colWidths[0] + 8, y: lineY, size: 8, font, color: rgb(0.3, 0.3, 0.3) });
+        if (line) {
+          p.drawText(line, { x: margin + colWidths[0] + 6, y: lineY, size: 7, font, color: rgb(0.3, 0.3, 0.3) });
+        }
       }
 
       // Signature lines
-      const sigY = yPos - rowHeight + 12;
+      const sigY = py - rowHeight / 2 - 2;
       p.drawLine({
-        start: { x: margin + colWidths[0] + colWidths[1] + 10, y: sigY - 2 },
-        end: { x: margin + colWidths[0] + colWidths[1] + colWidths[2] - 10, y: sigY - 2 },
+        start: { x: margin + colWidths[0] + colWidths[1] + 10, y: sigY },
+        end: { x: margin + colWidths[0] + colWidths[1] + colWidths[2] - 10, y: sigY },
         thickness: 0.5,
         color: rgb(0.5, 0.5, 0.5),
       });
       p.drawLine({
-        start: { x: margin + colWidths[0] + colWidths[1] + colWidths[2] + 10, y: sigY - 2 },
-        end: { x: margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] - 10, y: sigY - 2 },
+        start: { x: margin + colWidths[0] + colWidths[1] + colWidths[2] + 10, y: sigY },
+        end: { x: margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] - 10, y: sigY },
         thickness: 0.5,
         color: rgb(0.5, 0.5, 0.5),
       });
+
+      return py - rowHeight;
     };
 
-    let y = tableTop;
-    drawHeader(page, y);
-    y -= headerHeight;
+    // ===== BUILD PAGES =====
+    y = drawPageHeader(page);
+    y = drawTableHeader(page, y);
 
-    for (let i = 0; i < (employees || []).length; i++) {
-      const emp = employees![i];
+    const emps = employees || [];
+    for (let i = 0; i < emps.length; i++) {
+      const emp = emps[i];
+      // Check if row fits on current page
       if (y - rowHeight < margin + 20) {
+        // Footer
         page.drawText(`Seite ${pdfDoc.getPageCount()}`, {
           x: width / 2 - 15,
-          y: 15,
+          y: 14,
           size: 7,
           font,
           color: rgb(0.5, 0.5, 0.5),
         });
+        // New page
         page = pdfDoc.addPage([width, height]);
-        y = height - margin - 20;
-        drawHeader(page, y);
-        y -= headerHeight;
+        y = drawPageHeader(page);
+        y = drawTableHeader(page, y);
       }
-      drawRow(page, y, emp, i);
-      y -= rowHeight;
+      y = drawRow(page, y, emp, i);
     }
 
+    // Bottom border + footer on last page
     page.drawLine({
       start: { x: margin, y },
       end: { x: width - margin, y },
       thickness: 0.5,
-      color: rgb(0.7, 0.7, 0.7),
+      color: rgb(0.6, 0.6, 0.6),
     });
 
     page.drawText(`Seite ${pdfDoc.getPageCount()}`, {
       x: width / 2 - 15,
-      y: 15,
+      y: 14,
       size: 7,
       font,
       color: rgb(0.5, 0.5, 0.5),
