@@ -482,65 +482,103 @@ export default function PersonalPage() {
         <div className="text-center py-16 text-gray-500">
           {searchQuery || activeDept !== 'all' ? 'No employees match your criteria.' : 'No employees yet. Create your first employee!'}
         </div>
-      ) : (
+      ) : activeDept !== 'all' || searchQuery ? (
+        /* Filtered or search results — flat grid */
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredEmployees.map((emp) => (
-            <div key={emp.id} className="card bg-dark-800 border-dark-500 flex flex-col">
-              {/* Card Header */}
-              <div className="p-6 pb-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold text-white">
-                      {emp.first_name} {emp.last_name}
-                    </h3>
-                    <p className="text-sm text-gray-400 mt-1">{emp.department?.name || 'No Department'}</p>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteEmployee(emp.id)}
-                    className="text-gray-600 hover:text-red-400 transition-colors"
-                    title="Delete employee"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Card Body */}
-              <div className="px-6 py-2 space-y-3 flex-1">
-                <div className="flex items-center text-sm text-gray-300">
-                  <EnvelopeIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0" />
-                  <span className="truncate">{emp.email}</span>
-                </div>
-                {emp.phone && (
-                  <div className="flex items-center text-sm text-gray-300">
-                    <PhoneIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0" />
-                    <span>{emp.phone}</span>
-                  </div>
-                )}
-                <div className="flex items-start text-sm text-gray-300">
-                  <MapPinIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0 mt-0.5" />
-                  <span>{emp.street}, {emp.postal_code} {emp.city}</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-300">
-                  <CalendarIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0" />
-                  <span>Since {new Date(emp.entry_date).toLocaleDateString('de-DE')}</span>
-                </div>
-              </div>
-
-              {/* Card Footer */}
-              <div className="p-6 pt-4">
-                <Link
-                  href={`/personal/${emp.id}`}
-                  className="flex items-center justify-center w-full px-4 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
-                >
-                  View Profile
-                  <ArrowRightIcon className="ml-2 h-4 w-4" />
-                </Link>
-              </div>
-            </div>
+            <EmployeeCard key={emp.id} emp={emp} onDelete={handleDeleteEmployee} />
           ))}
         </div>
+      ) : (
+        /* Grouped by department */
+        <div className="space-y-10">
+          {(() => {
+            // Sort by department name, then by last name
+            const sorted = [...filteredEmployees].sort((a, b) => {
+              const deptA = a.department?.name || 'ZZZ';
+              const deptB = b.department?.name || 'ZZZ';
+              if (deptA !== deptB) return deptA.localeCompare(deptB);
+              return a.last_name.localeCompare(b.last_name);
+            });
+
+            // Group
+            const groups: Record<string, Employee[]> = {};
+            for (const emp of sorted) {
+              const deptName = emp.department?.name || 'Keine Abteilung';
+              if (!groups[deptName]) groups[deptName] = [];
+              groups[deptName].push(emp);
+            }
+
+            return Object.entries(groups).map(([deptName, emps]) => (
+              <div key={deptName}>
+                <h3 className="mb-4 text-lg font-bold uppercase tracking-wider text-[#d0ff59]">
+                  {deptName}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {emps.map((emp) => (
+                    <EmployeeCard key={emp.id} emp={emp} onDelete={handleDeleteEmployee} />
+                  ))}
+                </div>
+              </div>
+            ));
+          })()}
+        </div>
       )}
+    </div>
+  );
+}
+
+function EmployeeCard({ emp, onDelete }: { emp: Employee; onDelete: (id: string) => void }) {
+  return (
+    <div className="card bg-dark-800 border-dark-500 flex flex-col">
+      <div className="p-6 pb-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-xl font-bold text-white">
+              {emp.first_name} {emp.last_name}
+            </h3>
+            <p className="text-sm text-gray-400 mt-1">{emp.department?.name || 'No Department'}</p>
+          </div>
+          <button
+            onClick={() => onDelete(emp.id)}
+            className="text-gray-600 hover:text-red-400 transition-colors"
+            title="Delete employee"
+          >
+            <TrashIcon className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      <div className="px-6 py-2 space-y-3 flex-1">
+        <div className="flex items-center text-sm text-gray-300">
+          <EnvelopeIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0" />
+          <span className="truncate">{emp.email}</span>
+        </div>
+        {emp.phone && (
+          <div className="flex items-center text-sm text-gray-300">
+            <PhoneIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0" />
+            <span>{emp.phone}</span>
+          </div>
+        )}
+        <div className="flex items-start text-sm text-gray-300">
+          <MapPinIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0 mt-0.5" />
+          <span>{emp.street}, {emp.postal_code} {emp.city}</span>
+        </div>
+        <div className="flex items-center text-sm text-gray-300">
+          <CalendarIcon className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0" />
+          <span>Since {new Date(emp.entry_date).toLocaleDateString('de-DE')}</span>
+        </div>
+      </div>
+
+      <div className="p-6 pt-4">
+        <Link
+          href={`/personal/${emp.id}`}
+          className="flex items-center justify-center w-full px-4 py-3 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
+        >
+          View Profile
+          <ArrowRightIcon className="ml-2 h-4 w-4" />
+        </Link>
+      </div>
     </div>
   );
 }
