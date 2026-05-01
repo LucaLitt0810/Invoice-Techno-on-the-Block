@@ -220,8 +220,8 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Signature lines (centered in columns)
-      const sigY = py - rowHeight / 2;
+      // Signature lines (near bottom of cell)
+      const sigY = py - rowHeight + 7;
       const sigPad = 16;
       p.drawLine({
         start: { x: margin + colWidths[0] + colWidths[1] + sigPad, y: sigY },
