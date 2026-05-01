@@ -23,97 +23,109 @@ export async function GET(request: NextRequest) {
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const width = 595.28;
+    const width = 595.28;  // A4 Portrait
     const height = 841.89;
-    const margin = 50;
-    const tableTop = height - margin - 80;
-    const colWidths = [220, 70, 70, 155];
-    const rowHeight = 32;
-    const headerHeight = 36;
+    const margin = 40;
+    const usableWidth = width - margin * 2;
+
+    const colWidths = [240, 80, 80, 110];
+    const rowHeight = 30;
+    const headerHeight = 30;
+
+    const headers = ['Name', 'Anwesend', 'Abwesend', 'Bemerkung'];
 
     let page = pdfDoc.addPage([width, height]);
 
-    // Header box
-    page.drawRectangle({
-      x: margin,
-      y: height - margin - 60,
-      width: width - margin * 2,
-      height: 50,
-      color: rgb(0.12, 0.12, 0.12),
-    });
+    // ===== PAGE HEADER (drawn on every page) =====
+    const drawPageHeader = (p: typeof page) => {
+      let py = height - margin;
 
-    page.drawText('TECHNO ON THE BLOCK', {
-      x: margin + 12,
-      y: height - margin - 30,
-      size: 16,
-      font: fontBold,
-      color: rgb(1, 1, 1),
-    });
-    page.drawText('Vereinshausstrasse 10, 4133 Pratteln', {
-      x: margin + 12,
-      y: height - margin - 46,
-      size: 8,
-      font,
-      color: rgb(0.7, 0.7, 0.7),
-    });
-
-    // Title
-    page.drawText('ANWESENHEITSLISTE', {
-      x: margin,
-      y: tableTop + 10,
-      size: 18,
-      font: fontBold,
-      color: rgb(0.12, 0.12, 0.12),
-    });
-
-    // Event info
-    page.drawText(`Event: ${eventName}`, {
-      x: margin,
-      y: tableTop - 10,
-      size: 10,
-      font,
-      color: rgb(0.4, 0.4, 0.4),
-    });
-    page.drawText(`Datum: ${eventDate}`, {
-      x: 250,
-      y: tableTop - 10,
-      size: 10,
-      font,
-      color: rgb(0.4, 0.4, 0.4),
-    });
-
-    let y = tableTop - 40;
-
-    // Draw table header
-    const drawHeader = (p: typeof page, yPos: number) => {
+      // Black header bar
       p.drawRectangle({
         x: margin,
-        y: yPos - headerHeight,
-        width: width - margin * 2,
+        y: py - 42,
+        width: usableWidth,
+        height: 42,
+        color: rgb(0.12, 0.12, 0.12),
+      });
+
+      p.drawText('TECHNO ON THE BLOCK', {
+        x: margin + 10,
+        y: py - 24,
+        size: 15,
+        font: fontBold,
+        color: rgb(1, 1, 1),
+      });
+      p.drawText('Vereinshausstrasse 10, 4133 Pratteln', {
+        x: margin + 10,
+        y: py - 37,
+        size: 7,
+        font,
+        color: rgb(0.7, 0.7, 0.7),
+      });
+
+      py -= 56;
+
+      // Title
+      p.drawText('ANWESENHEITSLISTE', {
+        x: margin,
+        y: py,
+        size: 18,
+        font: fontBold,
+        color: rgb(0.12, 0.12, 0.12),
+      });
+      py -= 18;
+
+      // Event + Date on one line
+      p.drawText(`Event: ${eventName}`, {
+        x: margin,
+        y: py,
+        size: 9,
+        font,
+        color: rgb(0.4, 0.4, 0.4),
+      });
+      p.drawText(`Datum: ${eventDate}`, {
+        x: margin + 200,
+        y: py,
+        size: 9,
+        font,
+        color: rgb(0.4, 0.4, 0.4),
+      });
+
+      return py - 18;
+    };
+
+    // ===== TABLE HEADER =====
+    const drawTableHeader = (p: typeof page, py: number) => {
+      p.drawRectangle({
+        x: margin,
+        y: py - headerHeight,
+        width: usableWidth,
         height: headerHeight,
         color: rgb(0.18, 0.18, 0.18),
       });
 
-      const headers = ['Name', 'Anwesend', 'Abwesend', 'Bemerkung'];
       let x = margin + 8;
       for (let i = 0; i < headers.length; i++) {
         p.drawText(headers[i], {
           x,
-          y: yPos - headerHeight + 12,
+          y: py - headerHeight + 9,
           size: 9,
           font: fontBold,
           color: rgb(1, 1, 1),
         });
         x += colWidths[i];
       }
+      return py - headerHeight;
     };
 
-    const drawRow = (p: typeof page, yPos: number, emp: any, index: number) => {
+    // ===== TABLE ROW =====
+    const drawRow = (p: typeof page, py: number, emp: any, index: number) => {
       const bg = index % 2 === 0 ? rgb(0.97, 0.97, 0.97) : rgb(1, 1, 1);
       p.drawRectangle({
         x: margin,
-        y: yPos - rowHeight,
-        width: width - margin * 2,
+        y: py - rowHeight,
+        width: usableWidth,
         height: rowHeight,
         color: bg,
       });
@@ -123,80 +135,84 @@ export async function GET(request: NextRequest) {
       for (let i = 0; i < colWidths.length; i++) {
         x += colWidths[i];
         p.drawLine({
-          start: { x, y: yPos },
-          end: { x, y: yPos - rowHeight },
+          start: { x, y: py },
+          end: { x, y: py - rowHeight },
           thickness: 0.3,
           color: rgb(0.85, 0.85, 0.85),
         });
       }
 
-      // Data
+      // Name
       const fullName = `${emp.last_name}, ${emp.first_name}`;
       p.drawText(fullName, {
         x: margin + 8,
-        y: yPos - rowHeight + 11,
+        y: py - rowHeight + 10,
         size: 9,
         font,
-        color: rgb(0.2, 0.2, 0.2),
+        color: rgb(0.15, 0.15, 0.15),
       });
 
-      // Checkbox for Anwesend
+      // Centered checkbox for Anwesend
+      const cbSize = 12;
+      const cbX1 = margin + colWidths[0] + (colWidths[1] - cbSize) / 2;
       p.drawRectangle({
-        x: margin + colWidths[0] + 22,
-        y: yPos - rowHeight + 8,
-        width: 14,
-        height: 14,
+        x: cbX1,
+        y: py - rowHeight + (rowHeight - cbSize) / 2,
+        width: cbSize,
+        height: cbSize,
         borderWidth: 0.8,
-        borderColor: rgb(0.5, 0.5, 0.5),
+        borderColor: rgb(0.4, 0.4, 0.4),
       });
 
-      // Checkbox for Abwesend
+      // Centered checkbox for Abwesend
+      const cbX2 = margin + colWidths[0] + colWidths[1] + (colWidths[2] - cbSize) / 2;
       p.drawRectangle({
-        x: margin + colWidths[0] + colWidths[1] + 22,
-        y: yPos - rowHeight + 8,
-        width: 14,
-        height: 14,
+        x: cbX2,
+        y: py - rowHeight + (rowHeight - cbSize) / 2,
+        width: cbSize,
+        height: cbSize,
         borderWidth: 0.8,
-        borderColor: rgb(0.5, 0.5, 0.5),
+        borderColor: rgb(0.4, 0.4, 0.4),
       });
+
+      return py - rowHeight;
     };
 
-    drawHeader(page, y);
-    y -= headerHeight;
+    // ===== BUILD PAGES =====
+    let y = drawPageHeader(page);
+    y = drawTableHeader(page, y);
 
     for (let i = 0; i < (employees || []).length; i++) {
       const emp = employees![i];
-      if (y - rowHeight < margin + 30) {
-        // Footer on current page
+      if (y - rowHeight < margin + 20) {
+        // Footer
         page.drawText(`Seite ${pdfDoc.getPageCount()}`, {
           x: width / 2 - 15,
-          y: 20,
-          size: 8,
+          y: 14,
+          size: 7,
           font,
           color: rgb(0.5, 0.5, 0.5),
         });
+        // New page
         page = pdfDoc.addPage([width, height]);
-        y = height - margin - 20;
-        drawHeader(page, y);
-        y -= headerHeight;
+        y = drawPageHeader(page);
+        y = drawTableHeader(page, y);
       }
-      drawRow(page, y, emp, i);
-      y -= rowHeight;
+      y = drawRow(page, y, emp, i);
     }
 
-    // Bottom border line
+    // Bottom border + footer on last page
     page.drawLine({
       start: { x: margin, y },
       end: { x: width - margin, y },
       thickness: 0.5,
-      color: rgb(0.7, 0.7, 0.7),
+      color: rgb(0.6, 0.6, 0.6),
     });
 
-    // Footer on last page
     page.drawText(`Seite ${pdfDoc.getPageCount()}`, {
       x: width / 2 - 15,
-      y: 20,
-      size: 8,
+      y: 14,
+      size: 7,
       font,
       color: rgb(0.5, 0.5, 0.5),
     });
