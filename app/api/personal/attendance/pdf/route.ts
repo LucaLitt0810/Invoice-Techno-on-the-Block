@@ -28,22 +28,23 @@ export async function GET(request: NextRequest) {
     const margin = 40;
     const usableWidth = width - margin * 2;
 
-    const colWidths = [240, 80, 80, 110];
-    const rowHeight = 30;
-    const headerHeight = 30;
+    // Columns that sum exactly to usableWidth
+    const colWidths = [260, 80, 80, usableWidth - 260 - 80 - 80];
+    const rowHeight = 28;
+    const headerHeight = 26;
 
     const headers = ['Name', 'Anwesend', 'Abwesend', 'Bemerkung'];
 
     let page = pdfDoc.addPage([width, height]);
 
-    // ===== PAGE HEADER (drawn on every page) =====
-    const drawPageHeader = (p: typeof page) => {
-      let py = height - margin;
+    // Helper: draw page header, returns the y position where table should start
+    const drawPageHeader = (p: typeof page): number => {
+      const top = height - margin;
 
-      // Black header bar
+      // Black header bar: from top-42 to top
       p.drawRectangle({
         x: margin,
-        y: py - 42,
+        y: top - 42,
         width: usableWidth,
         height: 42,
         color: rgb(0.12, 0.12, 0.12),
@@ -51,55 +52,55 @@ export async function GET(request: NextRequest) {
 
       p.drawText('TECHNO ON THE BLOCK', {
         x: margin + 10,
-        y: py - 24,
+        y: top - 24,
         size: 15,
         font: fontBold,
         color: rgb(1, 1, 1),
       });
       p.drawText('Vereinshausstrasse 10, 4133 Pratteln', {
         x: margin + 10,
-        y: py - 37,
+        y: top - 36,
         size: 7,
         font,
         color: rgb(0.7, 0.7, 0.7),
       });
 
-      py -= 56;
-
-      // Title
+      // Title: 26px below the black bar
+      const titleY = top - 42 - 26;
       p.drawText('ANWESENHEITSLISTE', {
         x: margin,
-        y: py,
+        y: titleY,
         size: 18,
         font: fontBold,
         color: rgb(0.12, 0.12, 0.12),
       });
-      py -= 18;
 
-      // Event + Date on one line
+      // Event + Date: 18px below title
+      const infoY = titleY - 18;
       p.drawText(`Event: ${eventName}`, {
         x: margin,
-        y: py,
+        y: infoY,
         size: 9,
         font,
         color: rgb(0.4, 0.4, 0.4),
       });
       p.drawText(`Datum: ${eventDate}`, {
-        x: margin + 200,
-        y: py,
+        x: margin + 220,
+        y: infoY,
         size: 9,
         font,
         color: rgb(0.4, 0.4, 0.4),
       });
 
-      return py - 18;
+      // Return y where table header should start (16px below info line)
+      return infoY - 16;
     };
 
-    // ===== TABLE HEADER =====
-    const drawTableHeader = (p: typeof page, py: number) => {
+    // Helper: draw table header row
+    const drawTableHeader = (p: typeof page, y: number): number => {
       p.drawRectangle({
         x: margin,
-        y: py - headerHeight,
+        y: y - headerHeight,
         width: usableWidth,
         height: headerHeight,
         color: rgb(0.18, 0.18, 0.18),
@@ -109,34 +110,34 @@ export async function GET(request: NextRequest) {
       for (let i = 0; i < headers.length; i++) {
         p.drawText(headers[i], {
           x,
-          y: py - headerHeight + 9,
+          y: y - headerHeight + 8,
           size: 9,
           font: fontBold,
           color: rgb(1, 1, 1),
         });
         x += colWidths[i];
       }
-      return py - headerHeight;
+      return y - headerHeight;
     };
 
-    // ===== TABLE ROW =====
-    const drawRow = (p: typeof page, py: number, emp: any, index: number) => {
+    // Helper: draw one data row
+    const drawRow = (p: typeof page, y: number, emp: any, index: number): number => {
       const bg = index % 2 === 0 ? rgb(0.97, 0.97, 0.97) : rgb(1, 1, 1);
       p.drawRectangle({
         x: margin,
-        y: py - rowHeight,
+        y: y - rowHeight,
         width: usableWidth,
         height: rowHeight,
         color: bg,
       });
 
-      // Vertical lines
+      // Vertical lines between columns only (not after last)
       let x = margin;
-      for (let i = 0; i < colWidths.length; i++) {
+      for (let i = 0; i < colWidths.length - 1; i++) {
         x += colWidths[i];
         p.drawLine({
-          start: { x, y: py },
-          end: { x, y: py - rowHeight },
+          start: { x, y },
+          end: { x, y: y - rowHeight },
           thickness: 0.3,
           color: rgb(0.85, 0.85, 0.85),
         });
@@ -146,7 +147,7 @@ export async function GET(request: NextRequest) {
       const fullName = `${emp.last_name}, ${emp.first_name}`;
       p.drawText(fullName, {
         x: margin + 8,
-        y: py - rowHeight + 10,
+        y: y - rowHeight + 9,
         size: 9,
         font,
         color: rgb(0.15, 0.15, 0.15),
@@ -155,9 +156,10 @@ export async function GET(request: NextRequest) {
       // Centered checkbox for Anwesend
       const cbSize = 12;
       const cbX1 = margin + colWidths[0] + (colWidths[1] - cbSize) / 2;
+      const cbY = y - rowHeight + (rowHeight - cbSize) / 2;
       p.drawRectangle({
         x: cbX1,
-        y: py - rowHeight + (rowHeight - cbSize) / 2,
+        y: cbY,
         width: cbSize,
         height: cbSize,
         borderWidth: 0.8,
@@ -168,14 +170,14 @@ export async function GET(request: NextRequest) {
       const cbX2 = margin + colWidths[0] + colWidths[1] + (colWidths[2] - cbSize) / 2;
       p.drawRectangle({
         x: cbX2,
-        y: py - rowHeight + (rowHeight - cbSize) / 2,
+        y: cbY,
         width: cbSize,
         height: cbSize,
         borderWidth: 0.8,
         borderColor: rgb(0.4, 0.4, 0.4),
       });
 
-      return py - rowHeight;
+      return y - rowHeight;
     };
 
     // ===== BUILD PAGES =====
@@ -184,8 +186,9 @@ export async function GET(request: NextRequest) {
 
     for (let i = 0; i < (employees || []).length; i++) {
       const emp = employees![i];
+      // Check if row fits
       if (y - rowHeight < margin + 20) {
-        // Footer
+        // Footer on current page
         page.drawText(`Seite ${pdfDoc.getPageCount()}`, {
           x: width / 2 - 15,
           y: 14,
@@ -201,7 +204,7 @@ export async function GET(request: NextRequest) {
       y = drawRow(page, y, emp, i);
     }
 
-    // Bottom border + footer on last page
+    // Bottom border line
     page.drawLine({
       start: { x: margin, y },
       end: { x: width - margin, y },
@@ -209,6 +212,7 @@ export async function GET(request: NextRequest) {
       color: rgb(0.6, 0.6, 0.6),
     });
 
+    // Footer on last page
     page.drawText(`Seite ${pdfDoc.getPageCount()}`, {
       x: width / 2 - 15,
       y: 14,
