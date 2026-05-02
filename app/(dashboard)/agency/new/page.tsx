@@ -104,34 +104,34 @@ export default function NewAgencyLeadPage() {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Helvetica,Arial,sans-serif;">
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:Helvetica,Arial,sans-serif;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
     <tr>
       <td align="center" style="padding:40px 20px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background-color:#111111;border-radius:12px;overflow:hidden;border:1px solid #1a1a1a;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
           <!-- HEADER -->
           <tr>
             <td style="background:linear-gradient(135deg,#0000FF 0%,#0000cc 100%);padding:32px 40px;text-align:center;">
               <p style="margin:0;font-size:22px;font-weight:800;color:#ffffff;letter-spacing:3px;text-transform:uppercase;">TECHNO ON THE BLOCK</p>
-              <p style="margin:6px 0 0 0;font-size:11px;color:#cccccc;letter-spacing:2px;text-transform:uppercase;">The Agency – Artist Management</p>
+              <p style="margin:6px 0 0 0;font-size:11px;color:#e0e0e0;letter-spacing:2px;text-transform:uppercase;">The Agency – Artist Management</p>
             </td>
           </tr>
           <!-- BODY -->
           <tr>
             <td style="padding:40px;">
-              <p style="margin:0 0 20px 0;font-size:15px;color:#ffffff;line-height:1.6;">Hey ${contact},</p>
-              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">Big respect for what you've built with <strong style="color:#0000FF;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
-              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">My name is <strong style="color:#ffffff;">${sender}</strong> and I'm reaching out from <strong style="color:#ffffff;">The Agency – Artist Management</strong>, part of Techno on the Block, based in ${ort}.</p>
-              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly. Artists who understand the floor and know how to hold a crowd.</p>
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;background:#0d0d0d;border-radius:8px;border-left:4px solid #0000FF;">
+              <p style="margin:0 0 20px 0;font-size:15px;color:#111111;line-height:1.6;">Hey ${contact},</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">Big respect for what you've built with <strong style="color:#0000FF;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">My name is <strong style="color:#111111;">${sender}</strong> and I'm reaching out from <strong style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in ${ort}.</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly. Artists who understand the floor and know how to hold a crowd.</p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;background:#f8f9ff;border-radius:8px;border-left:4px solid #0000FF;">
                 <tr><td style="padding:20px 24px;">
                   <p style="margin:0 0 8px 0;font-size:12px;color:#666666;text-transform:uppercase;letter-spacing:1px;">Current Roster</p>
-                  <p style="margin:0;font-size:15px;color:#ffffff;line-height:1.6;">${rosterText}</p>
+                  <p style="margin:0;font-size:15px;color:#111111;line-height:1.6;">${rosterText}</p>
                 </td></tr>
               </table>
-              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">I'm confident some of them would be a great match for future nights at <strong style="color:#ffffff;">${venue}</strong>.</p>
-              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
-              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">Respect for what you're doing for the scene — looking forward to hearing from you.</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">I'm confident some of them would be a great match for future nights at <strong style="color:#111111;">${venue}</strong>.</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">Respect for what you're doing for the scene — looking forward to hearing from you.</p>
             </td>
           </tr>
           <!-- CTA -->
@@ -142,11 +142,11 @@ export default function NewAgencyLeadPage() {
           </tr>
           <!-- FOOTER -->
           <tr>
-            <td style="padding:24px 40px;background:#0d0d0d;border-top:1px solid #1a1a1a;text-align:center;">
-              <p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#ffffff;">${sender}</p>
+            <td style="padding:24px 40px;background:#f5f5f5;border-top:1px solid #e0e0e0;text-align:center;">
+              <p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#111111;">${sender}</p>
               <p style="margin:0 0 4px 0;font-size:12px;color:#666666;">The Agency – Artist Management</p>
               <p style="margin:0 0 4px 0;font-size:12px;color:#0000FF;font-weight:600;">Club Techno on the Block</p>
-              <p style="margin:0;font-size:12px;color:#444444;">Basel, Switzerland</p>
+              <p style="margin:0;font-size:12px;color:#888888;">Basel, Switzerland</p>
             </td>
           </tr>
         </table>
