@@ -28,6 +28,9 @@ export default function NewAgencyLeadPage() {
     country: 'DE',
     status: 'contacted' as 'contacted' | 'negotiation' | 'closed',
     notes: '',
+    email_name: '',
+    email_venue: '',
+    email_sender: '',
   });
 
   // Load prefill customer data
@@ -119,17 +122,47 @@ export default function NewAgencyLeadPage() {
         .insert(leadData);
 
       if (leadError) {
-        // If agency_leads table doesn't exist, show helpful message
         if (leadError.message?.includes('agency_leads') || leadError.code === '42P01') {
           toast.error(
             'The agency_leads table does not exist yet. Please run the SQL migration in Supabase first.',
             { duration: 6000 }
           );
-          // Still redirect since customer was created
           router.push('/agency');
           return;
         }
         throw leadError;
+      }
+
+      // Step 3: Send welcome email if email fields are filled
+      if (formData.email && formData.email_name && formData.email_venue && formData.email_sender) {
+        try {
+          const emailRes = await fetch('/api/email/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: formData.email,
+              subject: `Anfrage - ${formData.company_name}`,
+              html: `
+                <p>Hallo ${formData.email_name},</p>
+                <p>wir sind Techno on the Block, ein Verein, der sich auf die Organisation von Events spezialisiert hat.</p>
+                <p>Wir würden uns freuen, bald auch in <strong>${formData.email_venue}</strong> ein Event organisieren zu dürfen.</p>
+                <p>Falls du Interesse hast, melde dich gerne bei uns.</p>
+                <br>
+                <p>Freundliche Grüsse</p>
+                <p>${formData.email_sender}<br>Techno on the Block</p>
+              `,
+            }),
+          });
+          if (emailRes.ok) {
+            toast.success('Email wurde verschickt!');
+          } else {
+            const err = await emailRes.json();
+            toast.error('Email konnte nicht verschickt werden: ' + (err.error || 'Unbekannter Fehler'));
+          }
+        } catch (emailErr: any) {
+          console.error('Email error:', emailErr);
+          toast.error('Email-Fehler: ' + emailErr.message);
+        }
       }
 
       toast.success('Lead created successfully and customer added!');
@@ -265,6 +298,46 @@ export default function NewAgencyLeadPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Email Auto-Send */}
+          <div className="space-y-6 pt-6 border-t border-dark-500">
+            <h3 className="text-lg font-medium text-white">Automatische Email</h3>
+            <p className="text-sm text-gray-400">
+              Diese Felder werden für die automatische Willkommens-Email verwendet.
+            </p>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div>
+                <label className="label">Name Empfänger</label>
+                <input
+                  type="text"
+                  className="input"
+                  value={formData.email_name}
+                  onChange={(e) => handleChange('email_name', e.target.value)}
+                  placeholder="z.B. Max Mustermann"
+                />
+              </div>
+              <div>
+                <label className="label">Ort / Venue</label>
+                <input
+                  type="text"
+                  className="input"
+                  value={formData.email_venue}
+                  onChange={(e) => handleChange('email_venue', e.target.value)}
+                  placeholder="z.B. Pratteln"
+                />
+              </div>
+              <div>
+                <label className="label">Geschickt von</label>
+                <input
+                  type="text"
+                  className="input"
+                  value={formData.email_sender}
+                  onChange={(e) => handleChange('email_sender', e.target.value)}
+                  placeholder="z.B. Ben Littmann"
+                />
               </div>
             </div>
           </div>
