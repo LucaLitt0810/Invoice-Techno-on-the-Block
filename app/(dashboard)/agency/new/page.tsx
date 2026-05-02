@@ -114,7 +114,7 @@ export default function NewAgencyLeadPage() {
       <br>
       <p>Respect for what you're doing for the scene — looking forward to hearing from you.</p>
       <br>
-      <p>Best regards<br>${sender}<br>The Agency – Artist Management<br>Club Techno on the Block<br>${ort}, Switzerland</p>
+      <p>Best regards<br>${sender}<br>The Agency – Artist Management<br>Club Techno on the Block<br>Basel, Switzerland</p>
     `;
   };
 
@@ -191,7 +191,7 @@ export default function NewAgencyLeadPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               to: formData.email,
-              subject: `Artists from ${formData.city || 'Basel'} – Techno on the Block`,
+              subject: `Artists from Basel – Techno on the Block`,
               html: buildEmailHtml(),
             }),
           });
@@ -392,7 +392,7 @@ export default function NewAgencyLeadPage() {
             {(formData.contact_person || formData.email_venue || formData.email_sender) && (
               <div className="mt-4 rounded-lg border border-white/10 bg-[#0a0a0a] p-4">
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500">Vorschau</p>
-                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: Artists from {formData.city || '...'} – Techno on the Block</p>
+                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: Artists from Basel – Techno on the Block</p>
                 <div
                   className="text-sm text-gray-300 space-y-2"
                   dangerouslySetInnerHTML={{ __html: emailPreview }}
