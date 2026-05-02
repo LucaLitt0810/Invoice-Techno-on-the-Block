@@ -84,18 +84,27 @@ export default function NewAgencyLeadPage() {
   };
 
   const buildEmailHtml = () => {
-    const djList = djs.length > 0
-      ? djs.map((d) => `• ${d.name}${d.genre ? ` — ${d.genre}` : ''}`).join('<br>')
-      : '';
+    const venue = formData.email_venue || 'your venue';
+    const name = formData.email_name || 'there';
+    const sender = formData.email_sender || '';
+    const ort = formData.city || 'Basel';
+
+    const rosterNames = djs.length > 0
+      ? djs.map((d) => d.name).join(', ')
+      : 'JKB, Kalisto, NoPardon, Imgefecht and Toyz';
 
     return `
-      <p>Hallo ${formData.email_name || 'zusammen'},</p>
-      <p>ich bin ${formData.email_sender || ''} von <strong>Techno on the Block</strong>. Wir sind ein Event- & DJ-Management mit eigenem Roster und organisieren regelmässig elektronische Veranstaltungen in der Region.</p>
-      <p>Gerne würden wir auch bei euch in <strong>${formData.email_venue || ''}</strong> ein Event auf die Beine stellen — sei es als Clubnight, Open Air oder Festival-Act.</p>
-      ${djList ? `<p>Unser DJ-Roster umfasst unter anderem:<br><br>${djList}</p>` : ''}
-      <p>Hast du Interesse an einem kurzen Gespräch oder einer Zusammenarbeit? Ich freue mich auf deine Rückmeldung.</p>
+      <p>Hey ${venue} Team,</p>
       <br>
-      <p>Freundliche Grüsse<br>${formData.email_sender || ''}<br><strong>Techno on the Block</strong><br><a href="mailto:agency@technoontheblock.ch">agency@technoontheblock.ch</a></p>
+      <p>Respect for what you've built with ${venue} — the room and the energy have become a real pillar of the ${ort} techno scene.</p>
+      <br>
+      <p>I'm ${sender} from The Agency – Artist Management, coming out of Techno on the Block here in ${ort}. We work with artists who deliver exactly that raw, driving techno your floor stands for.</p>
+      <br>
+      <p>Our roster includes ${rosterNames}.</p>
+      <br>
+      <p>I'd love to send over a couple of mixes if you're open to checking them out.</p>
+      <br>
+      <p>Best<br>${sender}<br>The Agency – Artist Management<br>Techno on the Block<br>${ort}</p>
     `;
   };
 
@@ -172,7 +181,7 @@ export default function NewAgencyLeadPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               to: formData.email,
-              subject: `DJ-Booking für ${formData.email_venue} — Techno on the Block`,
+              subject: `${formData.city || 'Basel'} artists for ${formData.email_venue}`,
               html: buildEmailHtml(),
             }),
           });
@@ -373,7 +382,7 @@ export default function NewAgencyLeadPage() {
             {(formData.email_name || formData.email_venue || formData.email_sender) && (
               <div className="mt-4 rounded-lg border border-white/10 bg-[#0a0a0a] p-4">
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500">Vorschau</p>
-                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: DJ-Booking für {formData.email_venue || '...'} — Techno on the Block</p>
+                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: {formData.city || '...'} artists for {formData.email_venue || '...'}</p>
                 <div
                   className="text-sm text-gray-300 space-y-2"
                   dangerouslySetInnerHTML={{ __html: emailPreview }}
