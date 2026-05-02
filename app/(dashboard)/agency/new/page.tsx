@@ -90,13 +90,32 @@ export default function NewAgencyLeadPage() {
     const ort = formData.city || 'Basel';
 
     const activeDJs = djs.filter((d) => d.active);
-    let rosterText = 'JKB, Kalisto, NoPardon, Imgefecht and Toyz';
-    if (activeDJs.length > 0) {
-      const names = activeDJs.map((d) => d.name);
-      if (names.length === 1) rosterText = names[0];
-      else if (names.length === 2) rosterText = `${names[0]} and ${names[1]}`;
-      else rosterText = `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
-    }
+    const defaultDJs = [
+      { name: 'JKB', genre: 'Raw Techno' },
+      { name: 'Kalisto', genre: 'Peak Time' },
+      { name: 'NoPardon', genre: 'Hardgroove' },
+      { name: 'Imgefecht', genre: 'Industrial' },
+      { name: 'Toyz', genre: 'Hypnotic' },
+    ];
+    const rosterDJs = activeDJs.length > 0
+      ? activeDJs.map((d) => ({ name: d.name, genre: d.genre || '' }))
+      : defaultDJs;
+
+    const rosterRows = rosterDJs.map((dj) => `
+      <tr>
+        <td style="padding:10px 0;border-bottom:1px solid #e8e8e8;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+              <td style="width:8px;height:8px;background:#0000FF;border-radius:50%;padding:0;"></td>
+              <td style="padding-left:14px;">
+                <p style="margin:0;font-size:15px;font-weight:700;color:#111111;">${dj.name}</p>
+                ${dj.genre ? `<p style="margin:2px 0 0 0;font-size:11px;color:#0000FF;text-transform:uppercase;letter-spacing:1px;">${dj.genre}</p>` : ''}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    `).join('');
 
     return `<!DOCTYPE html>
 <html>
@@ -123,12 +142,23 @@ export default function NewAgencyLeadPage() {
               <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">Big respect for what you've built with <strong style="color:#0000FF;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
               <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">My name is <strong style="color:#111111;">${sender}</strong> and I'm reaching out from <strong style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in ${ort}.</p>
               <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly. Artists who understand the floor and know how to hold a crowd.</p>
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;background:#f8f9ff;border-radius:8px;border-left:4px solid #0000FF;">
-                <tr><td style="padding:20px 24px;">
-                  <p style="margin:0 0 8px 0;font-size:12px;color:#666666;text-transform:uppercase;letter-spacing:1px;">Current Roster</p>
-                  <p style="margin:0;font-size:15px;color:#111111;line-height:1.6;">${rosterText}</p>
-                </td></tr>
+
+              <!-- ROSTER -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:28px 0;background:#fafbff;border-radius:10px;border:1px solid #e0e0e0;overflow:hidden;">
+                <tr>
+                  <td style="background:linear-gradient(90deg,#0000FF 0%,#0000cc 100%);padding:14px 24px;">
+                    <p style="margin:0;font-size:12px;color:#ffffff;text-transform:uppercase;letter-spacing:2px;font-weight:600;">Artist Roster</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 24px 16px 24px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                      ${rosterRows}
+                    </table>
+                  </td>
+                </tr>
               </table>
+
               <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">I'm confident some of them would be a great match for future nights at <strong style="color:#111111;">${venue}</strong>.</p>
               <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
               <p style="margin:0 0 20px 0;font-size:15px;color:#333333;line-height:1.6;">Respect for what you're doing for the scene — looking forward to hearing from you.</p>
