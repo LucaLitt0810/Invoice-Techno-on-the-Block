@@ -30,7 +30,6 @@ export default function NewAgencyLeadPage() {
     country: 'DE',
     status: 'contacted' as 'contacted' | 'negotiation' | 'closed',
     notes: '',
-    email_name: '',
     email_venue: '',
     email_sender: '',
   });
@@ -73,6 +72,7 @@ export default function NewAgencyLeadPage() {
               city: data.city,
               country: data.country,
               status: 'contacted',
+              email_venue: data.city || '',
             }));
           }
         });
@@ -85,26 +85,36 @@ export default function NewAgencyLeadPage() {
 
   const buildEmailHtml = () => {
     const venue = formData.email_venue || 'your venue';
-    const name = formData.email_name || 'there';
+    const contact = formData.contact_person || 'there';
     const sender = formData.email_sender || '';
     const ort = formData.city || 'Basel';
 
-    const rosterNames = djs.length > 0
-      ? djs.map((d) => d.name).join(', ')
-      : 'JKB, Kalisto, NoPardon, Imgefecht and Toyz';
+    const activeDJs = djs.filter((d) => d.active);
+    let rosterText = 'JKB, Kalisto, NoPardon, Imgefecht and Toyz';
+    if (activeDJs.length > 0) {
+      const names = activeDJs.map((d) => d.name);
+      if (names.length === 1) rosterText = names[0];
+      else if (names.length === 2) rosterText = `${names[0]} and ${names[1]}`;
+      else rosterText = `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+    }
 
     return `
-      <p>Hey ${venue} Team,</p>
+      <p>Hey ${contact},</p>
       <br>
-      <p>Respect for what you've built with ${venue} — the room and the energy have become a real pillar of the ${ort} techno scene.</p>
+      <p>Big respect for what you've built with ${venue}. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
       <br>
-      <p>I'm ${sender} from The Agency – Artist Management, coming out of Techno on the Block here in ${ort}. We work with artists who deliver exactly that raw, driving techno your floor stands for.</p>
+      <p>My name is ${sender} and I'm reaching out from The Agency – Artist Management, part of Techno on the Block, based in ${ort}.</p>
       <br>
-      <p>Our roster includes ${rosterNames}.</p>
+      <p>We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly. Artists who understand the floor and know how to hold a crowd.</p>
       <br>
-      <p>I'd love to send over a couple of mixes if you're open to checking them out.</p>
+      <p>Some of the artists we're currently working with are ${rosterText} — each bringing their own character while staying rooted in that raw techno energy.</p>
       <br>
-      <p>Best<br>${sender}<br>The Agency – Artist Management<br>Techno on the Block<br>${ort}</p>
+      <p>I'm confident some of them would be a great match for future nights at ${venue}.</p>
+      <p>If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
+      <br>
+      <p>Respect for what you're doing for the scene — looking forward to hearing from you.</p>
+      <br>
+      <p>Best regards<br>${sender}<br>The Agency – Artist Management<br>Club Techno on the Block<br>${ort}, Switzerland</p>
     `;
   };
 
@@ -174,14 +184,14 @@ export default function NewAgencyLeadPage() {
       }
 
       // Send email
-      if (formData.email && formData.email_name && formData.email_venue && formData.email_sender) {
+      if (formData.email && formData.contact_person && formData.email_venue && formData.email_sender) {
         try {
           const emailRes = await fetch('/api/email/send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               to: formData.email,
-              subject: `${formData.city || 'Basel'} artists for ${formData.email_venue}`,
+              subject: `Artists from ${formData.city || 'Basel'} – Techno on the Block`,
               html: buildEmailHtml(),
             }),
           });
@@ -347,23 +357,13 @@ export default function NewAgencyLeadPage() {
             </p>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               <div>
-                <label className="label">Name Empfänger</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={formData.email_name}
-                  onChange={(e) => handleChange('email_name', e.target.value)}
-                  placeholder="z.B. Max Mustermann"
-                />
-              </div>
-              <div>
-                <label className="label">Ort / Venue</label>
+                <label className="label">Venue Name</label>
                 <input
                   type="text"
                   className="input"
                   value={formData.email_venue}
                   onChange={(e) => handleChange('email_venue', e.target.value)}
-                  placeholder="z.B. Pratteln"
+                  placeholder="z.B. Kinker"
                 />
               </div>
               <div>
@@ -373,16 +373,26 @@ export default function NewAgencyLeadPage() {
                   className="input"
                   value={formData.email_sender}
                   onChange={(e) => handleChange('email_sender', e.target.value)}
-                  placeholder="z.B. Ben Littmann"
+                  placeholder="z.B. Luca Littmann"
+                />
+              </div>
+              <div>
+                <label className="label">Contact Person (auto)</label>
+                <input
+                  type="text"
+                  className="input bg-white/5"
+                  value={formData.contact_person || '—'}
+                  readOnly
+                  title="Wird automatisch aus dem Contact Person Feld übernommen"
                 />
               </div>
             </div>
 
             {/* Email Preview */}
-            {(formData.email_name || formData.email_venue || formData.email_sender) && (
+            {(formData.contact_person || formData.email_venue || formData.email_sender) && (
               <div className="mt-4 rounded-lg border border-white/10 bg-[#0a0a0a] p-4">
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500">Vorschau</p>
-                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: {formData.city || '...'} artists for {formData.email_venue || '...'}</p>
+                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: Artists from {formData.city || '...'} – Techno on the Block</p>
                 <div
                   className="text-sm text-gray-300 space-y-2"
                   dangerouslySetInnerHTML={{ __html: emailPreview }}
