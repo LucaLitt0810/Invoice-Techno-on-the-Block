@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { data, error } = await resend.emails.send({
-      from: from || 'Techno on the Block <no-reply@technoontheblock.ch>',
+      from: from || process.env.EMAIL_FROM || 'Techno on the Block <no-reply@technoontheblock.ch>',
       to: Array.isArray(to) ? to : [to],
       subject,
       html,
