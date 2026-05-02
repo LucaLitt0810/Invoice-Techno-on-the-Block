@@ -98,24 +98,63 @@ export default function NewAgencyLeadPage() {
       else rosterText = `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
     }
 
-    return `
-      <p>Hey ${contact},</p>
-      <br>
-      <p>Big respect for what you've built with ${venue}. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
-      <br>
-      <p>My name is ${sender} and I'm reaching out from The Agency – Artist Management, part of Techno on the Block, based in ${ort}.</p>
-      <br>
-      <p>We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly. Artists who understand the floor and know how to hold a crowd.</p>
-      <br>
-      <p>Some of the artists we're currently working with are ${rosterText} — each bringing their own character while staying rooted in that raw techno energy.</p>
-      <br>
-      <p>I'm confident some of them would be a great match for future nights at ${venue}.</p>
-      <p>If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
-      <br>
-      <p>Respect for what you're doing for the scene — looking forward to hearing from you.</p>
-      <br>
-      <p>Best regards<br>${sender}<br>The Agency – Artist Management<br>Club Techno on the Block<br>Basel, Switzerland</p>
-    `;
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background-color:#111111;border-radius:12px;overflow:hidden;border:1px solid #1a1a1a;">
+          <!-- HEADER -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#0000FF 0%,#0000cc 100%);padding:32px 40px;text-align:center;">
+              <p style="margin:0;font-size:22px;font-weight:800;color:#ffffff;letter-spacing:3px;text-transform:uppercase;">TECHNO ON THE BLOCK</p>
+              <p style="margin:6px 0 0 0;font-size:11px;color:#cccccc;letter-spacing:2px;text-transform:uppercase;">The Agency – Artist Management</p>
+            </td>
+          </tr>
+          <!-- BODY -->
+          <tr>
+            <td style="padding:40px;">
+              <p style="margin:0 0 20px 0;font-size:15px;color:#ffffff;line-height:1.6;">Hey ${contact},</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">Big respect for what you've built with <strong style="color:#0000FF;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">My name is <strong style="color:#ffffff;">${sender}</strong> and I'm reaching out from <strong style="color:#ffffff;">The Agency – Artist Management</strong>, part of Techno on the Block, based in ${ort}.</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly. Artists who understand the floor and know how to hold a crowd.</p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;background:#0d0d0d;border-radius:8px;border-left:4px solid #0000FF;">
+                <tr><td style="padding:20px 24px;">
+                  <p style="margin:0 0 8px 0;font-size:12px;color:#666666;text-transform:uppercase;letter-spacing:1px;">Current Roster</p>
+                  <p style="margin:0;font-size:15px;color:#ffffff;line-height:1.6;">${rosterText}</p>
+                </td></tr>
+              </table>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">I'm confident some of them would be a great match for future nights at <strong style="color:#ffffff;">${venue}</strong>.</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#cccccc;line-height:1.6;">Respect for what you're doing for the scene — looking forward to hearing from you.</p>
+            </td>
+          </tr>
+          <!-- CTA -->
+          <tr>
+            <td style="padding:0 40px 32px 40px;text-align:center;">
+              <a href="mailto:agency@technoontheblock.ch?subject=Re:%20Artists%20from%20Basel%20%E2%80%93%20Techno%20on%20the%20Block" style="display:inline-block;background:linear-gradient(135deg,#0000FF 0%,#0000cc 100%);color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Reply to this email</a>
+            </td>
+          </tr>
+          <!-- FOOTER -->
+          <tr>
+            <td style="padding:24px 40px;background:#0d0d0d;border-top:1px solid #1a1a1a;text-align:center;">
+              <p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#ffffff;">${sender}</p>
+              <p style="margin:0 0 4px 0;font-size:12px;color:#666666;">The Agency – Artist Management</p>
+              <p style="margin:0 0 4px 0;font-size:12px;color:#0000FF;font-weight:600;">Club Techno on the Block</p>
+              <p style="margin:0;font-size:12px;color:#444444;">Basel, Switzerland</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
