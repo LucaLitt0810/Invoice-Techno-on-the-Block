@@ -6,8 +6,9 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { AGENCY_STATUS_OPTIONS } from '@/types';
+import { DJ } from '@/types/bookings';
 import { COUNTRIES, generateCustomerNumber } from '@/lib/utils/helpers';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 
 export default function NewAgencyLeadPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function NewAgencyLeadPage() {
   const prefillCustomerId = searchParams.get('customer_id');
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
+  const [djs, setDjs] = useState<DJ[]>([]);
   const [prefillCustomer, setPrefillCustomer] = useState<{ company_name: string; contact_person: string | null; email: string; phone: string | null; street: string; postal_code: string; city: string; country: string } | null>(null);
 
   const [formData, setFormData] = useState({
@@ -33,6 +35,22 @@ export default function NewAgencyLeadPage() {
     email_sender: '',
   });
 
+  // Load DJ roster
+  useEffect(() => {
+    fetchDJs();
+  }, []);
+
+  const fetchDJs = async () => {
+    try {
+      const res = await fetch('/api/djs');
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      setDjs((data.djs || []).filter((d: DJ) => d.active));
+    } catch {
+      // silent fail
+    }
+  };
+
   // Load prefill customer data
   useEffect(() => {
     if (prefillCustomerId) {
@@ -44,7 +62,8 @@ export default function NewAgencyLeadPage() {
         .then(({ data }) => {
           if (data) {
             setPrefillCustomer(data);
-            setFormData({
+            setFormData((prev) => ({
+              ...prev,
               company_name: data.company_name,
               contact_person: data.contact_person || '',
               email: data.email,
@@ -54,8 +73,7 @@ export default function NewAgencyLeadPage() {
               city: data.city,
               country: data.country,
               status: 'contacted',
-              notes: '',
-            });
+            }));
           }
         });
     }
@@ -65,18 +83,32 @@ export default function NewAgencyLeadPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const buildEmailHtml = () => {
+    const djList = djs.length > 0
+      ? djs.map((d) => `• ${d.name}${d.genre ? ` — ${d.genre}` : ''}`).join('<br>')
+      : '';
+
+    return `
+      <p>Hallo ${formData.email_name || 'zusammen'},</p>
+      <p>ich bin ${formData.email_sender || ''} von <strong>Techno on the Block</strong>. Wir sind ein Event- & DJ-Management mit eigenem Roster und organisieren regelmässig elektronische Veranstaltungen in der Region.</p>
+      <p>Gerne würden wir auch bei euch in <strong>${formData.email_venue || ''}</strong> ein Event auf die Beine stellen — sei es als Clubnight, Open Air oder Festival-Act.</p>
+      ${djList ? `<p>Unser DJ-Roster umfasst unter anderem:<br><br>${djList}</p>` : ''}
+      <p>Hast du Interesse an einem kurzen Gespräch oder einer Zusammenarbeit? Ich freue mich auf deine Rückmeldung.</p>
+      <br>
+      <p>Freundliche Grüsse<br>${formData.email_sender || ''}<br><strong>Techno on the Block</strong><br><a href="mailto:agency@technoontheblock.ch">agency@technoontheblock.ch</a></p>
+    `;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
     try {
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       let customerId = prefillCustomerId;
 
-      // Step 1: Create customer only if not prefilled
       if (!customerId) {
         const customerData = {
           company_name: formData.company_name,
@@ -100,7 +132,6 @@ export default function NewAgencyLeadPage() {
         customerId = customer.id;
       }
 
-      // Step 2: Create agency lead linked to customer and user
       const leadData = {
         user_id: user.id,
         user_email: user.email,
@@ -133,7 +164,7 @@ export default function NewAgencyLeadPage() {
         throw leadError;
       }
 
-      // Step 3: Send welcome email if email fields are filled
+      // Send email
       if (formData.email && formData.email_name && formData.email_venue && formData.email_sender) {
         try {
           const emailRes = await fetch('/api/email/send', {
@@ -141,16 +172,8 @@ export default function NewAgencyLeadPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               to: formData.email,
-              subject: `Anfrage - ${formData.company_name}`,
-              html: `
-                <p>Hallo ${formData.email_name},</p>
-                <p>wir sind Techno on the Block, ein Verein, der sich auf die Organisation von Events spezialisiert hat.</p>
-                <p>Wir würden uns freuen, bald auch in <strong>${formData.email_venue}</strong> ein Event organisieren zu dürfen.</p>
-                <p>Falls du Interesse hast, melde dich gerne bei uns.</p>
-                <br>
-                <p>Freundliche Grüsse</p>
-                <p>${formData.email_sender}<br>Techno on the Block</p>
-              `,
+              subject: `DJ-Booking für ${formData.email_venue} — Techno on the Block`,
+              html: buildEmailHtml(),
             }),
           });
           if (emailRes.ok) {
@@ -174,6 +197,8 @@ export default function NewAgencyLeadPage() {
       setSaving(false);
     }
   };
+
+  const emailPreview = buildEmailHtml();
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -304,9 +329,12 @@ export default function NewAgencyLeadPage() {
 
           {/* Email Auto-Send */}
           <div className="space-y-6 pt-6 border-t border-dark-500">
-            <h3 className="text-lg font-medium text-white">Automatische Email</h3>
+            <h3 className="text-lg font-medium text-white flex items-center gap-2">
+              <EnvelopeIcon className="h-5 w-5" />
+              Automatische Email
+            </h3>
             <p className="text-sm text-gray-400">
-              Diese Felder werden für die automatische Willkommens-Email verwendet.
+              Wenn alle Felder ausgefüllt sind, wird beim Erstellen des Leads automatisch eine professionelle DJ-Vermarktungs-Email verschickt.
             </p>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               <div>
@@ -340,6 +368,18 @@ export default function NewAgencyLeadPage() {
                 />
               </div>
             </div>
+
+            {/* Email Preview */}
+            {(formData.email_name || formData.email_venue || formData.email_sender) && (
+              <div className="mt-4 rounded-lg border border-white/10 bg-[#0a0a0a] p-4">
+                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500">Vorschau</p>
+                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: DJ-Booking für {formData.email_venue || '...'} — Techno on the Block</p>
+                <div
+                  className="text-sm text-gray-300 space-y-2"
+                  dangerouslySetInnerHTML={{ __html: emailPreview }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Notes */}
