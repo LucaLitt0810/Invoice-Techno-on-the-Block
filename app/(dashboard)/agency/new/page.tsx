@@ -106,10 +106,10 @@ export default function NewAgencyLeadPage() {
         <td class="dm-border-row" style="padding:10px 0;border-bottom:1px solid #e8e8e8;">
           <table role="presentation" cellspacing="0" cellpadding="0" border="0">
             <tr>
-              <td style="width:8px;height:8px;background:#0000FF;border-radius:50%;padding:0;"></td>
+              <td style="width:8px;height:8px;background:#2563eb;border-radius:50%;padding:0;"></td>
               <td style="padding-left:14px;">
                 <p class="dm-text-strong" style="margin:0;font-size:15px;font-weight:700;color:#111111;">${dj.name}</p>
-                ${dj.genre ? `<p style="margin:2px 0 0 0;font-size:11px;color:#0000FF;text-transform:uppercase;letter-spacing:1px;">${dj.genre}</p>` : ''}
+                ${dj.genre ? `<p style="margin:2px 0 0 0;font-size:11px;color:#2563eb;text-transform:uppercase;letter-spacing:1px;">${dj.genre}</p>` : ''}
               </td>
             </tr>
           </table>
@@ -129,7 +129,7 @@ export default function NewAgencyLeadPage() {
     @media (prefers-color-scheme: dark) {
       .dm-bg-body { background-color: #1a1a1a !important; }
       .dm-bg-card { background-color: #242424 !important; border-color: #333333 !important; }
-      .dm-bg-header { background: linear-gradient(135deg, #0000FF 0%, #0000cc 100%) !important; }
+      .dm-bg-header { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important; }
       .dm-bg-roster { background-color: #1e1e2e !important; border-color: #333333 !important; }
       .dm-bg-footer { background-color: #1a1a1a !important; border-color: #333333 !important; }
       .dm-text-primary { color: #f0f0f0 !important; }
@@ -150,7 +150,7 @@ export default function NewAgencyLeadPage() {
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 2px 12px rgba(0,0,0,0.06);" class="dm-bg-card">
           <!-- HEADER -->
           <tr>
-            <td class="dm-bg-header" style="background:linear-gradient(135deg,#0000FF 0%,#0000cc 100%);padding:28px 24px;text-align:center;">
+            <td class="dm-bg-header" style="background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);padding:28px 24px;text-align:center;">
               <p style="margin:0;font-size:20px;font-weight:800;color:#ffffff;letter-spacing:3px;text-transform:uppercase;line-height:1.2;">TECHNO ON THE BLOCK</p>
               <p style="margin:6px 0 0 0;font-size:10px;color:rgba(255,255,255,0.85);letter-spacing:2px;text-transform:uppercase;line-height:1.2;">The Agency – Artist Management</p>
             </td>
@@ -159,14 +159,14 @@ export default function NewAgencyLeadPage() {
           <tr>
             <td style="padding:32px 24px;">
               <p class="dm-text-primary" style="margin:0 0 18px 0;font-size:16px;color:#111111;line-height:1.6;">Hey ${contact},</p>
-              <p class="dm-text-secondary" style="margin:0 0 18px 0;font-size:16px;color:#333333;line-height:1.6;">Big respect for what you've built with <strong style="color:#0000FF;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
+              <p class="dm-text-secondary" style="margin:0 0 18px 0;font-size:16px;color:#333333;line-height:1.6;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
               <p class="dm-text-secondary" style="margin:0 0 18px 0;font-size:16px;color:#333333;line-height:1.6;">My name is <strong class="dm-text-strong" style="color:#111111;">${sender}</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in ${ort}.</p>
               <p class="dm-text-secondary" style="margin:0 0 18px 0;font-size:16px;color:#333333;line-height:1.6;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly. Artists who understand the floor and know how to hold a crowd.</p>
 
               <!-- ROSTER -->
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;border-radius:10px;overflow:hidden;" class="dm-bg-roster">
                 <tr>
-                  <td style="background:linear-gradient(90deg,#0000FF 0%,#0000cc 100%);padding:12px 20px;">
+                  <td style="background:linear-gradient(90deg,#2563eb 0%,#1d4ed8 100%);padding:12px 20px;">
                     <p style="margin:0;font-size:11px;color:#ffffff;text-transform:uppercase;letter-spacing:2px;font-weight:600;">Artist Roster</p>
                   </td>
                 </tr>
@@ -187,7 +187,7 @@ export default function NewAgencyLeadPage() {
           <!-- CTA -->
           <tr>
             <td style="padding:0 24px 28px 24px;text-align:center;">
-              <a href="mailto:agency@technoontheblock.ch?subject=Re:%20Artists%20from%20Basel%20%E2%80%93%20Techno%20on%20the%20Block" style="display:inline-block;background:linear-gradient(135deg,#0000FF 0%,#0000cc 100%);color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Reply to this email</a>
+              <a href="mailto:agency@technoontheblock.ch?subject=Re:%20Artists%20from%20Basel%20%E2%80%93%20Techno%20on%20the%20Block" style="display:inline-block;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Reply to this email</a>
             </td>
           </tr>
           <!-- FOOTER -->
@@ -195,7 +195,7 @@ export default function NewAgencyLeadPage() {
             <td class="dm-bg-footer" style="padding:20px 24px;background:#f5f5f5;border-top:1px solid #e0e0e0;text-align:center;">
               <p class="dm-text-strong" style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#111111;">${sender}</p>
               <p class="dm-text-muted" style="margin:0 0 4px 0;font-size:11px;color:#666666;">The Agency – Artist Management</p>
-              <p style="margin:0 0 4px 0;font-size:11px;color:#0000FF;font-weight:600;">Club Techno on the Block</p>
+              <p style="margin:0 0 4px 0;font-size:11px;color:#2563eb;font-weight:600;">Club Techno on the Block</p>
               <p class="dm-text-muted" style="margin:0;font-size:11px;color:#888888;">Basel, Switzerland</p>
             </td>
           </tr>
