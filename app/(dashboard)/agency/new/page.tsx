@@ -119,6 +119,15 @@ export default function NewAgencyLeadPage() {
   <meta name="supported-color-schemes" content="light dark">
   <style>
     :root { color-scheme: light dark; }
+    @media only screen and (max-width: 600px) {
+      .col-stack { display: block !important; width: 100% !important; max-width: 100% !important; border: none !important; padding-left: 20px !important; padding-right: 20px !important; }
+      .col-roster { border-bottom: 1px solid #e8e8e8 !important; }
+      .col-content { order: 1 !important; }
+      .col-roster { order: 2 !important; }
+      .col-team { order: 3 !important; border-top: 1px solid #e8e8e8 !important; }
+      .mob-center { text-align: center !important; }
+      .mob-pad { padding: 24px 20px !important; }
+    }
     @media (prefers-color-scheme: dark) {
       .dm-bg-body { background-color: #111111 !important; }
       .dm-bg-card { background-color: #1a1a1a !important; }
@@ -153,7 +162,7 @@ export default function NewAgencyLeadPage() {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
                   <!-- LEFT: DJ ROSTER -->
-                  <td class="dm-bg-left" width="180" style="width:180px;min-width:180px;background:#f8f9fa;border-right:1px solid #e8e8e8;padding:28px 20px;vertical-align:top;">
+                  <td class="col-stack col-roster dm-bg-left" width="180" style="width:180px;min-width:180px;background:#f8f9fa;border-right:1px solid #e8e8e8;padding:28px 20px;vertical-align:top;">
                     <p style="margin:0 0 16px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">DJ Roster</p>
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       ${rosterRows}
@@ -161,7 +170,7 @@ export default function NewAgencyLeadPage() {
                   </td>
 
                   <!-- CENTER: MAIN CONTENT -->
-                  <td style="padding:32px 28px;vertical-align:top;">
+                  <td class="col-stack col-content mob-pad" style="padding:32px 28px;vertical-align:top;">
                     <p class="dm-text-primary" style="margin:0 0 16px 0;font-size:15px;color:#111111;line-height:1.55;">Hey ${contact},</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">Luca Littmann</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
@@ -171,7 +180,7 @@ export default function NewAgencyLeadPage() {
 
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
-                        <td style="text-align:center;padding:8px 0 4px 0;">
+                        <td class="mob-center" style="text-align:center;padding:8px 0 4px 0;">
                           <a href="mailto:agency@technoontheblock.ch?subject=Re:%20Artists%20from%20Basel%20%E2%80%93%20Techno%20on%20the%20Block" style="display:inline-block;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Reply to this email</a>
                         </td>
                       </tr>
@@ -179,7 +188,7 @@ export default function NewAgencyLeadPage() {
                   </td>
 
                   <!-- RIGHT: AGENCY TEAM -->
-                  <td class="dm-bg-right" width="160" style="width:160px;min-width:160px;background:#f8f9fa;border-left:1px solid #e8e8e8;padding:28px 18px;vertical-align:top;">
+                  <td class="col-stack col-team dm-bg-right" width="160" style="width:160px;min-width:160px;background:#f8f9fa;border-left:1px solid #e8e8e8;padding:28px 18px;vertical-align:top;">
                     <p style="margin:0 0 16px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Agency Team</p>
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
