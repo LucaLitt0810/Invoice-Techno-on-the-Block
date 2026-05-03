@@ -119,12 +119,14 @@ export default function NewAgencyLeadPage() {
   <meta name="supported-color-schemes" content="light dark">
   <style>
     :root { color-scheme: light dark; }
+    body { word-wrap: break-word; overflow-wrap: break-word; -webkit-text-size-adjust: 100%; }
     @media only screen and (max-width: 600px) {
       .hide-mobile { display: none !important; }
-      .show-mobile { display: block !important; width: 100% !important; max-width: 100% !important; }
+      .show-mobile { display: block !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
       .mob-center { text-align: center !important; }
       .mob-pad { padding: 24px 20px !important; }
       .mob-border { border-top: 1px solid #e8e8e8 !important; border-bottom: 1px solid #e8e8e8 !important; }
+      .mob-wrap { word-wrap: break-word !important; overflow-wrap: break-word !important; }
     }
     @media only screen and (min-width: 601px) {
       .hide-desktop { display: none !important; }
@@ -215,37 +217,49 @@ export default function NewAgencyLeadPage() {
           <!-- MOBILE: stacked Content → Team → Roster -->
           <tr class="hide-desktop">
             <td style="padding:0;">
-              <!-- CONTENT -->
-              <div class="show-mobile mob-pad" style="padding:28px 20px;">
-                <p class="dm-text-primary" style="margin:0 0 16px 0;font-size:15px;color:#111111;line-height:1.55;">Hey ${contact},</p>
-                <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
-                <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">Luca Littmann</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
-                <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly.</p>
-                <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">I'm confident some of them would be a great match for future nights at <strong class="dm-text-strong" style="color:#111111;">${venue}</strong>.</p>
-                <p class="dm-text-secondary" style="margin:0 0 20px 0;font-size:15px;color:#444444;line-height:1.55;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
-                <div class="mob-center" style="text-align:center;padding:8px 0 4px 0;">
-                  <a href="mailto:agency@technoontheblock.ch?subject=Re:%20Artists%20from%20Basel%20%E2%80%93%20Techno%20on%20the%20Block" style="display:inline-block;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Reply to this email</a>
-                </div>
-              </div>
-              <!-- TEAM -->
-              <div class="show-mobile mob-border mob-pad dm-bg-right" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;">
-                <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Agency Team</p>
-                <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">Luca Littmann</p>
-                <p style="margin:3px 0 0 0;font-size:10px;color:#666666;line-height:1.4;">Artist Management<br>Techno on the Block</p>
-                <p style="margin:12px 0 0 0;padding-top:12px;border-top:1px solid #e0e0e0;font-size:10px;color:#888888;line-height:1.5;" class="dm-border">
-                  <strong style="color:#2563eb;">Club</strong><br>
-                  Techno on the Block<br>
-                  Basel, Switzerland<br><br>
-                  <a href="mailto:agency@technoontheblock.ch" style="color:#2563eb;text-decoration:none;">agency@technoontheblock.ch</a>
-                </p>
-              </div>
-              <!-- ROSTER -->
-              <div class="show-mobile mob-border mob-pad dm-bg-left" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8;">
-                <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">DJ Roster</p>
-                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-                  ${rosterRows}
-                </table>
-              </div>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="table-layout:fixed;">
+                <!-- CONTENT -->
+                <tr>
+                  <td class="mob-wrap mob-pad" style="padding:28px 20px;word-wrap:break-word;overflow-wrap:break-word;">
+                    <p class="dm-text-primary" style="margin:0 0 16px 0;font-size:15px;color:#111111;line-height:1.55;">Hey ${contact},</p>
+                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
+                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">Luca Littmann</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
+                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly.</p>
+                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">I'm confident some of them would be a great match for future nights at <strong class="dm-text-strong" style="color:#111111;">${venue}</strong>.</p>
+                    <p class="dm-text-secondary" style="margin:0 0 20px 0;font-size:15px;color:#444444;line-height:1.55;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td class="mob-center" style="text-align:center;padding:8px 0 4px 0;">
+                          <a href="mailto:agency@technoontheblock.ch?subject=Re:%20Artists%20from%20Basel%20%E2%80%93%20Techno%20on%20the%20Block" style="display:inline-block;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Reply to this email</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <!-- TEAM -->
+                <tr>
+                  <td class="mob-wrap mob-pad dm-bg-right" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;word-wrap:break-word;overflow-wrap:break-word;">
+                    <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Agency Team</p>
+                    <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">Luca Littmann</p>
+                    <p style="margin:3px 0 0 0;font-size:10px;color:#666666;line-height:1.4;">Artist Management<br>Techno on the Block</p>
+                    <p style="margin:12px 0 0 0;padding-top:12px;border-top:1px solid #e0e0e0;font-size:10px;color:#888888;line-height:1.5;" class="dm-border">
+                      <strong style="color:#2563eb;">Club</strong><br>
+                      Techno on the Block<br>
+                      Basel, Switzerland<br><br>
+                      <a href="mailto:agency@technoontheblock.ch" style="color:#2563eb;text-decoration:none;">agency@technoontheblock.ch</a>
+                    </p>
+                  </td>
+                </tr>
+                <!-- ROSTER -->
+                <tr>
+                  <td class="mob-wrap mob-pad dm-bg-left" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8;word-wrap:break-word;overflow-wrap:break-word;">
+                    <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">DJ Roster</p>
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                      ${rosterRows}
+                    </table>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
