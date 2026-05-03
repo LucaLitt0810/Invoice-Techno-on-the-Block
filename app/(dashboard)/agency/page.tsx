@@ -15,6 +15,8 @@ import {
   BriefcaseIcon,
   UserGroupIcon,
   XMarkIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -96,7 +98,7 @@ export default function AgencyPage() {
         .from('email_team_members')
         .select('*')
         .eq('is_active', true)
-        .order('name');
+        .order('sort_order', { ascending: true });
 
       if (error) throw error;
       setTeamMembers(data || []);
@@ -112,23 +114,55 @@ export default function AgencyPage() {
     e.preventDefault();
     if (!newMemberName.trim()) return;
     try {
+      const maxOrder = teamMembers.length > 0
+        ? Math.max(...teamMembers.map((m) => m.sort_order ?? 0))
+        : -1;
       const { data, error } = await (supabase.from('email_team_members') as any)
         .insert({
           name: newMemberName.trim(),
           email: newMemberEmail.trim() || null,
           role: newMemberRole.trim(),
+          sort_order: maxOrder + 1,
         })
         .select()
         .single();
 
       if (error) throw error;
-      setTeamMembers((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+      setTeamMembers((prev) => [...prev, data].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)));
       setNewMemberName('');
       setNewMemberEmail('');
       setNewMemberRole('Artist Management');
       toast.success('Team member added');
     } catch (error: any) {
       toast.error(error.message || 'Failed to add member');
+    }
+  };
+
+  const handleMoveMember = async (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= teamMembers.length) return;
+
+    const updated = [...teamMembers];
+    const temp = updated[index];
+    updated[index] = updated[newIndex];
+    updated[newIndex] = temp;
+
+    // Update sort_order locally
+    const reordered = updated.map((m, i) => ({ ...m, sort_order: i }));
+    setTeamMembers(reordered);
+
+    // Persist to DB
+    try {
+      const a = reordered[index];
+      const b = reordered[newIndex];
+      await (supabase.from('email_team_members') as any)
+        .update({ sort_order: a.sort_order })
+        .eq('id', a.id);
+      await (supabase.from('email_team_members') as any)
+        .update({ sort_order: b.sort_order })
+        .eq('id', b.id);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update order');
     }
   };
 
@@ -468,14 +502,34 @@ export default function AgencyPage() {
                   <p className="text-sm text-gray-500 text-center py-4">No team members yet.</p>
                 ) : (
                   <div className="space-y-2">
-                    {teamMembers.map((m) => (
+                    {teamMembers.map((m, idx) => (
                       <div
                         key={m.id}
                         className="flex items-center justify-between rounded-lg bg-[#0a0a0a] border border-white/5 px-4 py-3"
                       >
-                        <div>
-                          <p className="text-sm font-medium text-white">{m.name}</p>
-                          <p className="text-xs text-gray-500">{m.role}{m.email ? ` · ${m.email}` : ''}</p>
+                        <div className="flex items-center gap-3">
+                          <div className="flex flex-col gap-0.5">
+                            <button
+                              onClick={() => handleMoveMember(idx, 'up')}
+                              disabled={idx === 0}
+                              className="text-gray-500 hover:text-white disabled:opacity-20 disabled:hover:text-gray-500 transition-colors"
+                              title="Move up"
+                            >
+                              <ChevronUpIcon className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleMoveMember(idx, 'down')}
+                              disabled={idx === teamMembers.length - 1}
+                              className="text-gray-500 hover:text-white disabled:opacity-20 disabled:hover:text-gray-500 transition-colors"
+                              title="Move down"
+                            >
+                              <ChevronDownIcon className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-white">{m.name}</p>
+                            <p className="text-xs text-gray-500">{m.role}{m.email ? ` · ${m.email}` : ''}</p>
+                          </div>
                         </div>
                         <button
                           onClick={() => handleDeleteMember(m.id)}

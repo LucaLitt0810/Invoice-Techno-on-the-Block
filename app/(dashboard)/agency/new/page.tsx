@@ -58,7 +58,7 @@ export default function NewAgencyLeadPage() {
         .from('email_team_members')
         .select('*')
         .eq('is_active', true)
-        .order('name');
+        .order('sort_order', { ascending: true });
 
       if (error) throw error;
       const members = (data || []) as EmailTeamMember[];
@@ -130,6 +130,22 @@ export default function NewAgencyLeadPage() {
           ${dj.genre ? `<p style="margin:2px 0 0 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:1px;">${dj.genre}</p>` : ''}
         </td>
       </tr>
+    `).join('');
+
+    const sortedTeam = [...teamMembers].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    const teamRows = sortedTeam.map((m, i) => `
+      <tr>
+        <td style="padding-bottom:14px;${i > 0 ? 'border-top:1px solid #e0e0e0;padding-top:14px;' : ''}" class="${i > 0 ? 'dm-border' : ''}">
+          <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">${m.name}</p>
+          <p style="margin:3px 0 0 0;font-size:10px;color:#666666;line-height:1.4;">${m.role || 'Artist Management'}<br>Techno on the Block</p>
+        </td>
+      </tr>
+    `).join('');
+    const teamRowsMobile = sortedTeam.map((m, i) => `
+      <div style="${i > 0 ? 'margin-top:12px;padding-top:12px;border-top:1px solid #e0e0e0;' : ''}" class="${i > 0 ? 'dm-border' : ''}">
+        <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">${m.name}</p>
+        <p style="margin:3px 0 0 0;font-size:10px;color:#666666;line-height:1.4;">${m.role || 'Artist Management'}<br>Techno on the Block</p>
+      </div>
     `).join('');
 
     return `<!DOCTYPE html>
@@ -213,12 +229,7 @@ export default function NewAgencyLeadPage() {
                   <td class="dm-bg-right" width="160" style="width:160px;min-width:160px;background:#f8f9fa;border-left:1px solid #e8e8e8;padding:28px 18px;vertical-align:top;">
                     <p style="margin:0 0 16px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Agency Team</p>
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-                      <tr>
-                        <td style="padding-bottom:14px;">
-                          <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">${sender}</p>
-                          <p style="margin:3px 0 0 0;font-size:10px;color:#666666;line-height:1.4;">Artist Management<br>Techno on the Block</p>
-                        </td>
-                      </tr>
+                      ${teamRows}
                       <tr>
                         <td style="padding-top:14px;border-top:1px solid #e0e0e0;" class="dm-border">
                           <p style="margin:0;font-size:10px;color:#888888;line-height:1.5;">
@@ -262,8 +273,7 @@ export default function NewAgencyLeadPage() {
                 <tr>
                   <td class="mob-wrap mob-pad dm-bg-right" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;word-wrap:break-word;overflow-wrap:break-word;">
                     <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Agency Team</p>
-                    <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">${sender}</p>
-                    <p style="margin:3px 0 0 0;font-size:10px;color:#666666;line-height:1.4;">Artist Management<br>Techno on the Block</p>
+                    ${teamRowsMobile}
                     <p style="margin:12px 0 0 0;padding-top:12px;border-top:1px solid #e0e0e0;font-size:10px;color:#888888;line-height:1.5;" class="dm-border">
                       <strong style="color:#2563eb;">Club</strong><br>
                       Techno on the Block<br>
