@@ -103,16 +103,9 @@ export default function NewAgencyLeadPage() {
 
     const rosterRows = rosterDJs.map((dj) => `
       <tr>
-        <td class="dm-border-row" style="padding:10px 0;border-bottom:1px solid #e8e8e8;">
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-            <tr>
-              <td style="width:8px;height:8px;background:#2563eb;border-radius:50%;padding:0;"></td>
-              <td style="padding-left:14px;">
-                <p class="dm-text-strong" style="margin:0;font-size:15px;font-weight:700;color:#111111;">${dj.name}</p>
-                ${dj.genre ? `<p style="margin:2px 0 0 0;font-size:11px;color:#2563eb;text-transform:uppercase;letter-spacing:1px;">${dj.genre}</p>` : ''}
-              </td>
-            </tr>
-          </table>
+        <td style="padding:8px 0;">
+          <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;letter-spacing:0.3px;">${dj.name}</p>
+          ${dj.genre ? `<p style="margin:2px 0 0 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:1px;">${dj.genre}</p>` : ''}
         </td>
       </tr>
     `).join('');
@@ -127,85 +120,101 @@ export default function NewAgencyLeadPage() {
   <style>
     :root { color-scheme: light dark; }
     @media (prefers-color-scheme: dark) {
-      .dm-bg-body { background-color: #1a1a1a !important; }
-      .dm-bg-card { background-color: #242424 !important; border-color: #333333 !important; }
-      .dm-bg-header { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important; }
-      .dm-bg-roster { background-color: #1e1e2e !important; border-color: #333333 !important; }
-      .dm-bg-footer { background-color: #1a1a1a !important; border-color: #333333 !important; }
-      .dm-text-primary { color: #f0f0f0 !important; }
+      .dm-bg-body { background-color: #111111 !important; }
+      .dm-bg-card { background-color: #1a1a1a !important; }
+      .dm-bg-left { background-color: #141414 !important; border-color: #2a2a2a !important; }
+      .dm-bg-right { background-color: #141414 !important; border-color: #2a2a2a !important; }
+      .dm-bg-footer { background-color: #111111 !important; border-color: #2a2a2a !important; }
+      .dm-text-primary { color: #f5f5f5 !important; }
       .dm-text-secondary { color: #bbbbbb !important; }
-      .dm-text-muted { color: #888888 !important; }
+      .dm-text-muted { color: #777777 !important; }
       .dm-text-strong { color: #ffffff !important; }
-      .dm-border-row { border-bottom-color: #333333 !important; }
+      .dm-border { border-color: #2a2a2a !important; }
     }
   </style>
 </head>
-<body class="dm-bg-body" style="margin:0;padding:0;background-color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
-  <!--[if mso]>
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td>
-  <![endif]-->
+<body class="dm-bg-body" style="margin:0;padding:0;background-color:#f0f0f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
     <tr>
-      <td align="center" style="padding:24px 12px;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 2px 12px rgba(0,0,0,0.06);" class="dm-bg-card">
-          <!-- HEADER -->
+      <td align="center" style="padding:20px 10px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:720px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.12);" class="dm-bg-card">
+
+          <!-- TOP BAR -->
           <tr>
-            <td class="dm-bg-header" style="background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);padding:28px 24px;text-align:center;">
-              <p style="margin:0;font-size:20px;font-weight:800;color:#ffffff;letter-spacing:3px;text-transform:uppercase;line-height:1.2;">TECHNO ON THE BLOCK</p>
-              <p style="margin:6px 0 0 0;font-size:10px;color:rgba(255,255,255,0.85);letter-spacing:2px;text-transform:uppercase;line-height:1.2;">The Agency – Artist Management</p>
+            <td style="background:linear-gradient(90deg,#2563eb 0%,#1d4ed8 100%);padding:16px 24px;text-align:center;">
+              <p style="margin:0;font-size:18px;font-weight:800;color:#ffffff;letter-spacing:4px;text-transform:uppercase;">TECHNO ON THE BLOCK</p>
+              <p style="margin:4px 0 0 0;font-size:9px;color:rgba(255,255,255,0.8);letter-spacing:3px;text-transform:uppercase;">The Agency – Artist Management</p>
             </td>
           </tr>
-          <!-- BODY -->
-          <tr>
-            <td style="padding:32px 24px;">
-              <p class="dm-text-primary" style="margin:0 0 18px 0;font-size:16px;color:#111111;line-height:1.6;">Hey ${contact},</p>
-              <p class="dm-text-secondary" style="margin:0 0 18px 0;font-size:16px;color:#333333;line-height:1.6;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
-              <p class="dm-text-secondary" style="margin:0 0 18px 0;font-size:16px;color:#333333;line-height:1.6;">My name is <strong class="dm-text-strong" style="color:#111111;">${sender}</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in ${ort}.</p>
-              <p class="dm-text-secondary" style="margin:0 0 18px 0;font-size:16px;color:#333333;line-height:1.6;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly. Artists who understand the floor and know how to hold a crowd.</p>
 
-              <!-- ROSTER -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;border-radius:10px;overflow:hidden;" class="dm-bg-roster">
+          <!-- 3-COLUMN LAYOUT -->
+          <tr>
+            <td style="padding:0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
-                  <td style="background:linear-gradient(90deg,#2563eb 0%,#1d4ed8 100%);padding:12px 20px;">
-                    <p style="margin:0;font-size:11px;color:#ffffff;text-transform:uppercase;letter-spacing:2px;font-weight:600;">Artist Roster</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 20px 14px 20px;background:#fafbff;" class="dm-bg-roster">
+                  <!-- LEFT: DJ ROSTER -->
+                  <td class="dm-bg-left" width="180" style="width:180px;min-width:180px;background:#f8f9fa;border-right:1px solid #e8e8e8;padding:28px 20px;vertical-align:top;">
+                    <p style="margin:0 0 16px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">DJ Roster</p>
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       ${rosterRows}
                     </table>
                   </td>
+
+                  <!-- CENTER: MAIN CONTENT -->
+                  <td style="padding:32px 28px;vertical-align:top;">
+                    <p class="dm-text-primary" style="margin:0 0 16px 0;font-size:15px;color:#111111;line-height:1.55;">Hey ${contact},</p>
+                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
+                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">${sender}</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in ${ort}.</p>
+                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly.</p>
+                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">I'm confident some of them would be a great match for future nights at <strong class="dm-text-strong" style="color:#111111;">${venue}</strong>.</p>
+                    <p class="dm-text-secondary" style="margin:0 0 20px 0;font-size:15px;color:#444444;line-height:1.55;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
+
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td style="text-align:center;padding:8px 0 4px 0;">
+                          <a href="mailto:agency@technoontheblock.ch?subject=Re:%20Artists%20from%20Basel%20%E2%80%93%20Techno%20on%20the%20Block" style="display:inline-block;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Reply to this email</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+
+                  <!-- RIGHT: AGENCY TEAM -->
+                  <td class="dm-bg-right" width="160" style="width:160px;min-width:160px;background:#f8f9fa;border-left:1px solid #e8e8e8;padding:28px 18px;vertical-align:top;">
+                    <p style="margin:0 0 16px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Agency Team</p>
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td style="padding-bottom:14px;">
+                          <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">${sender}</p>
+                          <p style="margin:3px 0 0 0;font-size:10px;color:#666666;line-height:1.4;">Artist Management<br>Techno on the Block</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-top:14px;border-top:1px solid #e0e0e0;" class="dm-border">
+                          <p style="margin:0;font-size:10px;color:#888888;line-height:1.5;">
+                            <strong style="color:#2563eb;">Club</strong><br>
+                            Techno on the Block<br>
+                            Basel, Switzerland<br><br>
+                            <a href="mailto:agency@technoontheblock.ch" style="color:#2563eb;text-decoration:none;">agency@technoontheblock.ch</a>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
                 </tr>
               </table>
+            </td>
+          </tr>
 
-              <p class="dm-text-secondary" style="margin:0 0 18px 0;font-size:16px;color:#333333;line-height:1.6;">I'm confident some of them would be a great match for future nights at <strong class="dm-text-strong" style="color:#111111;">${venue}</strong>.</p>
-              <p class="dm-text-secondary" style="margin:0 0 18px 0;font-size:16px;color:#333333;line-height:1.6;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
-              <p class="dm-text-secondary" style="margin:0 0 18px 0;font-size:16px;color:#333333;line-height:1.6;">Respect for what you're doing for the scene — looking forward to hearing from you.</p>
-            </td>
-          </tr>
-          <!-- CTA -->
-          <tr>
-            <td style="padding:0 24px 28px 24px;text-align:center;">
-              <a href="mailto:agency@technoontheblock.ch?subject=Re:%20Artists%20from%20Basel%20%E2%80%93%20Techno%20on%20the%20Block" style="display:inline-block;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Reply to this email</a>
-            </td>
-          </tr>
           <!-- FOOTER -->
           <tr>
-            <td class="dm-bg-footer" style="padding:20px 24px;background:#f5f5f5;border-top:1px solid #e0e0e0;text-align:center;">
-              <p class="dm-text-strong" style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#111111;">${sender}</p>
-              <p class="dm-text-muted" style="margin:0 0 4px 0;font-size:11px;color:#666666;">The Agency – Artist Management</p>
-              <p style="margin:0 0 4px 0;font-size:11px;color:#2563eb;font-weight:600;">Club Techno on the Block</p>
-              <p class="dm-text-muted" style="margin:0;font-size:11px;color:#888888;">Basel, Switzerland</p>
+            <td class="dm-bg-footer" style="padding:16px 24px;background:#f0f0f0;border-top:1px solid #e0e0e0;text-align:center;">
+              <p class="dm-text-muted" style="margin:0;font-size:10px;color:#999999;letter-spacing:1px;text-transform:uppercase;">© Techno on the Block — The Agency</p>
             </td>
           </tr>
         </table>
       </td>
     </tr>
   </table>
-  <!--[if mso]>
-  </td></tr></table>
-  <![endif]-->
 </body>
 </html>`;
   };
