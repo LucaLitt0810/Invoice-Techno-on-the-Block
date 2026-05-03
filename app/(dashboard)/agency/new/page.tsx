@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
-import { AGENCY_STATUS_OPTIONS } from '@/types';
+import { AGENCY_STATUS_OPTIONS, EmailTeamMember } from '@/types';
 import { DJ } from '@/types/bookings';
 import { COUNTRIES, generateCustomerNumber } from '@/lib/utils/helpers';
 import { ArrowLeftIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
@@ -17,6 +17,8 @@ export default function NewAgencyLeadPage() {
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
   const [djs, setDjs] = useState<DJ[]>([]);
+  const [teamMembers, setTeamMembers] = useState<EmailTeamMember[]>([]);
+  const [emailSenderId, setEmailSenderId] = useState('');
   const [prefillCustomer, setPrefillCustomer] = useState<{ company_name: string; contact_person: string | null; email: string; phone: string | null; street: string; postal_code: string; city: string; country: string } | null>(null);
 
   const [formData, setFormData] = useState({
@@ -31,12 +33,12 @@ export default function NewAgencyLeadPage() {
     status: 'contacted' as 'contacted' | 'negotiation' | 'closed',
     notes: '',
     email_venue: '',
-    email_sender: '',
   });
 
-  // Load DJ roster
+  // Load DJ roster & team
   useEffect(() => {
     fetchDJs();
+    fetchTeam();
   }, []);
 
   const fetchDJs = async () => {
@@ -45,6 +47,24 @@ export default function NewAgencyLeadPage() {
       if (!res.ok) throw new Error('Failed');
       const data = await res.json();
       setDjs((data.djs || []).filter((d: DJ) => d.active));
+    } catch {
+      // silent fail
+    }
+  };
+
+  const fetchTeam = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('email_team_members')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      const members = (data || []) as EmailTeamMember[];
+      setTeamMembers(members);
+      // Default to first member
+      if (members.length > 0) setEmailSenderId(members[0].id);
     } catch {
       // silent fail
     }
@@ -86,7 +106,9 @@ export default function NewAgencyLeadPage() {
   const buildEmailHtml = () => {
     const venue = formData.email_venue || 'your venue';
     const contact = formData.contact_person || 'there';
-    const sender = 'Luca Littmann';
+    const selectedSender = teamMembers.find((m) => m.id === emailSenderId);
+    const sender = selectedSender?.name || 'Luca Littmann';
+    const senderCity = formData.city || 'Basel';
     const ort = formData.city || 'Basel';
 
     const activeDJs = djs.filter((d) => d.active);
@@ -175,7 +197,7 @@ export default function NewAgencyLeadPage() {
                   <td style="padding:32px 28px;vertical-align:top;">
                     <p class="dm-text-primary" style="margin:0 0 16px 0;font-size:15px;color:#111111;line-height:1.55;">Hey ${contact},</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
-                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">Luca Littmann</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
+                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">${sender}</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">I'm confident some of them would be a great match for future nights at <strong class="dm-text-strong" style="color:#111111;">${venue}</strong>.</p>
                     <p class="dm-text-secondary" style="margin:0 0 20px 0;font-size:15px;color:#444444;line-height:1.55;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
@@ -193,7 +215,7 @@ export default function NewAgencyLeadPage() {
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
                         <td style="padding-bottom:14px;">
-                          <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">Luca Littmann</p>
+                          <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">${sender}</p>
                           <p style="margin:3px 0 0 0;font-size:10px;color:#666666;line-height:1.4;">Artist Management<br>Techno on the Block</p>
                         </td>
                       </tr>
@@ -223,7 +245,7 @@ export default function NewAgencyLeadPage() {
                   <td class="mob-wrap mob-pad" style="padding:28px 20px;word-wrap:break-word;overflow-wrap:break-word;">
                     <p class="dm-text-primary" style="margin:0 0 16px 0;font-size:15px;color:#111111;line-height:1.55;">Hey ${contact},</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
-                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">Luca Littmann</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
+                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">${sender}</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">I'm confident some of them would be a great match for future nights at <strong class="dm-text-strong" style="color:#111111;">${venue}</strong>.</p>
                     <p class="dm-text-secondary" style="margin:0 0 20px 0;font-size:15px;color:#444444;line-height:1.55;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
@@ -240,7 +262,7 @@ export default function NewAgencyLeadPage() {
                 <tr>
                   <td class="mob-wrap mob-pad dm-bg-right" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;word-wrap:break-word;overflow-wrap:break-word;">
                     <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Agency Team</p>
-                    <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">Luca Littmann</p>
+                    <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">${sender}</p>
                     <p style="margin:3px 0 0 0;font-size:10px;color:#666666;line-height:1.4;">Artist Management<br>Techno on the Block</p>
                     <p style="margin:12px 0 0 0;padding-top:12px;border-top:1px solid #e0e0e0;font-size:10px;color:#888888;line-height:1.5;" class="dm-border">
                       <strong style="color:#2563eb;">Club</strong><br>
@@ -343,14 +365,17 @@ export default function NewAgencyLeadPage() {
       }
 
       // Send email
-      if (formData.email && formData.contact_person && formData.email_venue && formData.email_sender) {
+      if (formData.email && formData.contact_person && formData.email_venue && emailSenderId) {
         try {
+          const selSender = teamMembers.find((m) => m.id === emailSenderId);
+          const subjCity = formData.city || 'Basel';
           const emailRes = await fetch('/api/email/send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               to: formData.email,
-              subject: `Artists from Basel – Techno on the Block`,
+              subject: `Artists from ${subjCity} – Techno on the Block`,
+              from: selSender?.email ? `${selSender.name} <${selSender.email}>` : undefined,
               html: buildEmailHtml(),
             }),
           });
@@ -527,13 +552,20 @@ export default function NewAgencyLeadPage() {
               </div>
               <div>
                 <label className="label">Geschickt von</label>
-                <input
-                  type="text"
+                <select
                   className="input"
-                  value={formData.email_sender}
-                  onChange={(e) => handleChange('email_sender', e.target.value)}
-                  placeholder="z.B. Luca Littmann"
-                />
+                  value={emailSenderId}
+                  onChange={(e) => setEmailSenderId(e.target.value)}
+                >
+                  {teamMembers.length === 0 && (
+                    <option value="" className="bg-dark-800">Loading team...</option>
+                  )}
+                  {teamMembers.map((m) => (
+                    <option key={m.id} value={m.id} className="bg-dark-800">
+                      {m.name}{m.role ? ` (${m.role})` : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="label">Contact Person (auto)</label>
@@ -548,10 +580,10 @@ export default function NewAgencyLeadPage() {
             </div>
 
             {/* Email Preview */}
-            {(formData.contact_person || formData.email_venue || formData.email_sender) && (
+            {(formData.contact_person || formData.email_venue || emailSenderId) && (
               <div className="mt-4 rounded-lg border border-white/10 bg-[#0a0a0a] p-4">
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500">Vorschau</p>
-                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: Artists from Basel – Techno on the Block</p>
+                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: Artists from {formData.city || 'Basel'} – Techno on the Block</p>
                 <div
                   className="text-sm text-gray-300 space-y-2"
                   dangerouslySetInnerHTML={{ __html: emailPreview }}

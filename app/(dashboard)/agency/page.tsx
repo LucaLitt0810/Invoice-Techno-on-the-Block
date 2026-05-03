@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
-import { AgencyLead, AGENCY_STATUS_OPTIONS } from '@/types';
+import { AgencyLead, AGENCY_STATUS_OPTIONS, EmailTeamMember } from '@/types';
 import { Booking, BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS } from '@/types/bookings';
 import {
   PlusIcon,
@@ -13,6 +13,8 @@ import {
   ArrowTopRightOnSquareIcon,
   CalendarIcon,
   BriefcaseIcon,
+  UserGroupIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -28,6 +30,14 @@ export default function AgencyPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const supabase = createClient();
+
+  // Team modal state
+  const [showTeamModal, setShowTeamModal] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<EmailTeamMember[]>([]);
+  const [teamLoading, setTeamLoading] = useState(false);
+  const [newMemberName, setNewMemberName] = useState('');
+  const [newMemberEmail, setNewMemberEmail] = useState('');
+  const [newMemberRole, setNewMemberRole] = useState('Artist Management');
 
   useEffect(() => {
     if (activeTab === 'leads') fetchLeads();
@@ -55,7 +65,6 @@ export default function AgencyPage() {
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      // Load bookings without customer join (FK may not exist in DB)
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select('*, dj:djs(*)')
@@ -63,7 +72,6 @@ export default function AgencyPage() {
 
       if (bookingsError) throw bookingsError;
 
-      // Load customers separately and merge
       const { data: customersData } = await supabase.from('customers').select('id, company_name');
       const customerMap = new Map(customersData?.map((c: any) => [c.id, c]) || []);
 
@@ -79,6 +87,69 @@ export default function AgencyPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchTeam = async () => {
+    setTeamLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('email_team_members')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      setTeamMembers(data || []);
+    } catch (error) {
+      console.error('Error fetching team:', error);
+      toast.error('Failed to load team members');
+    } finally {
+      setTeamLoading(false);
+    }
+  };
+
+  const handleAddMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMemberName.trim()) return;
+    try {
+      const { data, error } = await (supabase.from('email_team_members') as any)
+        .insert({
+          name: newMemberName.trim(),
+          email: newMemberEmail.trim() || null,
+          role: newMemberRole.trim(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      setTeamMembers((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+      setNewMemberName('');
+      setNewMemberEmail('');
+      setNewMemberRole('Artist Management');
+      toast.success('Team member added');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add member');
+    }
+  };
+
+  const handleDeleteMember = async (id: string) => {
+    if (!confirm('Remove this team member?')) return;
+    try {
+      const { error } = await (supabase.from('email_team_members') as any)
+        .update({ is_active: false })
+        .eq('id', id);
+
+      if (error) throw error;
+      setTeamMembers((prev) => prev.filter((m) => m.id !== id));
+      toast.success('Team member removed');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to remove member');
+    }
+  };
+
+  const openTeamModal = () => {
+    setShowTeamModal(true);
+    fetchTeam();
   };
 
   const handleDeleteLead = async (id: string) => {
@@ -133,7 +204,14 @@ export default function AgencyPage() {
             Manage leads and bookings in one place.
           </p>
         </div>
-        <div className="mt-4 flex md:mt-0 md:ml-4">
+        <div className="mt-4 flex md:mt-0 md:ml-4 gap-3">
+          <button
+            onClick={openTeamModal}
+            className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
+          >
+            <UserGroupIcon className="-ml-1 mr-2 h-5 w-5" />
+            Edit Team
+          </button>
           {activeTab === 'leads' ? (
             <Link
               href="/agency/new"
@@ -329,6 +407,89 @@ export default function AgencyPage() {
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Team Modal */}
+      {showTeamModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-lg rounded-xl bg-[#1a1a1a] border border-white/10 overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-white/10">
+              <h3 className="text-lg font-bold text-white uppercase tracking-tight">Email Team</h3>
+              <button onClick={() => setShowTeamModal(false)} className="text-gray-400 hover:text-white">
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-5 max-h-[60vh] overflow-y-auto">
+              {/* Add Member */}
+              <form onSubmit={handleAddMember} className="space-y-3">
+                <p className="text-sm font-medium text-gray-300">Add Team Member</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    placeholder="Name *"
+                    value={newMemberName}
+                    onChange={(e) => setNewMemberName(e.target.value)}
+                    required
+                    className="input text-sm"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={newMemberEmail}
+                    onChange={(e) => setNewMemberEmail(e.target.value)}
+                    className="input text-sm"
+                  />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Role"
+                  value={newMemberRole}
+                  onChange={(e) => setNewMemberRole(e.target.value)}
+                  className="input text-sm w-full"
+                />
+                <button
+                  type="submit"
+                  className="w-full rounded-lg bg-[#2563eb] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+                >
+                  Add Member
+                </button>
+              </form>
+
+              {/* Member List */}
+              <div>
+                <p className="text-sm font-medium text-gray-300 mb-3">Active Members ({teamMembers.length})</p>
+                {teamLoading ? (
+                  <div className="flex justify-center py-4">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#2563eb] border-t-transparent" />
+                  </div>
+                ) : teamMembers.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">No team members yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {teamMembers.map((m) => (
+                      <div
+                        key={m.id}
+                        className="flex items-center justify-between rounded-lg bg-[#0a0a0a] border border-white/5 px-4 py-3"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-white">{m.name}</p>
+                          <p className="text-xs text-gray-500">{m.role}{m.email ? ` · ${m.email}` : ''}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteMember(m.id)}
+                          className="text-gray-500 hover:text-red-400 transition-colors"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

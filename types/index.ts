@@ -35,6 +35,16 @@ export type Customer = {
   created_at: string;
 };
 
+export type EmailTeamMember = {
+  id: string;
+  name: string;
+  email: string | null;
+  role: string;
+  phone: string | null;
+  is_active: boolean;
+  created_at: string;
+};
+
 export type Product = {
   id: string;
   company_id?: string | null;
