@@ -386,10 +386,14 @@ export default function NewInvoicePage() {
       // Send email if status is 'sent'
       if (status === 'sent') {
         try {
-          await fetch(`/api/invoices/${invoice.id}/send`, { method: 'POST' });
-        } catch (sendError) {
+          const res = await fetch(`/api/invoices/${invoice.id}/send`, { method: 'POST' });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || `Email send failed (${res.status})`);
+          }
+        } catch (sendError: any) {
           console.error('Error sending invoice email:', sendError);
-          toast.error('Invoice created but failed to send email');
+          toast.error('Invoice created but failed to send email: ' + (sendError.message || 'Unknown error'));
           router.push('/invoices');
           return;
         }

@@ -80,16 +80,19 @@ export default function InvoiceDetailPage() {
         method: 'POST',
       });
 
-      if (!response.ok) throw new Error('Failed to send email');
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `Email send failed (${response.status})`);
+      }
 
       toast.success('Invoice sent successfully');
       
       // Update invoice status to sent
       await (supabase.from('invoices') as any).update({ status: 'sent' }).eq('id', params.id);
       fetchInvoice();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending invoice:', error);
-      toast.error('Failed to send invoice');
+      toast.error('Failed to send invoice: ' + (error.message || 'Unknown error'));
     } finally {
       setSending(false);
     }
