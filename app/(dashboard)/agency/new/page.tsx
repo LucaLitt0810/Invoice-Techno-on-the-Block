@@ -120,13 +120,14 @@ export default function NewAgencyLeadPage() {
   <style>
     :root { color-scheme: light dark; }
     @media only screen and (max-width: 600px) {
-      .col-stack { display: block !important; width: 100% !important; max-width: 100% !important; border: none !important; padding-left: 20px !important; padding-right: 20px !important; }
-      .col-roster { border-bottom: 1px solid #e8e8e8 !important; }
-      .col-content { order: 1 !important; }
-      .col-roster { order: 2 !important; }
-      .col-team { order: 3 !important; border-top: 1px solid #e8e8e8 !important; }
+      .hide-mobile { display: none !important; }
+      .show-mobile { display: block !important; width: 100% !important; max-width: 100% !important; }
       .mob-center { text-align: center !important; }
       .mob-pad { padding: 24px 20px !important; }
+      .mob-border { border-top: 1px solid #e8e8e8 !important; border-bottom: 1px solid #e8e8e8 !important; }
+    }
+    @media only screen and (min-width: 601px) {
+      .hide-desktop { display: none !important; }
     }
     @media (prefers-color-scheme: dark) {
       .dm-bg-body { background-color: #111111 !important; }
@@ -156,39 +157,36 @@ export default function NewAgencyLeadPage() {
             </td>
           </tr>
 
-          <!-- 3-COLUMN LAYOUT -->
-          <tr>
+          <!-- DESKTOP: 3 columns side by side -->
+          <tr class="hide-mobile">
             <td style="padding:0;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
                   <!-- LEFT: DJ ROSTER -->
-                  <td class="col-stack col-roster dm-bg-left" width="180" style="width:180px;min-width:180px;background:#f8f9fa;border-right:1px solid #e8e8e8;padding:28px 20px;vertical-align:top;">
+                  <td class="dm-bg-left" width="180" style="width:180px;min-width:180px;background:#f8f9fa;border-right:1px solid #e8e8e8;padding:28px 20px;vertical-align:top;">
                     <p style="margin:0 0 16px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">DJ Roster</p>
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       ${rosterRows}
                     </table>
                   </td>
-
                   <!-- CENTER: MAIN CONTENT -->
-                  <td class="col-stack col-content mob-pad" style="padding:32px 28px;vertical-align:top;">
+                  <td style="padding:32px 28px;vertical-align:top;">
                     <p class="dm-text-primary" style="margin:0 0 16px 0;font-size:15px;color:#111111;line-height:1.55;">Hey ${contact},</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">Luca Littmann</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">I'm confident some of them would be a great match for future nights at <strong class="dm-text-strong" style="color:#111111;">${venue}</strong>.</p>
                     <p class="dm-text-secondary" style="margin:0 0 20px 0;font-size:15px;color:#444444;line-height:1.55;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
-
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
-                        <td class="mob-center" style="text-align:center;padding:8px 0 4px 0;">
+                        <td style="text-align:center;padding:8px 0 4px 0;">
                           <a href="mailto:agency@technoontheblock.ch?subject=Re:%20Artists%20from%20Basel%20%E2%80%93%20Techno%20on%20the%20Block" style="display:inline-block;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Reply to this email</a>
                         </td>
                       </tr>
                     </table>
                   </td>
-
                   <!-- RIGHT: AGENCY TEAM -->
-                  <td class="col-stack col-team dm-bg-right" width="160" style="width:160px;min-width:160px;background:#f8f9fa;border-left:1px solid #e8e8e8;padding:28px 18px;vertical-align:top;">
+                  <td class="dm-bg-right" width="160" style="width:160px;min-width:160px;background:#f8f9fa;border-left:1px solid #e8e8e8;padding:28px 18px;vertical-align:top;">
                     <p style="margin:0 0 16px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Agency Team</p>
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
@@ -211,6 +209,43 @@ export default function NewAgencyLeadPage() {
                   </td>
                 </tr>
               </table>
+            </td>
+          </tr>
+
+          <!-- MOBILE: stacked Content → Team → Roster -->
+          <tr class="hide-desktop">
+            <td style="padding:0;">
+              <!-- CONTENT -->
+              <div class="show-mobile mob-pad" style="padding:28px 20px;">
+                <p class="dm-text-primary" style="margin:0 0 16px 0;font-size:15px;color:#111111;line-height:1.55;">Hey ${contact},</p>
+                <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
+                <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">Luca Littmann</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
+                <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly.</p>
+                <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">I'm confident some of them would be a great match for future nights at <strong class="dm-text-strong" style="color:#111111;">${venue}</strong>.</p>
+                <p class="dm-text-secondary" style="margin:0 0 20px 0;font-size:15px;color:#444444;line-height:1.55;">If you're open to it, I'd be happy to send over artist profiles and mixes so you can get a better impression.</p>
+                <div class="mob-center" style="text-align:center;padding:8px 0 4px 0;">
+                  <a href="mailto:agency@technoontheblock.ch?subject=Re:%20Artists%20from%20Basel%20%E2%80%93%20Techno%20on%20the%20Block" style="display:inline-block;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Reply to this email</a>
+                </div>
+              </div>
+              <!-- TEAM -->
+              <div class="show-mobile mob-border mob-pad dm-bg-right" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;">
+                <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Agency Team</p>
+                <p class="dm-text-strong" style="margin:0;font-size:13px;font-weight:700;color:#111111;">Luca Littmann</p>
+                <p style="margin:3px 0 0 0;font-size:10px;color:#666666;line-height:1.4;">Artist Management<br>Techno on the Block</p>
+                <p style="margin:12px 0 0 0;padding-top:12px;border-top:1px solid #e0e0e0;font-size:10px;color:#888888;line-height:1.5;" class="dm-border">
+                  <strong style="color:#2563eb;">Club</strong><br>
+                  Techno on the Block<br>
+                  Basel, Switzerland<br><br>
+                  <a href="mailto:agency@technoontheblock.ch" style="color:#2563eb;text-decoration:none;">agency@technoontheblock.ch</a>
+                </p>
+              </div>
+              <!-- ROSTER -->
+              <div class="show-mobile mob-border mob-pad dm-bg-left" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8;">
+                <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">DJ Roster</p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  ${rosterRows}
+                </table>
+              </div>
             </td>
           </tr>
 
