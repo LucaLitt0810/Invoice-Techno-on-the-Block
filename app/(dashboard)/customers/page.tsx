@@ -39,14 +39,42 @@ export default function CustomersPage() {
     if (!confirm('Are you sure you want to delete this customer?')) return;
 
     try {
+      // Check for blocking relations (invoices & contracts have NOT NULL + ON DELETE RESTRICT)
+      const [{ data: invoices }, { data: contracts }] = await Promise.all([
+        supabase.from('invoices').select('id,invoice_number').eq('customer_id', id),
+        supabase.from('contracts').select('id,title').eq('customer_id', id),
+      ]);
+
+      if ((invoices && invoices.length > 0) || (contracts && contracts.length > 0)) {
+        let msg = 'Cannot delete this customer because it is linked to:\n';
+        if (invoices && invoices.length > 0) {
+          msg += `- ${invoices.length} invoice(s)\n`;
+        }
+        if (contracts && contracts.length > 0) {
+          msg += `- ${contracts.length} contract(s)\n`;
+        }
+        msg += 'Please delete or reassign these first.';
+        toast.error(msg, { duration: 6000 });
+        return;
+      }
+
+      // Clear nullable foreign keys first (agency_leads, bookings)
+      await (supabase.from('agency_leads') as any)
+        .update({ customer_id: null })
+        .eq('customer_id', id);
+      await (supabase.from('bookings') as any)
+        .update({ customer_id: null })
+        .eq('customer_id', id);
+
+      // Now delete the customer
       const { error } = await (supabase.from('customers') as any).delete().eq('id', id);
       if (error) throw error;
-      
+
       setCustomers((prev) => prev.filter((c) => c.id !== id));
       toast.success('Customer deleted successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting customer:', error);
-      toast.error('Failed to delete customer');
+      toast.error(error?.message || 'Failed to delete customer');
     }
   };
 
