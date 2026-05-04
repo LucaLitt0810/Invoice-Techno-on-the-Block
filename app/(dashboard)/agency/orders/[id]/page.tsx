@@ -19,7 +19,10 @@ import {
   ClipboardDocumentListIcon,
   EnvelopeIcon,
   ArrowTopRightOnSquareIcon,
+  CheckCircleIcon,
+  CircleStackIcon,
 } from '@heroicons/react/24/outline';
+import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 
 const ORDER_STATUS_COLORS: Record<string, string> = {
   open: 'bg-blue-900/30 text-blue-400 border-blue-800',
@@ -161,6 +164,20 @@ export default function OrderDetailPage() {
     return map[status] || map.draft;
   };
 
+  const toggleDjRider = async () => {
+    try {
+      const newVal = !order?.dj_rider_filled;
+      const { error } = await (supabase.from('orders') as any)
+        .update({ dj_rider_filled: newVal })
+        .eq('id', orderId);
+      if (error) throw error;
+      setOrder((prev) => prev ? { ...prev, dj_rider_filled: newVal } : prev);
+      toast.success(newVal ? 'DJ Rider marked as filled' : 'DJ Rider marked as open');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -208,6 +225,72 @@ export default function OrderDetailPage() {
             <TrashIcon className="-ml-1 mr-2 h-4 w-4" />
             Delete
           </button>
+        </div>
+      </div>
+
+      {/* Progress Checklist */}
+      <div className="rounded-xl bg-[#0a0a0a] border border-white/5 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-white uppercase tracking-wider">Order Progress</h3>
+          <span className="text-xs text-gray-500">
+            {[
+              offers.length > 0,
+              contracts.length > 0,
+              bookings.length > 0,
+              order.dj_rider_filled,
+            ].filter(Boolean).length} / 4 completed
+          </span>
+        </div>
+        <div className="w-full bg-[#1a1a1a] rounded-full h-2 mb-5">
+          <div
+            className="bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] h-2 rounded-full transition-all duration-500"
+            style={{
+              width: `${([offers.length > 0, contracts.length > 0, bookings.length > 0, order.dj_rider_filled].filter(Boolean).length / 4) * 100}%`,
+            }}
+          />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            {
+              label: 'Angebotschreiben',
+              done: offers.length > 0,
+              onClick: () => setActiveTab('offers'),
+            },
+            {
+              label: 'Vertragsbestätigung',
+              done: contracts.length > 0,
+              onClick: () => setActiveTab('contracts'),
+            },
+            {
+              label: 'Booking Eintragen',
+              done: bookings.length > 0,
+              onClick: () => setActiveTab('bookings'),
+            },
+            {
+              label: 'DJ Rider ausgefüllt',
+              done: order.dj_rider_filled,
+              onClick: toggleDjRider,
+            },
+          ].map((item, i) => (
+            <button
+              key={i}
+              onClick={item.onClick}
+              className={`flex items-center gap-2.5 p-3 rounded-lg border transition-all text-left ${
+                item.done
+                  ? 'bg-green-900/20 border-green-800/50'
+                  : 'bg-[#111] border-white/5 hover:border-white/20'
+              }`}
+            >
+              {item.done ? (
+                <CheckCircleSolid className="h-5 w-5 text-green-400 flex-shrink-0" />
+              ) : (
+                <CircleStackIcon className="h-5 w-5 text-gray-600 flex-shrink-0" />
+              )}
+              <span className={`text-xs font-medium ${item.done ? 'text-green-300' : 'text-gray-400'}`}>
+                {item.label}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 

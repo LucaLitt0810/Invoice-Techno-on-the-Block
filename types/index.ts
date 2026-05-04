@@ -67,6 +67,7 @@ export type Order = {
   description: string | null;
   status: OrderStatus;
   total_budget: number | null;
+  dj_rider_filled: boolean;
   created_at: string;
   updated_at: string;
 };
