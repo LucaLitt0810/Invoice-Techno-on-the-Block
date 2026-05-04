@@ -57,7 +57,7 @@ export default function OrderDetailPage() {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*, customer:customers(*)')
+        .select('*, customer:customers(*), dj:djs(id, name)')
         .eq('id', orderId)
         .single();
 
@@ -282,6 +282,12 @@ export default function OrderDetailPage() {
                         {order.customer.company_name}
                       </Link>
                     ) : '-'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-400">DJ</span>
+                  <span className="text-sm text-white">
+                    {order.dj ? order.dj.name : '-'}
                   </span>
                 </div>
                 <div className="flex justify-between">

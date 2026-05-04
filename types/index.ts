@@ -61,6 +61,8 @@ export type Order = {
   user_email: string | null;
   customer_id: string | null;
   customer?: Customer;
+  dj_id: string | null;
+  dj?: { id: string; name: string };
   title: string;
   description: string | null;
   status: OrderStatus;

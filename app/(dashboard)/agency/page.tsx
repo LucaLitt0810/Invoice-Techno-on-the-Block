@@ -111,7 +111,7 @@ export default function AgencyPage() {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*, customer:customers(*)')
+        .select('*, customer:customers(*), dj:djs(id, name)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -565,6 +565,9 @@ export default function AgencyPage() {
                       <Link href={`/agency/orders/${order.id}`} className="text-white font-medium hover:underline">
                         {order.title}
                       </Link>
+                      {order.dj && (
+                        <p className="text-sm text-gray-500">DJ: {order.dj.name}</p>
+                      )}
                       {order.description && (
                         <p className="text-sm text-gray-500 truncate max-w-[250px]">{order.description}</p>
                       )}

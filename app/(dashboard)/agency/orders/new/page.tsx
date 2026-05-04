@@ -6,6 +6,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { Customer, ORDER_STATUS_OPTIONS } from '@/types';
+import { DJ } from '@/types/bookings';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function NewOrderPage() {
@@ -13,17 +14,20 @@ export default function NewOrderPage() {
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [djs, setDjs] = useState<DJ[]>([]);
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     customer_id: '',
+    dj_id: '',
     status: 'open' as 'open' | 'in_progress' | 'completed' | 'cancelled',
     total_budget: '',
   });
 
   useEffect(() => {
     fetchCustomers();
+    fetchDJs();
   }, []);
 
   const fetchCustomers = async () => {
@@ -34,6 +38,20 @@ export default function NewOrderPage() {
         .order('company_name');
       if (error) throw error;
       setCustomers(data || []);
+    } catch {
+      // silent
+    }
+  };
+
+  const fetchDJs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('djs')
+        .select('id, name')
+        .eq('active', true)
+        .order('name');
+      if (error) throw error;
+      setDjs(data || []);
     } catch {
       // silent
     }
@@ -57,6 +75,7 @@ export default function NewOrderPage() {
         title: formData.title,
         description: formData.description || null,
         customer_id: formData.customer_id || null,
+        dj_id: formData.dj_id || null,
         status: formData.status,
         total_budget: formData.total_budget ? parseFloat(formData.total_budget) : null,
       };
@@ -118,6 +137,22 @@ export default function NewOrderPage() {
               {customers.map((c) => (
                 <option key={c.id} value={c.id} className="bg-dark-800">
                   {c.company_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label">DJ</label>
+            <select
+              className="input"
+              value={formData.dj_id}
+              onChange={(e) => handleChange('dj_id', e.target.value)}
+            >
+              <option value="" className="bg-dark-800">Select a DJ...</option>
+              {djs.map((dj) => (
+                <option key={dj.id} value={dj.id} className="bg-dark-800">
+                  {dj.name}
                 </option>
               ))}
             </select>
