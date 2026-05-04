@@ -1,218 +1,186 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useCompany } from '@/hooks/useCompany';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
+import { ArrowLeftIcon, EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 
 export default function SettingsPage() {
-  const { selectedCompany, setSelectedCompany } = useCompany();
-  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
-  const [activeTab, setActiveTab] = useState<'general' | 'export'>('general');
+  const router = useRouter();
   const supabase = createClient();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch all companies for the dropdown
+  const [emailForm, setEmailForm] = useState({ newEmail: '', currentPassword: '' });
+  const [passwordForm, setPasswordForm] = useState({ newPassword: '', confirmPassword: '' });
+
   useEffect(() => {
-    const fetchCompanies = async () => {
-      const { data } = await supabase
-        .from('companies')
-        .select('id, name')
-        .order('name');
-      setCompanies(data || []);
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      if (user?.email) {
+        setEmailForm((prev) => ({ ...prev, newEmail: user.email || '' }));
+      }
     };
-    fetchCompanies();
+    fetchUser();
   }, []);
 
-  const handleExport = (type: 'customers' | 'invoices' | 'payments', format: 'csv' | 'datev') => {
-    if (!selectedCompany) {
-      toast.error('Please select a coworker first');
+  const handleUpdateEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailForm.newEmail) {
+      toast.error('Please enter a new email address');
       return;
     }
-    
-    const url = `/api/export?type=${type}&format=${format}&companyId=${selectedCompany.id}`;
-    window.open(url, '_blank');
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ email: emailForm.newEmail });
+      if (error) throw error;
+      toast.success('Email update requested. Check your new email inbox for confirmation.');
+      setEmailForm((prev) => ({ ...prev, currentPassword: '' }));
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update email');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: passwordForm.newPassword });
+      if (error) throw error;
+      toast.success('Password updated successfully');
+      setPasswordForm({ newPassword: '', confirmPassword: '' });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update password');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Settings</h2>
-        <p className="mt-1 text-sm text-gray-400">
-          Manage your account settings and export data.
-        </p>
-      </div>
-
-      {/* Coworker Selector */}
-      <div className="card bg-dark-800 border-dark-500">
-        <div className="card-header border-b border-dark-500">
-          <h3 className="text-lg font-medium text-white uppercase tracking-wider">Select Coworker for Export</h3>
-        </div>
-        <div className="card-body">
-          <label className="label">Coworker</label>
-          <select
-            value={selectedCompany?.id || ''}
-            onChange={(e) => {
-              const company = companies.find(c => c.id === e.target.value);
-              setSelectedCompany(company || null);
-            }}
-            className="input bg-dark-800 border-dark-500 text-white w-full max-w-md"
-          >
-            <option value="" className="bg-dark-800">Select coworker...</option>
-            {companies.map((company) => (
-              <option key={company.id} value={company.id} className="bg-dark-800">
-                {company.name}
-              </option>
-            ))}
-          </select>
-          {companies.length === 0 && (
-            <p className="text-sm text-yellow-400 mt-2">
-              No coworkers found. <Link href="/coworkers/new" className="underline">Create a coworker first</Link>.
-            </p>
-          )}
+    <div className="max-w-2xl mx-auto space-y-8">
+      <div className="md:flex md:items-center md:justify-between">
+        <div className="flex-1 min-w-0">
+          <Link href="/dashboard" className="inline-flex items-center text-sm text-gray-400 hover:text-white mb-2">
+            <ArrowLeftIcon className="mr-1 h-4 w-4" />
+            Back to Dashboard
+          </Link>
+          <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Settings</h2>
+          <p className="mt-1 text-sm text-gray-400">
+            Manage your account settings and preferences.
+          </p>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-dark-500">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('general')}
-            className={`${
-              activeTab === 'general'
-                ? 'border-white text-white'
-                : 'border-transparent text-gray-400 hover:text-white hover:border-gray-600'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm uppercase tracking-wider`}
-          >
-            General
-          </button>
-          <button
-            onClick={() => setActiveTab('export')}
-            className={`${
-              activeTab === 'export'
-                ? 'border-white text-white'
-                : 'border-transparent text-gray-400 hover:text-white hover:border-gray-600'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm uppercase tracking-wider`}
-          >
-            Data Export
-          </button>
-        </nav>
-      </div>
-
-      {/* General Settings */}
-      {activeTab === 'general' && (
-        <div className="card bg-dark-800 border-dark-500">
-          <div className="card-header border-b border-dark-500">
-            <h3 className="text-lg font-medium text-white uppercase tracking-wider">Account Information</h3>
+      {/* Email */}
+      <div className="card bg-dark-800">
+        <div className="card-body space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-blue-500/10">
+              <EnvelopeIcon className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-medium text-white">Email Address</h3>
+              <p className="text-sm text-gray-400">Change the email address associated with your account.</p>
+            </div>
           </div>
-          <div className="card-body space-y-6">
-            <p className="text-gray-400">
-              Manage your account settings through the Supabase dashboard.
-            </p>
-            <div className="flex space-x-4">
-              <Link 
-                href="/coworkers" 
-                className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider"
+
+          <form onSubmit={handleUpdateEmail} className="space-y-4">
+            <div>
+              <label className="label">Current Email</label>
+              <input
+                type="email"
+                className="input bg-white/5"
+                value={user?.email || ''}
+                disabled
+              />
+            </div>
+            <div>
+              <label className="label">New Email Address</label>
+              <input
+                type="email"
+                className="input"
+                value={emailForm.newEmail}
+                onChange={(e) => setEmailForm((prev) => ({ ...prev, newEmail: e.target.value }))}
+                placeholder="new@example.com"
+                required
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-3 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50"
               >
-                Manage Coworkers
-              </Link>
+                {loading ? 'Updating...' : 'Update Email'}
+              </button>
             </div>
-          </div>
+          </form>
         </div>
-      )}
+      </div>
 
-      {/* Export Settings */}
-      {activeTab === 'export' && (
-        <div className="space-y-6">
-          <div className="card bg-dark-800 border-dark-500">
-            <div className="card-header border-b border-dark-500">
-              <h3 className="text-lg font-medium text-white uppercase tracking-wider">Export Data</h3>
+      {/* Password */}
+      <div className="card bg-dark-800">
+        <div className="card-body space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-blue-500/10">
+              <LockClosedIcon className="h-5 w-5 text-blue-400" />
             </div>
-            <div className="card-body">
-              <p className="text-gray-400 mb-6">
-                Export your data for accounting purposes. All data is exported in CSV format compatible with most accounting software.
-              </p>
-
-              {!selectedCompany && (
-                <div className="mb-6 p-4 bg-yellow-900/20 border border-yellow-800">
-                  <p className="text-yellow-400 text-sm">
-                    Please select a coworker above to enable data export.
-                  </p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {/* Customers Export */}
-                <div className="border border-dark-500 bg-dark-700 p-4">
-                  <h4 className="font-medium text-white uppercase tracking-wider mb-2">Customers</h4>
-                  <p className="text-sm text-gray-400 mb-4">
-                    Export all customer data including contact information.
-                  </p>
-                  <button
-                    onClick={() => handleExport('customers', 'csv')}
-                    disabled={!selectedCompany}
-                    className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider w-full disabled:opacity-50"
-                  >
-                    Export CSV
-                  </button>
-                </div>
-
-                {/* Invoices Export */}
-                <div className="border border-dark-500 bg-dark-700 p-4">
-                  <h4 className="font-medium text-white uppercase tracking-wider mb-2">Invoices</h4>
-                  <p className="text-sm text-gray-400 mb-4">
-                    Export all invoice data for accounting.
-                  </p>
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => handleExport('invoices', 'csv')}
-                      disabled={!selectedCompany}
-                      className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider w-full disabled:opacity-50"
-                    >
-                      Export CSV
-                    </button>
-                    <button
-                      onClick={() => handleExport('invoices', 'datev')}
-                      disabled={!selectedCompany}
-                      className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider w-full disabled:opacity-50"
-                    >
-                      Export DATEV
-                    </button>
-                  </div>
-                </div>
-
-                {/* Payments Export */}
-                <div className="border border-dark-500 bg-dark-700 p-4">
-                  <h4 className="font-medium text-white uppercase tracking-wider mb-2">Payments</h4>
-                  <p className="text-sm text-gray-400 mb-4">
-                    Export all payment records.
-                  </p>
-                  <button
-                    onClick={() => handleExport('payments', 'csv')}
-                    disabled={!selectedCompany}
-                    className="inline-flex items-center px-4 py-2 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium uppercase tracking-wider w-full disabled:opacity-50"
-                  >
-                    Export CSV
-                  </button>
-                </div>
-              </div>
+            <div>
+              <h3 className="text-lg font-medium text-white">Password</h3>
+              <p className="text-sm text-gray-400">Change your account password.</p>
             </div>
           </div>
 
-          <div className="card bg-yellow-900/20 border-yellow-800">
-            <div className="card-body">
-              <h4 className="text-sm font-medium text-yellow-400 mb-2 uppercase tracking-wider">
-                Note on DATEV Export
-              </h4>
-              <p className="text-sm text-yellow-300/70">
-                The DATEV export format follows the standard CSV format for DATEV Buchführung. 
-                You may need to adjust account numbers (Konto/Gegenkonto) according to your 
-                specific DATEV chart of accounts.
-              </p>
+          <form onSubmit={handleUpdatePassword} className="space-y-4">
+            <div>
+              <label className="label">New Password</label>
+              <input
+                type="password"
+                className="input"
+                value={passwordForm.newPassword}
+                onChange={(e) => setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }))}
+                placeholder="••••••••"
+                minLength={6}
+                required
+              />
             </div>
-          </div>
+            <div>
+              <label className="label">Confirm New Password</label>
+              <input
+                type="password"
+                className="input"
+                value={passwordForm.confirmPassword}
+                onChange={(e) => setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
+                placeholder="••••••••"
+                minLength={6}
+                required
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-3 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider disabled:opacity-50"
+              >
+                {loading ? 'Updating...' : 'Update Password'}
+              </button>
+            </div>
+          </form>
         </div>
-      )}
+      </div>
     </div>
   );
 }

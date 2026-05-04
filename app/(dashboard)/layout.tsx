@@ -24,7 +24,8 @@ import {
   DocumentCheckIcon,
   CalendarIcon,
   ClockIcon,
-  BanknotesIcon
+  BanknotesIcon,
+  Cog6ToothIcon
 } from '@heroicons/react/24/outline';
 
 // Navigation based on role
@@ -167,6 +168,27 @@ export default function DashboardLayout({
                 ))}
               </nav>
             </div>
+            <div className="flex-shrink-0 flex border-t border-dark-500 p-4">
+              <Link
+                href="/settings"
+                className={`flex items-center text-sm font-medium uppercase tracking-wider transition-colors mr-auto ${
+                  pathname === '/settings'
+                    ? 'text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <Cog6ToothIcon className="mr-3 h-5 w-5" />
+                Settings
+              </Link>
+              <button
+                onClick={() => { setSidebarOpen(false); handleSignOut(); }}
+                className="flex items-center text-sm font-medium text-gray-400 hover:text-white uppercase tracking-wider"
+              >
+                <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" />
+                Sign out
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -199,6 +221,17 @@ export default function DashboardLayout({
             </nav>
           </div>
           <div className="flex-shrink-0 flex border-t border-dark-500 p-4">
+            <Link
+              href="/settings"
+              className={`flex items-center text-sm font-medium uppercase tracking-wider transition-colors mr-auto ${
+                pathname === '/settings'
+                  ? 'text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <Cog6ToothIcon className="mr-3 h-5 w-5" />
+              Settings
+            </Link>
             <button
               onClick={handleSignOut}
               className="flex items-center text-sm font-medium text-gray-400 hover:text-white uppercase tracking-wider"
