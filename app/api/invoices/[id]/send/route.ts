@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { Resend } from 'resend';
+import { generateInvoicePdf } from '@/lib/invoices/pdf';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -20,7 +21,8 @@ export async function POST(
       .select(`
         *,
         company:companies(*),
-        customer:customers(*)
+        customer:customers(*),
+        items:invoice_items(*)
       `)
       .eq('id', params.id)
       .single();
@@ -29,7 +31,7 @@ export async function POST(
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    // Format currency
+    // Format helpers
     const formatCurrency = (amount: number) => {
       return new Intl.NumberFormat('de-DE', {
         style: 'currency',
@@ -37,19 +39,12 @@ export async function POST(
       }).format(amount);
     };
 
-    // Format date
     const formatDate = (date: string) => {
       return new Date(date).toLocaleDateString('de-DE');
     };
 
-    // Build invoice items list
-    const { data: items } = await supabase
-      .from('invoice_items')
-      .select('*')
-      .eq('invoice_id', invoice.id)
-      .order('created_at', { ascending: true });
-
-    const itemsRows = (items || []).map((item: any) => `
+    // Build invoice items rows for email
+    const itemsRows = (invoice.items || []).map((item: any) => `
       <tr>
         <td style="padding:10px 0;border-bottom:1px solid #e8e8e8;" class="dm-border">
           <p class="dm-text-primary" style="margin:0;font-size:14px;color:#111111;font-weight:500;">${item.description}</p>
@@ -60,11 +55,6 @@ export async function POST(
         </td>
       </tr>
     `).join('');
-
-    // Generate payment URL if not paid
-    const paymentUrl = invoice.status !== 'paid'
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/invoices/${invoice.id}`
-      : undefined;
 
     const companyName = invoice.company?.name || 'Techno on the Block';
     const customerName = invoice.customer?.company_name || 'Customer';
@@ -120,7 +110,7 @@ export async function POST(
           <tr>
             <td class="mob-wrap mob-pad" style="padding:32px 28px;word-wrap:break-word;overflow-wrap:break-word;">
               <p class="dm-text-primary" style="margin:0 0 20px 0;font-size:15px;color:#111111;line-height:1.55;">Hello ${customerName},</p>
-              <p class="dm-text-secondary" style="margin:0 0 24px 0;font-size:15px;color:#444444;line-height:1.55;">Please find your invoice details below. If you have any questions, feel free to reply to this email.</p>
+              <p class="dm-text-secondary" style="margin:0 0 24px 0;font-size:15px;color:#444444;line-height:1.55;">Please find your invoice attached as a PDF. If you have any questions, feel free to reply to this email.</p>
 
               <!-- Invoice Meta -->
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:24px;">
@@ -166,19 +156,6 @@ export async function POST(
               </table>
               ` : ''}
 
-              <!-- Pay Button -->
-              ${paymentUrl ? `
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;">
-                <tr>
-                  <td style="text-align:center;padding:8px 0;">
-                    <a href="${paymentUrl}" style="display:inline-block;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Pay Invoice Online</a>
-                  </td>
-                </tr>
-              </table>
-              ` : `
-              <p style="margin:24px 0;text-align:center;font-size:13px;color:#2563eb;font-weight:600;">This invoice has been paid. Thank you!</p>
-              `}
-
               <p class="dm-text-secondary" style="margin:24px 0 0 0;font-size:14px;color:#444444;line-height:1.55;">Best regards,<br><strong class="dm-text-primary" style="color:#111111;">${companyName}</strong></p>
             </td>
           </tr>
@@ -200,25 +177,32 @@ export async function POST(
 
 Hello ${customerName},
 
-Please find your invoice details below:
+Please find your invoice attached as a PDF.
 
 Invoice Number: ${invoiceNumber}
 Date: ${invoiceDate}
 Due Date: ${dueDate}
 Total Amount: ${amount}
 
-${paymentUrl ? `Pay online: ${paymentUrl}\n` : 'This invoice has been paid. Thank you!'}
-
 Best regards,
 ${companyName}`;
 
-    // Send via Resend
+    // Generate PDF attachment
+    const pdfBytes = await generateInvoicePdf(invoice);
+
+    // Send via Resend with attachment
     const { data: sendData, error: sendError } = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'Techno on the Block <no-reply@technoontheblock.ch>',
       to: invoice.customer.email,
       subject,
       html,
       text,
+      attachments: [
+        {
+          filename: `Invoice-${invoiceNumber}.pdf`,
+          content: Buffer.from(pdfBytes),
+        },
+      ],
     });
 
     if (sendError) {
