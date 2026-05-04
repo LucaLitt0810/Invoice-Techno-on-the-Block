@@ -54,7 +54,7 @@ export default function RegisterPage() {
       <div className="text-center mb-12">
         <Link href="/" className="block">
           <div className="text-xl font-bold tracking-wide" style={{ color: '#3b82f6' }}>Techno on the Block</div>
-          <div className="text-lg font-semibold text-white">Invoice Center</div>
+          <div className="text-lg font-semibold text-white">Workspace</div>
         </Link>
       </div>
 

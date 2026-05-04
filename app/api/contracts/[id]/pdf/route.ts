@@ -46,7 +46,7 @@ export async function GET(
     
     // Brand Header
     page1.drawText('Techno on the Block', { x: 50, y, size: 14, font: fontBold });
-    page1.drawText('Invoice Center', { x: 50, y: y - 15, size: 10, font });
+    page1.drawText('Workspace', { x: 50, y: y - 15, size: 10, font });
     
     // Contract Type (right) - align N to end at line (545)
     const typeLabel = getTypeLabel(contract.contract_type);

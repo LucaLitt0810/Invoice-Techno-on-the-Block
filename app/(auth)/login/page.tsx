@@ -40,19 +40,13 @@ export default function LoginPage() {
       <div className="text-center mb-12">
         <Link href="/" className="block">
           <div className="text-xl font-bold tracking-wide" style={{ color: '#3b82f6' }}>Techno on the Block</div>
-          <div className="text-lg font-semibold text-white">Invoice Center</div>
+          <div className="text-lg font-semibold text-white">Workspace</div>
         </Link>
       </div>
 
       <div className="card p-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold uppercase tracking-wider mb-2">Sign In</h2>
-          <p className="text-gray-400 text-sm">
-            Or{' '}
-            <Link href="/register" className="text-white hover:text-gray-300 underline underline-offset-4">
-              create a new account
-            </Link>
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

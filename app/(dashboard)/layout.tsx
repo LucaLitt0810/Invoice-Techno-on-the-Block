@@ -146,7 +146,7 @@ export default function DashboardLayout({
               <div className="flex-shrink-0 flex items-center px-6 mb-8">
                 <div className="text-lg font-bold tracking-wider leading-tight">
                   <div className="text-blue-500">Techno on the Block</div>
-                  <div className="text-white">Invoice Center</div>
+                  <div className="text-white">Workspace</div>
                 </div>
               </div>
               <nav className="px-4 space-y-1">
@@ -178,7 +178,7 @@ export default function DashboardLayout({
             <div className="flex items-center flex-shrink-0 px-6 mb-8">
               <Link href="/" className="text-lg font-bold tracking-wider leading-tight">
                 <div className="text-blue-500">Techno on the Block</div>
-                <div className="text-white">Invoice Center</div>
+                <div className="text-white">Workspace</div>
               </Link>
             </div>
             <nav className="flex-1 px-4 space-y-1">

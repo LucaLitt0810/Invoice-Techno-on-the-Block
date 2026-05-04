@@ -42,7 +42,7 @@ export async function POST(
     
     // Brand Header (left)
     page.drawText('Techno on the Block', { x: 50, y, size: 14, font: fontBold });
-    page.drawText('Invoice Center', { x: 50, y: y - 15, size: 10, font });
+    page.drawText('Workspace', { x: 50, y: y - 15, size: 10, font });
     
     // Title (right) - BOOKING REJECTION
     const titleText = 'BOOKING REJECTION';

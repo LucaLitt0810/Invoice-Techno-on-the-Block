@@ -6,7 +6,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Techno on the Block Invoice Center',
+  title: 'Techno on the Block Workspace',
   description: 'Create, manage, and send professional invoices. Track payments and export accounting data.',
 };
 
