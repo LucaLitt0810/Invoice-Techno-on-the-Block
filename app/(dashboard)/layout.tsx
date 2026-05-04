@@ -30,11 +30,11 @@ import {
 
 // Navigation based on role
 const getNavigation = (role: string | undefined) => {
-  // DJ role: only see bookings and unavailability
+  // DJ role: only see bookings calendar and unavailability
   if (role === 'dj') {
     return [
       { name: 'DJ-Dashboard', href: '/dashboard', icon: HomeIcon },
-      { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
+      { name: 'Bookings', href: '/bookings', icon: CalendarIcon },
       { name: 'My Unavailability', href: '/bookings/unavailability', icon: ClockIcon },
     ];
   }
