@@ -15,11 +15,12 @@ interface BookingModalProps {
   userRole: string;
   currentDJId?: string;
   prefillCustomerId?: string | null;
+  prefillOrderId?: string | null;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export default function BookingModal({ booking, initialDate, djs, userRole, currentDJId, prefillCustomerId, onClose, onSaved }: BookingModalProps) {
+export default function BookingModal({ booking, initialDate, djs, userRole, currentDJId, prefillCustomerId, prefillOrderId, onClose, onSaved }: BookingModalProps) {
   const [formData, setFormData] = useState({
     dj_id: '',
     event_name: '',
@@ -28,6 +29,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
     location: '',
     client_name: '',
     customer_id: '',
+    order_id: '',
     fee: 0,
     provision: 0,
     status: 'request' as const,
@@ -74,6 +76,7 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
         location: booking.location || '',
         client_name: booking.client_name || '',
         customer_id: booking.customer_id || '',
+        order_id: booking.order_id || '',
         fee: booking.fee,
         provision: booking.provision || 0,
         status: booking.status,
@@ -93,9 +96,10 @@ export default function BookingModal({ booking, initialDate, djs, userRole, curr
         start_date: formatDateTimeInput(start),
         end_date: formatDateTimeInput(end),
         customer_id: prefillCustomerId || '',
+        order_id: prefillOrderId || '',
       }));
     }
-  }, [booking, initialDate, userRole, currentDJId, prefillCustomerId]);
+  }, [booking, initialDate, userRole, currentDJId, prefillCustomerId, prefillOrderId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

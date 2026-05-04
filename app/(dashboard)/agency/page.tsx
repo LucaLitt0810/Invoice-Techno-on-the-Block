@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
-import { AgencyLead, AGENCY_STATUS_OPTIONS, EmailTeamMember } from '@/types';
+import { AgencyLead, AGENCY_STATUS_OPTIONS, EmailTeamMember, Order, ORDER_STATUS_OPTIONS } from '@/types';
 import { Booking, BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS } from '@/types/bookings';
 import {
   PlusIcon,
@@ -17,18 +17,32 @@ import {
   XMarkIcon,
   ChevronUpIcon,
   ChevronDownIcon,
+  ClipboardDocumentListIcon,
+  DocumentTextIcon,
+  CurrencyDollarIcon,
+  DocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 
 const STATUS_COLORS: Record<string, string> = {
   blue: 'bg-blue-900/30 text-blue-400 border-blue-800',
   yellow: 'bg-yellow-900/30 text-yellow-400 border-yellow-800',
   green: 'bg-green-900/30 text-green-400 border-green-800',
+  red: 'bg-red-900/30 text-red-400 border-red-800',
+  gray: 'bg-gray-900/30 text-gray-400 border-gray-800',
+};
+
+const ORDER_STATUS_COLORS: Record<string, string> = {
+  open: 'bg-blue-900/30 text-blue-400 border-blue-800',
+  in_progress: 'bg-yellow-900/30 text-yellow-400 border-yellow-800',
+  completed: 'bg-green-900/30 text-green-400 border-green-800',
+  cancelled: 'bg-red-900/30 text-red-400 border-red-800',
 };
 
 export default function AgencyPage() {
-  const [activeTab, setActiveTab] = useState<'leads' | 'bookings'>('leads');
+  const [activeTab, setActiveTab] = useState<'leads' | 'bookings' | 'orders'>('leads');
   const [leads, setLeads] = useState<AgencyLead[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const supabase = createClient();
@@ -43,7 +57,8 @@ export default function AgencyPage() {
 
   useEffect(() => {
     if (activeTab === 'leads') fetchLeads();
-    else fetchBookings();
+    else if (activeTab === 'bookings') fetchBookings();
+    else fetchOrders();
   }, [activeTab]);
 
   const fetchLeads = async () => {
@@ -86,6 +101,24 @@ export default function AgencyPage() {
     } catch (error) {
       console.error('Error fetching bookings:', error);
       toast.error('Failed to load bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*, customer:customers(*)')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      toast.error('Failed to load orders');
     } finally {
       setLoading(false);
     }
@@ -147,11 +180,9 @@ export default function AgencyPage() {
     updated[index] = updated[newIndex];
     updated[newIndex] = temp;
 
-    // Update sort_order locally
     const reordered = updated.map((m, i) => ({ ...m, sort_order: i }));
     setTeamMembers(reordered);
 
-    // Persist to DB
     try {
       const a = reordered[index];
       const b = reordered[newIndex];
@@ -199,12 +230,32 @@ export default function AgencyPage() {
     }
   };
 
+  const handleDeleteOrder = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this order? All linked invoices, contracts and bookings will remain but be unlinked.')) return;
+    try {
+      const { error } = await (supabase.from('orders') as any).delete().eq('id', id);
+      if (error) throw error;
+      setOrders((prev) => prev.filter((o) => o.id !== id));
+      toast.success('Order deleted successfully');
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      toast.error('Failed to delete order');
+    }
+  };
+
   const getStatusLabel = (status: string) =>
     AGENCY_STATUS_OPTIONS.find((o) => o.value === status)?.label || status;
 
   const getStatusColor = (status: string) => {
     const color = AGENCY_STATUS_OPTIONS.find((o) => o.value === status)?.color || 'blue';
     return STATUS_COLORS[color] || STATUS_COLORS.blue;
+  };
+
+  const getOrderStatusLabel = (status: string) =>
+    ORDER_STATUS_OPTIONS.find((o) => o.value === status)?.label || status;
+
+  const getOrderStatusColor = (status: string) => {
+    return ORDER_STATUS_COLORS[status] || STATUS_COLORS.blue;
   };
 
   const filteredLeads = leads.filter(
@@ -221,6 +272,47 @@ export default function AgencyPage() {
       b.client_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredOrders = orders.filter(
+    (o) =>
+      o.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      o.customer?.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      o.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const getActionButton = () => {
+    if (activeTab === 'leads') {
+      return (
+        <Link
+          href="/agency/new"
+          className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+        >
+          <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+          New Lead
+        </Link>
+      );
+    }
+    if (activeTab === 'bookings') {
+      return (
+        <Link
+          href="/bookings"
+          className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+        >
+          <CalendarIcon className="-ml-1 mr-2 h-5 w-5" />
+          Open Calendar
+        </Link>
+      );
+    }
+    return (
+      <Link
+        href="/agency/orders/new"
+        className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
+      >
+        <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+        New Order
+      </Link>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -235,7 +327,7 @@ export default function AgencyPage() {
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Agency</h2>
           <p className="mt-1 text-sm text-gray-400">
-            Manage leads and bookings in one place.
+            Manage leads, bookings and orders in one place.
           </p>
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4 gap-3">
@@ -246,23 +338,7 @@ export default function AgencyPage() {
             <UserGroupIcon className="-ml-1 mr-2 h-5 w-5" />
             Edit Team
           </button>
-          {activeTab === 'leads' ? (
-            <Link
-              href="/agency/new"
-              className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
-            >
-              <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
-              New Lead
-            </Link>
-          ) : (
-            <Link
-              href="/bookings"
-              className="inline-flex items-center px-4 py-2 border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors text-sm font-medium uppercase tracking-wider"
-            >
-              <CalendarIcon className="-ml-1 mr-2 h-5 w-5" />
-              Open Calendar
-            </Link>
-          )}
+          {getActionButton()}
         </div>
       </div>
 
@@ -290,6 +366,17 @@ export default function AgencyPage() {
           <CalendarIcon className="h-4 w-4" />
           Bookings
         </button>
+        <button
+          onClick={() => setActiveTab('orders')}
+          className={`px-6 py-3 text-sm font-medium uppercase tracking-wider transition-colors flex items-center gap-2 ${
+            activeTab === 'orders'
+              ? 'text-white border-b-2 border-white'
+              : 'text-gray-500 hover:text-gray-300'
+          }`}
+        >
+          <ClipboardDocumentListIcon className="h-4 w-4" />
+          Auftragsservice
+        </button>
       </div>
 
       {/* Search */}
@@ -300,7 +387,13 @@ export default function AgencyPage() {
         <input
           type="text"
           className="input pl-10"
-          placeholder={activeTab === 'leads' ? 'Search leads by company, email, or contact person...' : 'Search bookings by event, location, or client...'}
+          placeholder={
+            activeTab === 'leads'
+              ? 'Search leads by company, email, or contact person...'
+              : activeTab === 'bookings'
+              ? 'Search bookings by event, location, or client...'
+              : 'Search orders by title or customer...'
+          }
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -435,6 +528,79 @@ export default function AgencyPage() {
                     </td>
                     <td className="table-cell text-right text-white">
                       {booking.fee?.toFixed(2)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Orders Tab */}
+      {activeTab === 'orders' && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className="border-b border-dark-500">
+                <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Order</th>
+                <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
+                <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Budget</th>
+                <th className="table-cell text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Created</th>
+                <th className="table-cell text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="table-cell text-center text-gray-500 py-8">
+                    {searchQuery ? 'No orders match your search.' : 'No orders yet. Create your first order to get started.'}
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map((order) => (
+                  <tr key={order.id} className="border-b border-dark-500 hover:bg-dark-800/50">
+                    <td className="table-cell">
+                      <Link href={`/agency/orders/${order.id}`} className="text-white font-medium hover:underline">
+                        {order.title}
+                      </Link>
+                      {order.description && (
+                        <p className="text-sm text-gray-500 truncate max-w-[250px]">{order.description}</p>
+                      )}
+                    </td>
+                    <td className="table-cell">
+                      {order.customer ? (
+                        <Link
+                          href={`/customers/${order.customer_id}`}
+                          className="inline-flex items-center text-sm text-blue-400 hover:text-blue-300"
+                        >
+                          {order.customer.company_name}
+                          <ArrowTopRightOnSquareIcon className="ml-1 h-3.5 w-3.5" />
+                        </Link>
+                      ) : (
+                        <span className="text-sm text-gray-500">-</span>
+                      )}
+                    </td>
+                    <td className="table-cell">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getOrderStatusColor(order.status)}`}>
+                        {getOrderStatusLabel(order.status)}
+                      </span>
+                    </td>
+                    <td className="table-cell text-gray-400">
+                      {order.total_budget ? `${order.total_budget.toFixed(2)}` : '-'}
+                    </td>
+                    <td className="table-cell text-gray-400">
+                      {new Date(order.created_at).toLocaleDateString('de-DE')}
+                    </td>
+                    <td className="table-cell text-right">
+                      <button
+                        onClick={() => handleDeleteOrder(order.id)}
+                        className="text-red-400 hover:text-red-300 transition-colors"
+                        title="Delete order"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
                     </td>
                   </tr>
                 ))

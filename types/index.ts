@@ -46,6 +46,52 @@ export type EmailTeamMember = {
   created_at: string;
 };
 
+export type OrderStatus = 'open' | 'in_progress' | 'completed' | 'cancelled';
+
+export const ORDER_STATUS_OPTIONS = [
+  { value: 'open', label: 'Open', color: 'blue' },
+  { value: 'in_progress', label: 'In Progress', color: 'yellow' },
+  { value: 'completed', label: 'Completed', color: 'green' },
+  { value: 'cancelled', label: 'Cancelled', color: 'red' },
+] as const;
+
+export type Order = {
+  id: string;
+  user_id: string;
+  user_email: string | null;
+  customer_id: string | null;
+  customer?: Customer;
+  title: string;
+  description: string | null;
+  status: OrderStatus;
+  total_budget: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type OfferStatus = 'draft' | 'sent' | 'accepted' | 'rejected';
+
+export const OFFER_STATUS_OPTIONS = [
+  { value: 'draft', label: 'Draft', color: 'gray' },
+  { value: 'sent', label: 'Sent', color: 'blue' },
+  { value: 'accepted', label: 'Accepted', color: 'green' },
+  { value: 'rejected', label: 'Rejected', color: 'red' },
+] as const;
+
+export type Offer = {
+  id: string;
+  order_id: string;
+  title: string;
+  description: string | null;
+  amount: number;
+  status: OfferStatus;
+  valid_until: string | null;
+  file_data: string | null;
+  file_name: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Product = {
   id: string;
   company_id?: string | null;

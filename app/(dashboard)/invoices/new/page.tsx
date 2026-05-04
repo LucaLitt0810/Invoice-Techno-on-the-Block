@@ -23,6 +23,7 @@ export default function NewInvoicePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillCustomerId = searchParams.get('customer_id');
+  const prefillOrderId = searchParams.get('order_id');
   const supabase = createClient();
   
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -311,6 +312,7 @@ export default function NewInvoicePage() {
       const invoicePayload: any = {
         company_id: formData.company_id,
         customer_id: formData.customer_id,
+        order_id: prefillOrderId || null,
         invoice_number: newInvoiceNumber,
         invoice_date: formData.invoice_date,
         service_date: null,

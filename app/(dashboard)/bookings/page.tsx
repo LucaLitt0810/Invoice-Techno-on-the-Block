@@ -39,6 +39,7 @@ export default function BookingsPage() {
   const [showUnavailability, setShowUnavailability] = useState(true);
   const searchParams = useSearchParams();
   const prefillCustomerId = searchParams.get('customer_id');
+  const prefillOrderId = searchParams.get('order_id');
   const [userRole, setUserRole] = useState<string>('user');
   const [currentDJId, setCurrentDJId] = useState<string>('');
   
@@ -508,6 +509,7 @@ export default function BookingsPage() {
           userRole={userRole}
           currentDJId={currentDJId}
           prefillCustomerId={prefillCustomerId}
+          prefillOrderId={prefillOrderId}
           onClose={() => setModalOpen(false)}
           onSaved={handleBookingSaved}
         />

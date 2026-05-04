@@ -14,6 +14,7 @@ export default function NewContractPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillCustomerId = searchParams.get('customer_id');
+  const prefillOrderId = searchParams.get('order_id');
   const supabase = createClient();
   
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -116,6 +117,7 @@ export default function NewContractPage() {
         ...formData,
         contract_number: newContractNumber,
         status,
+        order_id: prefillOrderId || null,
         event_date: formData.event_date || null,
         deposit_due: formData.deposit_due || null,
         final_payment_due: formData.final_payment_due || null,
