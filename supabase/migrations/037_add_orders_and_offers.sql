@@ -1,5 +1,5 @@
 -- Orders table (Aufträge)
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id),
   user_email TEXT,
@@ -13,12 +13,19 @@ CREATE TABLE orders (
 );
 
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow all access" ON orders FOR ALL USING (true) WITH CHECK (true);
-CREATE INDEX idx_orders_customer ON orders(customer_id);
-CREATE INDEX idx_orders_status ON orders(status);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'orders' AND policyname = 'Allow all access'
+  ) THEN
+    CREATE POLICY "Allow all access" ON orders FOR ALL USING (true) WITH CHECK (true);
+  END IF;
+END $$;
+CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 
 -- Offers / Quotes table (Angebote)
-CREATE TABLE offers (
+CREATE TABLE IF NOT EXISTS offers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -33,8 +40,15 @@ CREATE TABLE offers (
 );
 
 ALTER TABLE offers ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow all access" ON offers FOR ALL USING (true) WITH CHECK (true);
-CREATE INDEX idx_offers_order ON offers(order_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'offers' AND policyname = 'Allow all access'
+  ) THEN
+    CREATE POLICY "Allow all access" ON offers FOR ALL USING (true) WITH CHECK (true);
+  END IF;
+END $$;
+CREATE INDEX IF NOT EXISTS idx_offers_order ON offers(order_id);
 
 -- Link invoices to orders
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS order_id UUID REFERENCES orders(id) ON DELETE SET NULL;
