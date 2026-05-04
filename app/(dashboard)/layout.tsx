@@ -256,54 +256,7 @@ export default function DashboardLayout({
             <Bars3Icon className="h-6 w-6" />
           </button>
 
-          <div className="flex-1 px-4 flex justify-between">
-            <div className="flex-1 flex items-center">
-              {/* Coworker Selector */}
-              {companies.length > 0 && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    className="flex items-center space-x-2 text-sm font-medium text-gray-300 hover:text-white focus:outline-none"
-                    onClick={() => setCompanyDropdownOpen(!companyDropdownOpen)}
-                  >
-                    <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
-                    <span className="uppercase tracking-wider">{selectedCompany?.name || 'Select Coworker'}</span>
-                    <ChevronDownIcon className="h-4 w-4 text-gray-400" />
-                  </button>
-
-                  {companyDropdownOpen && (
-                    <div className="absolute left-0 mt-2 w-56 bg-dark-800 border border-dark-500 shadow-xl z-50">
-                      <div className="py-1" role="menu">
-                        {companies.map((company) => (
-                          <button
-                            key={company.id}
-                            onClick={() => handleCompanySelect(company)}
-                            className={`block w-full text-left px-4 py-2 text-sm uppercase tracking-wider ${
-                              selectedCompany?.id === company.id
-                                ? 'bg-white text-black'
-                                : 'text-gray-300 hover:bg-dark-700 hover:text-white'
-                            }`}
-                          >
-                            {company.name}
-                          </button>
-                        ))}
-                        <div className="border-t border-dark-500">
-                          <Link
-                            href="/coworkers/new"
-                            className="flex items-center px-4 py-2 text-sm text-white hover:bg-dark-700 uppercase tracking-wider"
-                            onClick={() => setCompanyDropdownOpen(false)}
-                          >
-                            <PlusIcon className="h-4 w-4 mr-2" />
-                            Add New Coworker
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
+          <div className="flex-1 px-4 flex justify-end">
             <div className="ml-4 flex items-center md:ml-6">
               <div className="text-sm text-gray-400">
                 {user?.email}
