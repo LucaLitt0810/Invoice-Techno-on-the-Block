@@ -168,6 +168,9 @@ export default function CustomersPage() {
                         <Link href={`/customers/${customer.id}`} className="text-gray-400 hover:text-white" title="View">
                           <EyeIcon className="h-5 w-5" />
                         </Link>
+                        <Link href={`/customers/${customer.id}/edit`} className="text-gray-400 hover:text-blue-400" title="Edit">
+                          <PencilIcon className="h-5 w-5" />
+                        </Link>
                         <button onClick={() => handleDelete(customer.id)} className="text-gray-400 hover:text-red-400" title="Delete">
                           <TrashIcon className="h-5 w-5" />
                         </button>
