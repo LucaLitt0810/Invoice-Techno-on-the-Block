@@ -6,6 +6,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { Invoice, InvoiceItem, TAX_OPTIONS, TaxType, PRODUCT_UNITS, CURRENCIES } from '@/types';
+import { DJ } from '@/types/bookings';
 import { formatDateInput } from '@/lib/utils/helpers';
 import { PlusIcon, TrashIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
@@ -28,6 +29,9 @@ export default function EditInvoicePage() {
   const [saving, setSaving] = useState(false);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
 
+  const [djs, setDjs] = useState<DJ[]>([]);
+  const [selectedDJ, setSelectedDJ] = useState<DJ | null>(null);
+
   const [formData, setFormData] = useState({
     invoice_date: '',
     due_date: '',
@@ -37,13 +41,24 @@ export default function EditInvoicePage() {
     notes: '',
     terms: '',
     status: 'created' as Invoice['status'],
+    dj_id: '',
   });
 
   const [items, setItems] = useState<EditItem[]>([]);
 
   useEffect(() => {
     if (params.id) fetchInvoice();
+    fetchDJs();
   }, [params.id]);
+
+  useEffect(() => {
+    if (formData.dj_id && djs.length > 0) {
+      const dj = djs.find((d) => d.id === formData.dj_id);
+      setSelectedDJ(dj || null);
+    } else {
+      setSelectedDJ(null);
+    }
+  }, [formData.dj_id, djs]);
 
   const fetchInvoice = async () => {
     try {
@@ -71,6 +86,7 @@ export default function EditInvoicePage() {
         notes: inv.notes || '',
         terms: inv.terms || '',
         status: inv.status,
+        dj_id: inv.dj_id || '',
       });
       setItems(
         (inv.items || []).map((item) => ({
@@ -98,8 +114,21 @@ export default function EditInvoicePage() {
     return 'no_vat';
   };
 
+  const fetchDJs = async () => {
+    const { data } = await supabase
+      .from('djs')
+      .select('*')
+      .eq('active', true)
+      .order('name');
+    setDjs(data || []);
+  };
+
   const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === 'dj_id') {
+      const dj = djs.find((d) => d.id === value);
+      setSelectedDJ(dj || null);
+    }
   };
 
   const handleItemChange = (index: number, field: keyof EditItem, value: string | number) => {
@@ -164,6 +193,7 @@ export default function EditInvoicePage() {
         terms: formData.terms || null,
         status: formData.status,
         ahv_waiver: formData.ahv_waiver,
+        dj_id: formData.dj_id || null,
       };
 
       let invoiceResult = await supabase
@@ -303,6 +333,24 @@ export default function EditInvoicePage() {
                   <option value="overdue" className="bg-dark-800">Overdue</option>
                   <option value="cancelled" className="bg-dark-800">Cancelled</option>
                 </select>
+              </div>
+              <div>
+                <label className="label">DJ</label>
+                <select
+                  className="input"
+                  value={formData.dj_id}
+                  onChange={(e) => handleChange('dj_id', e.target.value)}
+                >
+                  <option value="" className="bg-dark-800">No DJ assigned...</option>
+                  {djs.map((dj) => (
+                    <option key={dj.id} value={dj.id} className="bg-dark-800">
+                      {dj.name} {dj.dj_code ? `(${dj.dj_code})` : ''}
+                    </option>
+                  ))}
+                </select>
+                {selectedDJ && (
+                  <p className="mt-1 text-xs text-gray-400">{selectedDJ.email || 'No email'}</p>
+                )}
               </div>
               <div>
                 <label className="label">Tax</label>
