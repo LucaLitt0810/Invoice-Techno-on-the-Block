@@ -6,6 +6,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { Customer, Product, Company, TAX_OPTIONS, TaxType, PRODUCT_UNITS, CURRENCIES } from '@/types';
+import { DJ } from '@/types/bookings';
 import { formatCurrency, formatDateInput } from '@/lib/utils/helpers';
 import { PlusIcon, TrashIcon, BuildingOfficeIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { COUNTRIES, generateCustomerNumber } from '@/lib/utils/helpers';
@@ -29,10 +30,12 @@ export default function NewInvoicePage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [djs, setDjs] = useState<DJ[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedDJ, setSelectedDJ] = useState<DJ | null>(null);
   
   const today = new Date();
   const twoWeeksLater = new Date(today);
@@ -41,6 +44,7 @@ export default function NewInvoicePage() {
   const [formData, setFormData] = useState({
     company_id: '',
     customer_id: '',
+    dj_id: '',
     invoice_date: formatDateInput(today),
     service_date: formatDateInput(today),
     due_date: formatDateInput(twoWeeksLater),
@@ -98,10 +102,11 @@ export default function NewInvoicePage() {
     fetchCompanies();
   }, []);
 
-  // Fetch customers and products on load (not company-bound)
+  // Fetch customers, products, and DJs on load (not company-bound)
   useEffect(() => {
     fetchCustomers();
     fetchProducts();
+    fetchDJs();
   }, []);
 
   // Set selected company when company changes
@@ -160,6 +165,21 @@ export default function NewInvoicePage() {
     const customer = customers.find((c) => c.id === customerId);
     setSelectedCustomer(customer || null);
     setFormData((prev) => ({ ...prev, customer_id: customerId }));
+  };
+
+  const handleDJChange = (djId: string) => {
+    const dj = djs.find((d) => d.id === djId);
+    setSelectedDJ(dj || null);
+    setFormData((prev) => ({ ...prev, dj_id: djId }));
+  };
+
+  const fetchDJs = async () => {
+    const { data } = await supabase
+      .from('djs')
+      .select('*')
+      .eq('active', true)
+      .order('name');
+    setDjs(data || []);
   };
 
   const handleItemChange = (index: number, field: keyof InvoiceItem, value: string | number) => {
@@ -312,6 +332,7 @@ export default function NewInvoicePage() {
       const invoicePayload: any = {
         company_id: formData.company_id,
         customer_id: formData.customer_id,
+        dj_id: formData.dj_id || null,
         order_id: prefillOrderId || null,
         invoice_number: newInvoiceNumber,
         invoice_date: formData.invoice_date,
@@ -525,6 +546,37 @@ export default function NewInvoicePage() {
                   {selectedCustomer.postal_code} {selectedCustomer.city}
                 </p>
                 <p className="text-sm text-gray-400">{selectedCustomer.email}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* DJ Assignment */}
+        <div className="card bg-dark-800 border-dark-500">
+          <div className="card-header border-b border-dark-500">
+            <h3 className="text-lg font-medium text-white uppercase tracking-wider">DJ Assignment</h3>
+          </div>
+          <div className="card-body">
+            <select
+              className="input bg-dark-800 border-dark-500 text-white"
+              value={formData.dj_id}
+              onChange={(e) => handleDJChange(e.target.value)}
+            >
+              <option value="" className="bg-dark-800">No DJ assigned...</option>
+              {djs.map((dj) => (
+                <option key={dj.id} value={dj.id} className="bg-dark-800">
+                  {dj.name} {dj.dj_code ? `(${dj.dj_code})` : ''}
+                </option>
+              ))}
+            </select>
+
+            {selectedDJ && (
+              <div className="mt-4 p-4 bg-dark-700 border border-dark-500">
+                <p className="font-medium text-white">{selectedDJ.name}</p>
+                <p className="text-sm text-gray-400">{selectedDJ.email || 'No email'}</p>
+                {selectedDJ.genre && (
+                  <p className="text-sm text-gray-400">Genre: {selectedDJ.genre}</p>
+                )}
               </div>
             )}
           </div>

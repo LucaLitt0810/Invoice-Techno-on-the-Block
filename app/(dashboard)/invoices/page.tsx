@@ -46,7 +46,8 @@ export default function InvoicesPage() {
         .select(`
           *,
           customer:customers(company_name, email),
-          company:companies(name)
+          company:companies(name),
+          dj:djs(name)
         `)
         .order('created_at', { ascending: false });
 
@@ -93,7 +94,8 @@ export default function InvoicesPage() {
     (invoice) =>
       invoice.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
       invoice.customer?.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      invoice.company?.name.toLowerCase().includes(searchQuery.toLowerCase())
+      invoice.company?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      invoice.dj?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {
@@ -155,6 +157,7 @@ export default function InvoicesPage() {
                 <th className="table-header-cell">Invoice #</th>
                 <th className="table-header-cell">Coworker</th>
                 <th className="table-header-cell">Customer</th>
+                <th className="table-header-cell">DJ</th>
                 <th className="table-header-cell">Date</th>
                 <th className="table-header-cell">Due Date</th>
                 <th className="table-header-cell">Total</th>
@@ -165,7 +168,7 @@ export default function InvoicesPage() {
             <tbody className="divide-y divide-dark-500">
               {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-gray-500">
+                  <td colSpan={9} className="px-6 py-10 text-center text-gray-500">
                     {searchQuery || statusFilter ? 'No invoices found matching your criteria.' : 'No invoices yet. Create your first invoice!'}
                   </td>
                 </tr>
@@ -180,6 +183,7 @@ export default function InvoicesPage() {
                       </div>
                     </td>
                     <td className="table-cell text-gray-400">{invoice.customer?.company_name}</td>
+                    <td className="table-cell text-gray-400">{invoice.dj?.name || '-'}</td>
                     <td className="table-cell text-gray-400">{formatDate(invoice.invoice_date)}</td>
                     <td className="table-cell text-gray-400">
                       {formatDate(invoice.due_date)}

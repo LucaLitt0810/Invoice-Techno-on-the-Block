@@ -41,6 +41,7 @@ export default function InvoiceDetailPage() {
           *,
           company:companies(*),
           customer:customers(*),
+          dj:djs(name),
           items:invoice_items(*),
           payments:payments(*)
         `)
@@ -266,6 +267,10 @@ export default function InvoiceDetailPage() {
               <div>
                 <p className="text-sm text-gray-500">Status</p>
                 <div className="mt-1">{getStatusBadge(invoice.status, invoice.due_date)}</div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">DJ</p>
+                <p className="font-medium text-white">{invoice.dj?.name || '-'}</p>
               </div>
             </div>
           </div>

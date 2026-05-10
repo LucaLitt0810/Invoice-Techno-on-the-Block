@@ -143,11 +143,13 @@ export type Invoice = {
   notes: string | null;
   terms: string | null;
   ahv_waiver: boolean | null;
+  dj_id: string | null;
 
   created_at: string;
   updated_at: string;
   customer?: Customer;
   company?: Company;
+  dj?: { id: string; name: string } | null;
   items?: InvoiceItem[];
   payments?: Payment[];
 };

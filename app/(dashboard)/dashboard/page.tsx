@@ -53,6 +53,7 @@ export default function DashboardPage() {
   const [djStats, setDjStats] = useState<DJStats | null>(null);
   const [nextBooking, setNextBooking] = useState<Booking | null>(null);
   const [upcomingUnavailability, setUpcomingUnavailability] = useState<DJUnavailability[]>([]);
+  const [djInvoices, setDjInvoices] = useState<Invoice[]>([]);
 
   useEffect(() => {
     const init = async () => {
@@ -72,6 +73,7 @@ export default function DashboardPage() {
           if (djData) {
             setCurrentDJId(djData.id);
             await fetchDJDashboard(djData.id);
+            await fetchDJInvoices(djData.id);
           }
         } else {
           await fetchInvoiceDashboard();
@@ -222,6 +224,25 @@ export default function DashboardPage() {
       return <span className="badge badge-overdue">Overdue</span>;
     }
     return <span className="badge badge-sent">Sent</span>;
+  };
+
+  const fetchDJInvoices = async (djId: string) => {
+    try {
+      const { data: invoices, error } = await supabase
+        .from('invoices')
+        .select(`
+          *,
+          customer:customers(company_name),
+          company:companies(name)
+        `)
+        .eq('dj_id', djId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDjInvoices(invoices || []);
+    } catch (error) {
+      console.error('Error fetching DJ invoices:', error);
+    }
   };
 
   const getBookingStatusBadge = (status: string) => {
@@ -482,6 +503,61 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* My Invoices */}
+        <div className="card">
+          <div className="card-header border-b border-dark-500 flex items-center justify-between">
+            <h3 className="text-lg font-medium text-white uppercase tracking-wider flex items-center">
+              <BanknotesIcon className="h-5 w-5 mr-2" />
+              My Invoices
+            </h3>
+          </div>
+          <div className="card-body">
+            {djInvoices.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-dark-500">
+                      <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider pb-3">Invoice #</th>
+                      <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider pb-3">Customer</th>
+                      <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wider pb-3">Amount</th>
+                      <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wider pb-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-dark-500">
+                    {djInvoices.map((invoice) => (
+                      <tr key={invoice.id}>
+                        <td className="py-3">
+                          <span className="text-sm font-medium text-white">
+                            #{invoice.invoice_number}
+                          </span>
+                        </td>
+                        <td className="py-3">
+                          <span className="text-sm text-gray-400">
+                            {invoice.customer?.company_name}
+                          </span>
+                        </td>
+                        <td className="py-3 text-right">
+                          <span className="text-sm text-white">
+                            {formatCurrency(invoice.total)}
+                          </span>
+                        </td>
+                        <td className="py-3 text-center">
+                          {getStatusBadge(invoice.status, invoice.due_date)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <BanknotesIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                <p>No invoices assigned to you yet</p>
+              </div>
+            )}
           </div>
         </div>
 
