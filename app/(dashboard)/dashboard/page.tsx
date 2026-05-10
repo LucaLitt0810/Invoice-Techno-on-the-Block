@@ -15,7 +15,8 @@ import {
   MapPinIcon,
   CurrencyEuroIcon,
   ClockIcon as ClockIconOutline,
-  ArrowRightIcon
+  ArrowRightIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import {
   BarChart,
@@ -524,6 +525,7 @@ export default function DashboardPage() {
                       <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider pb-3">Customer</th>
                       <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wider pb-3">Amount</th>
                       <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wider pb-3">Status</th>
+                      <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wider pb-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-dark-500">
@@ -546,6 +548,16 @@ export default function DashboardPage() {
                         </td>
                         <td className="py-3 text-center">
                           {getStatusBadge(invoice.status, invoice.due_date)}
+                        </td>
+                        <td className="py-3 text-center">
+                          <Link
+                            href={`/api/invoices/${invoice.id}/pdf`}
+                            target="_blank"
+                            className="text-gray-400 hover:text-yellow-400 inline-flex items-center"
+                            title="View PDF"
+                          >
+                            <DocumentTextIcon className="h-5 w-5" />
+                          </Link>
                         </td>
                       </tr>
                     ))}
