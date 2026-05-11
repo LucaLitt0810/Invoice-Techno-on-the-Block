@@ -385,7 +385,7 @@ export default function NewAgencyLeadPage() {
             body: JSON.stringify({
               to: formData.email,
               subject: `Artists from ${subjCity} – Techno on the Block`,
-              from: selSender?.email ? `The Agency Techno on the Block <${selSender.email}>` : undefined,
+              from: 'The Agency Techno on the Block <agency@technoontheblock.ch>',
               html: buildEmailHtml(),
             }),
           });
