@@ -56,6 +56,7 @@ const getNavigation = (role: string | undefined) => {
     { name: 'Customers', href: '/customers', icon: UsersIcon },
     { name: 'Coworkers', href: '/coworkers', icon: BuildingOfficeIcon },
     { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
+    { name: 'DJ Bookings', href: '/bookings', icon: CalendarIcon },
     { name: 'Bookkeeping', href: '/bookkeeping', icon: BanknotesIcon },
     { name: 'Personal', href: '/personal', icon: UserGroupIcon },
     { name: 'Meetings', href: '/meetings', icon: CalendarDaysIcon },
