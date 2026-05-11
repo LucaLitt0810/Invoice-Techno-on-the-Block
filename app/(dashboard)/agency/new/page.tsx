@@ -106,7 +106,8 @@ export default function NewAgencyLeadPage() {
   const buildEmailHtml = () => {
     const venue = formData.email_venue || 'your venue';
     const contact = formData.contact_person || 'there';
-    const sender = 'The Agency Techno on the Block';
+    const selectedSender = teamMembers.find((m) => m.id === emailSenderId);
+    const sender = selectedSender?.name || 'Luca Littmann';
     const senderCity = formData.city || 'Basel';
     const ort = formData.city || 'Basel';
 
