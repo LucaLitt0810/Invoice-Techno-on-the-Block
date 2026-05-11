@@ -52,7 +52,6 @@ const getNavigation = (role: string | undefined) => {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Invoices', href: '/invoices', icon: DocumentTextIcon },
     { name: 'Contracts', href: '/contracts', icon: DocumentCheckIcon },
-    { name: 'Products', href: '/products', icon: ShoppingBagIcon },
     { name: 'B2B', href: '/b2b', icon: BuildingOfficeIcon },
     { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
     { name: 'DJ Bookings', href: '/bookings', icon: CalendarIcon },
