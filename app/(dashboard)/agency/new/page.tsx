@@ -106,8 +106,7 @@ export default function NewAgencyLeadPage() {
   const buildEmailHtml = () => {
     const venue = formData.email_venue || 'your venue';
     const contact = formData.contact_person || 'there';
-    const selectedSender = teamMembers.find((m) => m.id === emailSenderId);
-    const sender = selectedSender?.name || 'Luca Littmann';
+    const sender = 'The Agency Techno on the Block';
     const senderCity = formData.city || 'Basel';
     const ort = formData.city || 'Basel';
 
@@ -385,7 +384,7 @@ export default function NewAgencyLeadPage() {
             body: JSON.stringify({
               to: formData.email,
               subject: `Artists from ${subjCity} – Techno on the Block`,
-              from: selSender?.email ? `${selSender.name} <${selSender.email}>` : undefined,
+              from: selSender?.email ? `The Agency Techno on the Block <${selSender.email}>` : undefined,
               html: buildEmailHtml(),
             }),
           });
