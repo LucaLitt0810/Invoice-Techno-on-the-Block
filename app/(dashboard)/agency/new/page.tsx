@@ -246,7 +246,7 @@ export default function NewAgencyLeadPage() {
             </td>
           </tr>
 
-          <!-- MOBILE: stacked Content → Team → Roster -->
+          <!-- MOBILE: stacked Content → Roster → Team -->
           <tr class="hide-desktop">
             <td style="padding:0;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="table-layout:fixed;">
@@ -268,9 +268,18 @@ export default function NewAgencyLeadPage() {
                     </table>
                   </td>
                 </tr>
+                <!-- ROSTER -->
+                <tr>
+                  <td class="mob-wrap mob-pad dm-bg-left" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;word-wrap:break-word;overflow-wrap:break-word;">
+                    <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">DJ Roster</p>
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                      ${rosterRows}
+                    </table>
+                  </td>
+                </tr>
                 <!-- TEAM -->
                 <tr>
-                  <td class="mob-wrap mob-pad dm-bg-right" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;word-wrap:break-word;overflow-wrap:break-word;">
+                  <td class="mob-wrap mob-pad dm-bg-right" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8;word-wrap:break-word;overflow-wrap:break-word;">
                     <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Agency Team</p>
                     ${teamRowsMobile}
                     <p style="margin:12px 0 0 0;padding-top:12px;border-top:1px solid #e0e0e0;font-size:10px;color:#888888;line-height:1.5;" class="dm-border">
@@ -279,15 +288,6 @@ export default function NewAgencyLeadPage() {
                       Basel, Switzerland<br><br>
                       <a href="mailto:agency@technoontheblock.ch" style="color:#2563eb;text-decoration:none;">agency@technoontheblock.ch</a>
                     </p>
-                  </td>
-                </tr>
-                <!-- ROSTER -->
-                <tr>
-                  <td class="mob-wrap mob-pad dm-bg-left" style="padding:24px 20px;background:#f8f9fa;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8;word-wrap:break-word;overflow-wrap:break-word;">
-                    <p style="margin:0 0 12px 0;font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:2px;font-weight:700;">DJ Roster</p>
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-                      ${rosterRows}
-                    </table>
                   </td>
                 </tr>
               </table>
