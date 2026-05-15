@@ -23,6 +23,7 @@ export default function AgencyRiderPage() {
   const [orderTitle, setOrderTitle] = useState('');
   const [riderId, setRiderId] = useState<string | null>(null);
   const [disabledSectionIds, setDisabledSectionIds] = useState<string[]>([]);
+  const [fieldAssignments, setFieldAssignments] = useState<Record<string, string>>({});
   const [loadingOrder, setLoadingOrder] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -49,7 +50,7 @@ export default function AgencyRiderPage() {
 
         const { data: rider } = await (supabase as any)
           .from('dj_riders')
-          .select('id, disabled_section_ids')
+          .select('id, disabled_section_ids, field_assignments')
           .eq('order_id', orderId)
           .single();
 
@@ -61,6 +62,7 @@ export default function AgencyRiderPage() {
 
         setRiderId(rider.id);
         setDisabledSectionIds(rider.disabled_section_ids || []);
+        setFieldAssignments(rider.field_assignments || {});
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -140,6 +142,8 @@ export default function AgencyRiderPage() {
         changelog={changelog}
         messages={messages}
         isAgency={true}
+        currentUserId={user?.id}
+        fieldAssignments={fieldAssignments}
         onChange={handleChange}
         onConfirm={handleConfirm}
         onSendMessage={handleSendMessage}
@@ -150,17 +154,22 @@ export default function AgencyRiderPage() {
           riderId={riderId}
           orderId={orderId}
           sections={sections}
+          fields={fields}
           disabledSectionIds={disabledSectionIds}
+          fieldAssignments={fieldAssignments}
           onClose={() => setShowSettings(false)}
           onUpdate={() => {
-            // Refresh disabled sections
+            // Refresh settings
             (supabase as any)
               .from('dj_riders')
-              .select('disabled_section_ids')
+              .select('disabled_section_ids, field_assignments')
               .eq('id', riderId)
               .single()
               .then(({ data }: any) => {
-                if (data) setDisabledSectionIds(data.disabled_section_ids || []);
+                if (data) {
+                  setDisabledSectionIds(data.disabled_section_ids || []);
+                  setFieldAssignments(data.field_assignments || {});
+                }
               });
           }}
         />

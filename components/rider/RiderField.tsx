@@ -9,40 +9,40 @@ interface RiderFieldProps {
   field: DJRiderTemplateField;
   value: DJRiderValue | undefined;
   isAgency: boolean;
+  canEdit: boolean;
   onChange: (fieldId: string, value: string | null) => void;
   onConfirm: (valueId: string) => void;
 }
 
-export default function RiderField({ field, value, isAgency, onChange, onConfirm }: RiderFieldProps) {
+export default function RiderField({ field, value, isAgency, canEdit, onChange, onConfirm }: RiderFieldProps) {
   const [localValue, setLocalValue] = useState(value?.value || '');
 
   useEffect(() => {
     setLocalValue(value?.value || '');
   }, [value?.value]);
 
-  // Confirmation state from THIS user's perspective
   const confirmedByMe = isAgency ? value?.confirmed_by_agency : value?.confirmed_by_customer;
   const confirmedByOther = isAgency ? value?.confirmed_by_customer : value?.confirmed_by_agency;
   const isFullyConfirmed = value?.confirmed_by_agency && value?.confirmed_by_customer;
 
-  // Show clickable checkmark if value exists but not yet confirmed by me
   const needsMyConfirmation = !!value?.id && value.value !== null && value.value !== '' && !confirmedByMe;
 
-  const bgClass = isFullyConfirmed
-    ? 'bg-teal-900/20 border-teal-800/40'
-    : confirmedByMe
-    ? 'bg-[#111] border-white/5'
+  // Entire row green when fully confirmed
+  const rowClass = isFullyConfirmed
+    ? 'bg-green-900/10 border-green-800/30'
     : 'bg-[#111] border-white/5';
 
   const handleBlur = useCallback(() => {
+    if (!canEdit) return;
     if (localValue !== (value?.value || '')) {
       onChange(field.id, localValue || null);
     }
-  }, [localValue, value, field.id, onChange]);
+  }, [localValue, value, field.id, onChange, canEdit]);
 
   const renderInput = () => {
+    const disabled = !canEdit;
     const baseClasses =
-      'w-full bg-dark-900 border border-dark-500 rounded px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors';
+      'w-full bg-dark-900 border border-dark-500 rounded px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
 
     switch (field.field_type) {
       case 'textarea':
@@ -53,22 +53,25 @@ export default function RiderField({ field, value, isAgency, onChange, onConfirm
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
             onBlur={handleBlur}
+            disabled={disabled}
           />
         );
       case 'boolean':
         return (
-          <label className="inline-flex items-center cursor-pointer gap-2">
+          <label className={`inline-flex items-center gap-2 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
             <input
               type="checkbox"
               className="sr-only peer"
               checked={localValue === 'true'}
               onChange={(e) => {
+                if (disabled) return;
                 const newVal = e.target.checked ? 'true' : 'false';
                 setLocalValue(newVal);
                 onChange(field.id, newVal);
               }}
+              disabled={disabled}
             />
-            <div className="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <div className="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
             <span className="text-sm text-gray-400">{localValue === 'true' ? 'Ja' : 'Nein'}</span>
           </label>
         );
@@ -80,6 +83,7 @@ export default function RiderField({ field, value, isAgency, onChange, onConfirm
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
             onBlur={handleBlur}
+            disabled={disabled}
           />
         );
       case 'date':
@@ -90,6 +94,7 @@ export default function RiderField({ field, value, isAgency, onChange, onConfirm
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
             onBlur={handleBlur}
+            disabled={disabled}
           />
         );
       case 'time':
@@ -100,6 +105,7 @@ export default function RiderField({ field, value, isAgency, onChange, onConfirm
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
             onBlur={handleBlur}
+            disabled={disabled}
           />
         );
       case 'number':
@@ -111,6 +117,7 @@ export default function RiderField({ field, value, isAgency, onChange, onConfirm
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
             onBlur={handleBlur}
+            disabled={disabled}
           />
         );
       case 'url':
@@ -122,6 +129,7 @@ export default function RiderField({ field, value, isAgency, onChange, onConfirm
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
             onBlur={handleBlur}
+            disabled={disabled}
           />
         );
       default:
@@ -133,13 +141,14 @@ export default function RiderField({ field, value, isAgency, onChange, onConfirm
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
             onBlur={handleBlur}
+            disabled={disabled}
           />
         );
     }
   };
 
   return (
-    <div className={`flex items-start gap-3 p-3 rounded-lg border ${bgClass} transition-colors`}>
+    <div className={`flex items-start gap-3 p-3 rounded-lg border ${rowClass} transition-colors`}>
       <div className="flex-1 min-w-0">
         <label className="block text-sm font-medium text-gray-300 mb-1">
           {field.label}
@@ -149,6 +158,9 @@ export default function RiderField({ field, value, isAgency, onChange, onConfirm
           <p className="text-xs text-gray-600 mb-1">{field.placeholder}</p>
         )}
         {renderInput()}
+        {!canEdit && (
+          <p className="text-xs text-gray-600 mt-1">Nur von Agency bearbeitbar</p>
+        )}
       </div>
       <div className="flex-shrink-0 pt-6">
         {needsMyConfirmation ? (

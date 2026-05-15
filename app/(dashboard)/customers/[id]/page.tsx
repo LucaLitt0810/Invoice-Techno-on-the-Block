@@ -35,6 +35,9 @@ export default function CustomerDetailPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [leads, setLeads] = useState<AgencyLead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [defaultPassword, setDefaultPassword] = useState('');
+  const [creatingLogin, setCreatingLogin] = useState(false);
 
   useEffect(() => {
     if (params.id) fetchAll();
@@ -131,6 +134,20 @@ export default function CustomerDetailPage() {
           <div className="flex-1 min-w-0">
             <h2 className="text-2xl font-bold text-white uppercase tracking-tight">{customer.company_name}</h2>
             <p className="text-sm text-gray-400 mt-1">{customer.customer_number}</p>
+          </div>
+          <div className="mt-4 md:mt-0 flex gap-3">
+            {customer.auth_user_id ? (
+              <span className="inline-flex items-center px-3 py-2 bg-green-900/30 text-green-400 border border-green-800 rounded-lg text-xs font-medium uppercase tracking-wider">
+                Login aktiv
+              </span>
+            ) : (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium uppercase tracking-wider hover:bg-blue-500 transition-colors"
+              >
+                Create Login
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -415,6 +432,77 @@ export default function CustomerDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Create Login Modal */}
+      {showLoginModal && customer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-md rounded-xl bg-dark-800 border border-white/10 p-6">
+            <h3 className="text-lg font-bold text-white uppercase tracking-tight mb-2">
+              Login für {customer.company_name}
+            </h3>
+            <p className="text-sm text-gray-400 mb-4">
+              Erstelle ein Login für diesen Kunden. Ein Default-Passwort wird festgelegt und der Kunde erhält eine E-Mail mit Login-Link und Hinweis, das Passwort zu ändern.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-500 uppercase mb-1">E-Mail</label>
+                <p className="text-sm text-white">{customer.email}</p>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 uppercase mb-1">Default-Passwort</label>
+                <input
+                  type="text"
+                  value={defaultPassword}
+                  onChange={(e) => setDefaultPassword(e.target.value)}
+                  placeholder="z.B. ChangeMe123!"
+                  className="w-full bg-dark-900 border border-dark-500 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowLoginModal(false);
+                  setDefaultPassword('');
+                }}
+                className="px-4 py-2 border border-dark-500 text-gray-300 hover:text-white text-sm rounded-lg"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={async () => {
+                  if (!defaultPassword || defaultPassword.length < 6) {
+                    toast.error('Passwort muss mindestens 6 Zeichen haben');
+                    return;
+                  }
+                  setCreatingLogin(true);
+                  try {
+                    const res = await fetch(`/api/customers/${customer.id}/create-login`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ password: defaultPassword }),
+                    });
+                    const result = await res.json();
+                    if (!res.ok) throw new Error(result.error || 'Failed');
+                    toast.success('Login erstellt und E-Mail versendet');
+                    setShowLoginModal(false);
+                    setDefaultPassword('');
+                    fetchAll();
+                  } catch (error: any) {
+                    toast.error(error.message || 'Fehler beim Erstellen');
+                  } finally {
+                    setCreatingLogin(false);
+                  }
+                }}
+                disabled={creatingLogin}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 disabled:opacity-50"
+              >
+                {creatingLogin ? 'Erstelle...' : 'Login erstellen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

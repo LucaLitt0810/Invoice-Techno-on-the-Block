@@ -22,6 +22,7 @@ export default function CustomerRiderPage() {
   const [orderTitle, setOrderTitle] = useState('');
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [disabledSectionIds, setDisabledSectionIds] = useState<string[]>([]);
+  const [fieldAssignments, setFieldAssignments] = useState<Record<string, string>>({});
 
   const { sections, fields, values, changelog, messages, loading, updateValue, confirmValue, sendMessage } =
     useRiderRealtime(riderId, user?.id || null);
@@ -46,7 +47,7 @@ export default function CustomerRiderPage() {
         // Get rider order_id + disabled sections
         const { data: rider } = await (supabase as any)
           .from('dj_riders')
-          .select('order_id, disabled_section_ids')
+          .select('order_id, disabled_section_ids, field_assignments')
           .eq('id', riderId)
           .single();
 
@@ -56,6 +57,7 @@ export default function CustomerRiderPage() {
         }
 
         setDisabledSectionIds(rider.disabled_section_ids || []);
+        setFieldAssignments(rider.field_assignments || {});
 
         // Check access
         const { data: access } = await (supabase as any)
@@ -159,6 +161,8 @@ export default function CustomerRiderPage() {
         changelog={changelog}
         messages={messages}
         isAgency={false}
+        currentUserId={user?.id}
+        fieldAssignments={fieldAssignments}
         onChange={handleChange}
         onConfirm={handleConfirm}
         onSendMessage={handleSendMessage}

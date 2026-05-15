@@ -35,7 +35,6 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
     if (!riderId) return;
     setLoading(true);
     try {
-      // Get rider with template
       const { data: rider } = await supabase
         .from('dj_riders')
         .select('template_id')
@@ -44,7 +43,6 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
 
       if (!rider) return;
 
-      // Fetch sections and fields
       const { data: sectionsData } = await supabase
         .from('dj_rider_template_sections')
         .select('*')
@@ -59,13 +57,11 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
         .in('section_id', sectionIds)
         .order('sort_order', { ascending: true });
 
-      // Fetch values
       const { data: valuesData } = await supabase
         .from('dj_rider_values')
         .select('*')
         .eq('rider_id', riderId);
 
-      // Fetch changelog (simple query, no complex joins)
       const { data: changelogData } = await supabase
         .from('dj_rider_changelog')
         .select('*')
@@ -73,19 +69,17 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
         .order('created_at', { ascending: false })
         .limit(100);
 
-      // Fetch messages with user info
       const { data: messagesData } = await supabase
         .from('dj_rider_messages')
         .select('*')
         .eq('rider_id', riderId)
         .order('created_at', { ascending: true });
 
-      // Get unique user IDs from messages and changelog
+      // Build users map via API — always include current userId
       const messageUserIds = (messagesData || []).map((m: any) => m.user_id);
       const changelogUserIds = (changelogData || []).flatMap((c: any) => [c.changed_by, c.confirmed_by]);
-      const allUserIds = Array.from(new Set([...messageUserIds, ...changelogUserIds].filter(Boolean)));
+      const allUserIds = Array.from(new Set([...messageUserIds, ...changelogUserIds, userId].filter(Boolean)));
 
-      // Build users map via API (uses service role key server-side)
       let usersMap: Record<string, any> = {};
       if (allUserIds.length > 0) {
         try {
@@ -99,7 +93,7 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
             usersMap = result.users || {};
           }
         } catch (e) {
-          // Fallback: skip user enrichment
+          // Fallback
         }
       }
 
@@ -126,7 +120,7 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
     } finally {
       setLoading(false);
     }
-  }, [riderId, supabase]);
+  }, [riderId, supabase, userId]);
 
   useEffect(() => {
     fetchData();
@@ -160,14 +154,19 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
         { event: 'INSERT', schema: 'public', table: 'dj_rider_changelog', filter: `rider_id=eq.${riderId}` },
         (payload: any) => {
           setChangelog((prev) => {
-            const exists = prev.some((c) => c.id === payload.new.id);
-            if (exists) return prev;
+            const idx = prev.findIndex((c) => c.id === payload.new.id);
             const enriched = {
               ...payload.new,
               field: fieldsRef.current[payload.new.field_id] || null,
               changed_by_user: usersMapRef.current[payload.new.changed_by] || null,
-              confirmed_by_user: usersMapRef.current[payload.new.confirmed_by] || null,
+              confirmed_by_user: usersMapRef.current[payload.new.confirmed_by] || undefined,
             };
+            if (idx >= 0) {
+              // Replace optimistic entry with real one
+              const next = [...prev];
+              next[idx] = enriched as DJRiderChangelog;
+              return next;
+            }
             return [enriched as DJRiderChangelog, ...prev];
           });
         }
@@ -195,12 +194,16 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
         { event: 'INSERT', schema: 'public', table: 'dj_rider_messages', filter: `rider_id=eq.${riderId}` },
         (payload: any) => {
           setMessages((prev) => {
-            const exists = prev.some((m) => m.id === payload.new.id);
-            if (exists) return prev;
+            const idx = prev.findIndex((m) => m.id === payload.new.id);
             const enriched = {
               ...payload.new,
               user: usersMapRef.current[payload.new.user_id] || null,
             };
+            if (idx >= 0) {
+              const next = [...prev];
+              next[idx] = enriched as DJRiderMessage;
+              return next;
+            }
             return [...prev, enriched as DJRiderMessage];
           });
         }
@@ -219,6 +222,26 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
       const existing = values.find((v) => v.field_id === fieldId);
       const oldValue = existing?.value || null;
 
+      // Optimistic changelog entry for immediate UI feedback
+      const tempId = `temp-${Date.now()}-${fieldId}`;
+      const optimisticLog: DJRiderChangelog = {
+        id: tempId,
+        rider_id: riderId,
+        field_id: fieldId,
+        changed_by: userId,
+        old_value: oldValue,
+        new_value: value,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        confirmed_by: null,
+        confirmed_at: null,
+        field: fieldsRef.current[fieldId] || null,
+        changed_by_user: usersMapRef.current[userId] || undefined,
+        confirmed_by_user: undefined,
+      };
+      setChangelog((prev) => [optimisticLog, ...prev]);
+
       if (existing) {
         const { error } = await supabase
           .from('dj_rider_values')
@@ -230,7 +253,6 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
             confirmed_by_customer: false,
           })
           .eq('id', existing.id);
-
         if (error) throw error;
       } else {
         const { error } = await supabase.from('dj_rider_values').insert({
@@ -240,12 +262,18 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
           last_modified_by: userId,
           last_modified_at: new Date().toISOString(),
         });
-
         if (error) throw error;
       }
 
-      // Changelog is created by database trigger log_dj_rider_change() on UPDATE
-      // No explicit insert needed here
+      // Explicit changelog insert (trigger removed)
+      await supabase.from('dj_rider_changelog').insert({
+        rider_id: riderId,
+        field_id: fieldId,
+        changed_by: userId,
+        old_value: oldValue,
+        new_value: value,
+        status: 'pending',
+      });
     },
     [riderId, userId, values, supabase]
   );
@@ -262,10 +290,8 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
         .from('dj_rider_values')
         .update(update)
         .eq('id', valueId);
-
       if (error) throw error;
 
-      // Update corresponding changelog entries to confirmed
       const value = values.find((v) => v.id === valueId);
       if (value) {
         await supabase
@@ -295,12 +321,17 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
 
       if (error) throw error;
 
-      // Optimistically add to local state (avoid duplicates from realtime)
       if (data && data.length > 0) {
         setMessages((prev) => {
           const exists = prev.some((m) => m.id === data[0].id);
           if (exists) return prev;
-          return [...prev, data[0] as DJRiderMessage];
+          return [
+            ...prev,
+            {
+              ...data[0],
+              user: usersMapRef.current[userId] || null,
+            } as DJRiderMessage,
+          ];
         });
       }
     },

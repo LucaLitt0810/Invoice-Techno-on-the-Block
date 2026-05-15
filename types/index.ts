@@ -475,6 +475,7 @@ export type DJRiderChangelog = {
   old_value: string | null;
   new_value: string | null;
   created_at: string;
+  updated_at: string;
   confirmed_by: string | null;
   confirmed_at: string | null;
   status: DJRiderChangelogStatus;

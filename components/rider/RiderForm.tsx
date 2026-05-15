@@ -12,6 +12,8 @@ interface RiderFormProps {
   changelog: any[];
   messages: any[];
   isAgency: boolean;
+  currentUserId?: string | null;
+  fieldAssignments?: Record<string, string>;
   onChange: (fieldId: string, value: string | null) => void;
   onConfirm: (valueId: string) => void;
   onSendMessage: (content: string) => Promise<void>;
@@ -24,6 +26,8 @@ export default function RiderForm({
   changelog,
   messages,
   isAgency,
+  currentUserId,
+  fieldAssignments,
   onChange,
   onConfirm,
   onSendMessage,
@@ -39,6 +43,14 @@ export default function RiderForm({
   }, [sections, fields]);
 
   const getValue = (fieldId: string) => values.find((v) => v.field_id === fieldId);
+
+  const canEditField = (fieldId: string) => {
+    const assignment = fieldAssignments?.[fieldId];
+    if (!assignment || assignment === 'both') return true;
+    if (assignment === 'agency' && isAgency) return true;
+    if (assignment === 'customer' && !isAgency) return true;
+    return false;
+  };
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-140px)]">
@@ -67,6 +79,7 @@ export default function RiderForm({
                       field={field}
                       value={getValue(field.id)}
                       isAgency={isAgency}
+                      canEdit={canEditField(field.id)}
                       onChange={onChange}
                       onConfirm={onConfirm}
                     />
@@ -83,6 +96,7 @@ export default function RiderForm({
           changelog={changelog}
           messages={messages}
           onSendMessage={onSendMessage}
+          currentUserId={currentUserId}
         />
       </div>
     </div>
