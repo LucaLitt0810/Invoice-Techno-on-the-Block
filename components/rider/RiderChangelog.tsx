@@ -51,10 +51,11 @@ export default function RiderChangelog({ changelog, messages, onSendMessage }: R
     }
   };
 
-  const getUserName = (user?: { email: string; user_metadata?: { first_name?: string; last_name?: string } }) => {
+  const getUserName = (user?: { email: string; user_metadata?: { first_name?: string; last_name?: string; full_name?: string } }) => {
+    const full = user?.user_metadata?.full_name || '';
     const first = user?.user_metadata?.first_name || '';
     const last = user?.user_metadata?.last_name || '';
-    return `${first} ${last}`.trim() || user?.email || 'Unbekannt';
+    return full || `${first} ${last}`.trim() || user?.email || 'Unbekannt';
   };
 
   return (
@@ -114,6 +115,7 @@ export default function RiderChangelog({ changelog, messages, onSendMessage }: R
 
                 const log = item.data;
                 const isConfirmed = log.status === 'confirmed';
+                const hasField = log.field && log.field.label;
 
                 return (
                   <div key={`log-${idx}`} className="flex gap-2">
@@ -126,8 +128,8 @@ export default function RiderChangelog({ changelog, messages, onSendMessage }: R
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-medium text-gray-300">
                           {isConfirmed
-                            ? `${getUserName(log.confirmed_by_user)} hat bestätigt`
-                            : `${getUserName(log.changed_by_user)} hat geändert`}
+                            ? `${getUserName(log.confirmed_by_user || undefined) || 'Jemand'} hat bestätigt`
+                            : `${getUserName(log.changed_by_user || undefined) || 'Jemand'} hat geändert`}
                         </span>
                         <span className="text-xs text-gray-600">
                           {formatDistanceToNow(new Date(log.created_at), {
@@ -136,7 +138,7 @@ export default function RiderChangelog({ changelog, messages, onSendMessage }: R
                           })}
                         </span>
                       </div>
-                      {log.field && (
+                      {hasField && log.field && (
                         <p className="text-xs text-gray-500 mt-0.5">{log.field.label}</p>
                       )}
                       {!isConfirmed && (

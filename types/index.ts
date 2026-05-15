@@ -444,6 +444,8 @@ export type DJRider = {
   order_id: string;
   template_id: string;
   status: DJRiderStatus;
+  disabled_section_ids: string[];
+  field_assignments: Record<string, string>;
   created_at: string;
   updated_at: string;
   template?: DJRiderTemplate;

@@ -7,10 +7,11 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
 import { useRiderRealtime } from '@/components/rider/useRiderRealtime';
 import RiderForm from '@/components/rider/RiderForm';
+import RiderSettingsModal from '@/components/rider/RiderSettingsModal';
 
 export default function AgencyRiderPage() {
   const params = useParams();
@@ -21,7 +22,9 @@ export default function AgencyRiderPage() {
 
   const [orderTitle, setOrderTitle] = useState('');
   const [riderId, setRiderId] = useState<string | null>(null);
+  const [disabledSectionIds, setDisabledSectionIds] = useState<string[]>([]);
   const [loadingOrder, setLoadingOrder] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
 
   const { sections, fields, values, changelog, messages, loading, updateValue, confirmValue, sendMessage } =
     useRiderRealtime(riderId, user?.id || null);
@@ -46,7 +49,7 @@ export default function AgencyRiderPage() {
 
         const { data: rider } = await (supabase as any)
           .from('dj_riders')
-          .select('id')
+          .select('id, disabled_section_ids')
           .eq('order_id', orderId)
           .single();
 
@@ -57,6 +60,7 @@ export default function AgencyRiderPage() {
         }
 
         setRiderId(rider.id);
+        setDisabledSectionIds(rider.disabled_section_ids || []);
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -100,16 +104,28 @@ export default function AgencyRiderPage() {
     );
   }
 
+  // Filter sections based on disabled ids
+  const visibleSections = sections.filter((s) => !disabledSectionIds.includes(s.id));
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link
-          href={`/agency/orders/${orderId}`}
-          className="inline-flex items-center text-sm text-gray-400 hover:text-white"
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/agency/orders/${orderId}`}
+            className="inline-flex items-center text-sm text-gray-400 hover:text-white"
+          >
+            <ArrowLeftIcon className="mr-1 h-4 w-4" />
+            Back to Order
+          </Link>
+        </div>
+        <button
+          onClick={() => setShowSettings(true)}
+          className="inline-flex items-center gap-2 px-3 py-2 bg-dark-800 border border-dark-500 rounded-lg text-sm text-gray-300 hover:text-white hover:border-white/20 transition-colors"
         >
-          <ArrowLeftIcon className="mr-1 h-4 w-4" />
-          Back to Order
-        </Link>
+          <Cog6ToothIcon className="h-4 w-4" />
+          Settings
+        </button>
       </div>
 
       <div>
@@ -118,7 +134,7 @@ export default function AgencyRiderPage() {
       </div>
 
       <RiderForm
-        sections={sections}
+        sections={visibleSections}
         fields={fields}
         values={values}
         changelog={changelog}
@@ -128,6 +144,27 @@ export default function AgencyRiderPage() {
         onConfirm={handleConfirm}
         onSendMessage={handleSendMessage}
       />
+
+      {showSettings && riderId && (
+        <RiderSettingsModal
+          riderId={riderId}
+          orderId={orderId}
+          sections={sections}
+          disabledSectionIds={disabledSectionIds}
+          onClose={() => setShowSettings(false)}
+          onUpdate={() => {
+            // Refresh disabled sections
+            (supabase as any)
+              .from('dj_riders')
+              .select('disabled_section_ids')
+              .eq('id', riderId)
+              .single()
+              .then(({ data }: any) => {
+                if (data) setDisabledSectionIds(data.disabled_section_ids || []);
+              });
+          }}
+        />
+      )}
     </div>
   );
 }

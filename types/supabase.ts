@@ -507,6 +507,8 @@ export interface Database {
           order_id: string
           template_id: string
           status: 'draft' | 'active' | 'archived'
+          disabled_section_ids: string[]
+          field_assignments: Json
           created_at: string
           updated_at: string
         }
@@ -515,6 +517,8 @@ export interface Database {
           order_id: string
           template_id: string
           status?: 'draft' | 'active' | 'archived'
+          disabled_section_ids?: string[]
+          field_assignments?: Json
           created_at?: string
           updated_at?: string
         }
@@ -523,6 +527,8 @@ export interface Database {
           order_id?: string
           template_id?: string
           status?: 'draft' | 'active' | 'archived'
+          disabled_section_ids?: string[]
+          field_assignments?: Json
           created_at?: string
           updated_at?: string
         }

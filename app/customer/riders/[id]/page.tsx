@@ -21,6 +21,7 @@ export default function CustomerRiderPage() {
 
   const [orderTitle, setOrderTitle] = useState('');
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [disabledSectionIds, setDisabledSectionIds] = useState<string[]>([]);
 
   const { sections, fields, values, changelog, messages, loading, updateValue, confirmValue, sendMessage } =
     useRiderRealtime(riderId, user?.id || null);
@@ -42,10 +43,10 @@ export default function CustomerRiderPage() {
           return;
         }
 
-        // Get rider order_id
+        // Get rider order_id + disabled sections
         const { data: rider } = await (supabase as any)
           .from('dj_riders')
-          .select('order_id')
+          .select('order_id, disabled_section_ids')
           .eq('id', riderId)
           .single();
 
@@ -53,6 +54,8 @@ export default function CustomerRiderPage() {
           setHasAccess(false);
           return;
         }
+
+        setDisabledSectionIds(rider.disabled_section_ids || []);
 
         // Check access
         const { data: access } = await (supabase as any)
@@ -129,6 +132,9 @@ export default function CustomerRiderPage() {
     );
   }
 
+  // Filter sections based on disabled ids
+  const visibleSections = sections.filter((s) => !disabledSectionIds.includes(s.id));
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -147,7 +153,7 @@ export default function CustomerRiderPage() {
       </div>
 
       <RiderForm
-        sections={sections}
+        sections={visibleSections}
         fields={fields}
         values={values}
         changelog={changelog}

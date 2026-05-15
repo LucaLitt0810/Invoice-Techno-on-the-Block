@@ -54,6 +54,7 @@ const getNavigation = (role: string | undefined) => {
     { name: 'Contracts', href: '/contracts', icon: DocumentCheckIcon },
     { name: 'B2B', href: '/b2b', icon: BuildingOfficeIcon },
     { name: 'Agency', href: '/agency', icon: BriefcaseIcon },
+    { name: 'DJ Riders', href: '/riders', icon: DocumentCheckIcon },
     { name: 'DJ Bookings', href: '/bookings', icon: CalendarIcon },
     { name: 'Bookkeeping', href: '/bookkeeping', icon: BanknotesIcon },
     { name: 'Personal', href: '/personal', icon: UserGroupIcon },
