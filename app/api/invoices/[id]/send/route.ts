@@ -6,7 +6,13 @@ import { generateInvoicePdf } from '@/lib/invoices/pdf';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY is not configured');
+  }
+  return new Resend(apiKey);
+}
 
 export async function POST(
   request: NextRequest,
@@ -191,7 +197,7 @@ ${companyName}`;
     const pdfBytes = await generateInvoicePdf(invoice);
 
     // Send via Resend with attachment
-    const { data: sendData, error: sendError } = await resend.emails.send({
+    const { data: sendData, error: sendError } = await getResend().emails.send({
       from: process.env.EMAIL_FROM || 'Techno on the Block <no-reply@technoontheblock.ch>',
       to: invoice.customer.email,
       subject,

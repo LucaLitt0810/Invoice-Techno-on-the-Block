@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
-import { Order, ORDER_STATUS_OPTIONS, Offer, OFFER_STATUS_OPTIONS, Customer } from '@/types';
+import { Order, ORDER_STATUS_OPTIONS, Offer, OFFER_STATUS_OPTIONS, Customer, DJRider } from '@/types';
 import { Booking, BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS } from '@/types/bookings';
 import {
   ArrowLeftIcon,
@@ -46,6 +46,7 @@ export default function OrderDetailPage() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [contracts, setContracts] = useState<any[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [rider, setRider] = useState<DJRider | null>(null);
 
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [offerForm, setOfferForm] = useState({ title: '', description: '', amount: '', valid_until: '' });
@@ -73,17 +74,19 @@ export default function OrderDetailPage() {
       setOrder(data as Order);
 
       // Fetch related data in parallel
-      const [{ data: inv }, { data: off }, { data: con }, { data: book }] = await Promise.all([
+      const [{ data: inv }, { data: off }, { data: con }, { data: book }, { data: riderData }] = await Promise.all([
         supabase.from('invoices').select('*').eq('order_id', orderId).order('created_at', { ascending: false }),
         supabase.from('offers').select('*').eq('order_id', orderId).order('created_at', { ascending: false }),
         supabase.from('contracts').select('*').eq('order_id', orderId).order('created_at', { ascending: false }),
         supabase.from('bookings').select('*, dj:djs(*)').eq('order_id', orderId).order('start_date', { ascending: false }),
+        supabase.from('dj_riders').select('*').eq('order_id', orderId).maybeSingle(),
       ]);
 
       setInvoices(inv || []);
       setOffers(off || []);
       setContracts(con || []);
       setBookings((book || []) as Booking[]);
+      setRider(riderData || null);
     } catch (error) {
       console.error('Error fetching order:', error);
       toast.error('Failed to load order');
@@ -178,6 +181,74 @@ export default function OrderDetailPage() {
     }
   };
 
+  const handleCreateRider = async () => {
+    try {
+      // Get default template
+      const { data: template } = await supabase
+        .from('dj_rider_templates')
+        .select('id')
+        .eq('is_default', true)
+        .single();
+
+      if (!template) {
+        toast.error('No default rider template found');
+        return;
+      }
+
+      const { data: newRider, error } = await (supabase as any)
+        .from('dj_riders')
+        .insert({
+          order_id: orderId,
+          template_id: template.id,
+          status: 'active',
+        })
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      // Pre-populate values from template fields
+      const { data: sections } = await (supabase as any)
+        .from('dj_rider_template_sections')
+        .select('id')
+        .eq('template_id', template.id);
+
+      if (sections && sections.length > 0) {
+        const sectionIds = sections.map((s: any) => s.id);
+        const { data: fields } = await (supabase as any)
+          .from('dj_rider_template_fields')
+          .select('id')
+          .in('section_id', sectionIds);
+
+        if (fields && fields.length > 0) {
+          const values = fields.map((f: any) => ({
+            rider_id: newRider.id,
+            field_id: f.id,
+            value: null,
+          }));
+          await (supabase as any).from('dj_rider_values').insert(values);
+        }
+      }
+
+      // Auto-create customer access if order has a customer
+      if (order?.customer_id) {
+        await (supabase as any)
+          .from('order_customer_access')
+          .upsert({
+            order_id: orderId,
+            customer_id: order.customer_id,
+            can_view_rider: true,
+          }, { onConflict: 'order_id,customer_id' });
+      }
+
+      setRider(newRider as DJRider);
+      toast.success('DJ Rider created');
+      router.push(`/agency/orders/${orderId}/rider`);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create rider');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -267,9 +338,11 @@ export default function OrderDetailPage() {
               onClick: () => setActiveTab('bookings'),
             },
             {
-              label: 'DJ Rider ausgefüllt',
+              label: rider ? 'DJ Rider öffnen' : 'DJ Rider erstellen',
               done: order.dj_rider_filled,
-              onClick: toggleDjRider,
+              onClick: rider
+                ? () => router.push(`/agency/orders/${orderId}/rider`)
+                : handleCreateRider,
             },
           ].map((item, i) => (
             <button
@@ -423,6 +496,29 @@ export default function OrderDetailPage() {
                     <p className="text-xs text-gray-500">Add a DJ booking to this order</p>
                   </div>
                 </Link>
+                {rider ? (
+                  <Link
+                    href={`/agency/orders/${orderId}/rider`}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-[#0a0a0a] border border-teal-500/30 hover:border-teal-400/50 transition-colors"
+                  >
+                    <ClipboardDocumentListIcon className="h-5 w-5 text-teal-400" />
+                    <div>
+                      <p className="text-sm font-medium text-white">Open DJ Rider</p>
+                      <p className="text-xs text-gray-500">View and edit advancing details</p>
+                    </div>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={handleCreateRider}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg bg-[#0a0a0a] border border-white/5 hover:border-teal-400/50 transition-colors text-left"
+                  >
+                    <ClipboardDocumentListIcon className="h-5 w-5 text-teal-400" />
+                    <div>
+                      <p className="text-sm font-medium text-white">Create DJ Rider</p>
+                      <p className="text-xs text-gray-500">Set up advancing for this order</p>
+                    </div>
+                  </button>
+                )}
               </div>
             </div>
           </div>

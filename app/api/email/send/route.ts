@@ -4,7 +4,13 @@ import { Resend } from 'resend';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY is not configured');
+  }
+  return new Resend(apiKey);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: from || process.env.EMAIL_FROM || 'Techno on the Block <no-reply@technoontheblock.ch>',
       to: Array.isArray(to) ? to : [to],
       subject,
