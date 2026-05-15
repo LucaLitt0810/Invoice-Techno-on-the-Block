@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import {
   DJRiderTemplateSection,
@@ -20,11 +20,14 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
   const [messages, setMessages] = useState<DJRiderMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Build field map for quick lookup
-  const fieldMap = useCallback(() => {
+  // Refs for realtime handler to access current data without stale closures
+  const fieldsRef = useRef<Record<string, DJRiderTemplateField>>({});
+  const usersMapRef = useRef<Record<string, any>>({});
+
+  useEffect(() => {
     const map: Record<string, DJRiderTemplateField> = {};
     fields.forEach((f) => (map[f.id] = f));
-    return map;
+    fieldsRef.current = map;
   }, [fields]);
 
   // Fetch initial data
@@ -82,24 +85,19 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
       const changelogUserIds = (changelogData || []).flatMap((c: any) => [c.changed_by, c.confirmed_by]);
       const allUserIds = Array.from(new Set([...messageUserIds, ...changelogUserIds].filter(Boolean)));
 
-      // Build users map from customers table (auth_user_id -> customer info)
+      // Build users map via API (uses service role key server-side)
       let usersMap: Record<string, any> = {};
       if (allUserIds.length > 0) {
         try {
-          const { data: customersData } = await supabase
-            .from('customers')
-            .select('auth_user_id, email, company_name, contact_person')
-            .in('auth_user_id', allUserIds);
-
-          (customersData || []).forEach((c: any) => {
-            usersMap[c.auth_user_id] = {
-              email: c.email,
-              user_metadata: {
-                first_name: c.contact_person || c.company_name,
-                last_name: '',
-              },
-            };
+          const res = await fetch('/api/riders/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userIds: allUserIds }),
           });
+          if (res.ok) {
+            const result = await res.json();
+            usersMap = result.users || {};
+          }
         } catch (e) {
           // Fallback: skip user enrichment
         }
@@ -117,6 +115,7 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
         user: usersMap[msg.user_id] || null,
       }));
 
+      usersMapRef.current = usersMap;
       setSections(sectionsData || []);
       setFields(fieldsData || []);
       setValues(valuesData || []);
@@ -163,8 +162,32 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
           setChangelog((prev) => {
             const exists = prev.some((c) => c.id === payload.new.id);
             if (exists) return prev;
-            return [payload.new as DJRiderChangelog, ...prev];
+            const enriched = {
+              ...payload.new,
+              field: fieldsRef.current[payload.new.field_id] || null,
+              changed_by_user: usersMapRef.current[payload.new.changed_by] || null,
+              confirmed_by_user: usersMapRef.current[payload.new.confirmed_by] || null,
+            };
+            return [enriched as DJRiderChangelog, ...prev];
           });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'dj_rider_changelog', filter: `rider_id=eq.${riderId}` },
+        (payload: any) => {
+          setChangelog((prev) =>
+            prev.map((c) =>
+              c.id === payload.new.id
+                ? {
+                    ...payload.new,
+                    field: fieldsRef.current[payload.new.field_id] || c.field || null,
+                    changed_by_user: usersMapRef.current[payload.new.changed_by] || c.changed_by_user || null,
+                    confirmed_by_user: usersMapRef.current[payload.new.confirmed_by] || c.confirmed_by_user || null,
+                  }
+                : c
+            )
+          );
         }
       )
       .on(
@@ -174,7 +197,11 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
           setMessages((prev) => {
             const exists = prev.some((m) => m.id === payload.new.id);
             if (exists) return prev;
-            return [...prev, payload.new as DJRiderMessage];
+            const enriched = {
+              ...payload.new,
+              user: usersMapRef.current[payload.new.user_id] || null,
+            };
+            return [...prev, enriched as DJRiderMessage];
           });
         }
       )
@@ -217,19 +244,8 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
         if (error) throw error;
       }
 
-      // Explicitly create changelog entry (independent of database trigger)
-      const { error: changelogError } = await supabase.from('dj_rider_changelog').insert({
-        rider_id: riderId,
-        field_id: fieldId,
-        changed_by: userId,
-        old_value: oldValue,
-        new_value: value,
-        status: 'pending',
-      });
-
-      if (changelogError) {
-        console.error('Changelog insert error:', changelogError);
-      }
+      // Changelog is created by database trigger log_dj_rider_change() on UPDATE
+      // No explicit insert needed here
     },
     [riderId, userId, values, supabase]
   );
