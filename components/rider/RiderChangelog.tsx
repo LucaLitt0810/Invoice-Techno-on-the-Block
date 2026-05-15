@@ -6,15 +6,48 @@ import { formatDistanceToNow, format, isToday, isYesterday, differenceInMinutes 
 import { de } from 'date-fns/locale';
 import {
   UserCircleIcon,
-  CheckCircleIcon,
   PencilIcon,
-  ChatBubbleLeftIcon,
   ChatBubbleLeftRightIcon,
   CheckBadgeIcon,
   ClockIcon,
   HashtagIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
+
+// --- Helper functions (defined outside component to avoid TDZ issues) ---
+
+function getUserName(
+  user?: { email: string; user_metadata?: { first_name?: string; last_name?: string; full_name?: string } } | null
+) {
+  if (!user) return 'Unbekannt';
+  const full = user.user_metadata?.full_name || '';
+  const first = user.user_metadata?.first_name || '';
+  const last = user.user_metadata?.last_name || '';
+  return full || `${first} ${last}`.trim() || user.email || 'Unbekannt';
+}
+
+function getDateLabel(dateStr: string) {
+  const d = new Date(dateStr);
+  if (isToday(d)) return 'Heute';
+  if (isYesterday(d)) return 'Gestern';
+  return format(d, 'EEEE, d. MMMM', { locale: de });
+}
+
+function renderMentions(text: string) {
+  const parts = text.split(/(@\w+|@\S+)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('@')) {
+      return (
+        <span key={i} className="text-blue-400 font-medium bg-blue-900/20 px-1 rounded">
+          {part}
+        </span>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
+// --- Types ---
 
 interface RiderChangelogProps {
   changelog: DJRiderChangelog[];
@@ -33,6 +66,8 @@ interface GroupedItem {
   timestamp: string;
   items: ActivityItem[];
 }
+
+// --- Component ---
 
 export default function RiderChangelog({
   changelog,
@@ -117,35 +152,6 @@ export default function RiderChangelog({
     }
   };
 
-  const getUserName = (user?: { email: string; user_metadata?: { first_name?: string; last_name?: string; full_name?: string } } | null) => {
-    if (!user) return 'Unbekannt';
-    const full = user.user_metadata?.full_name || '';
-    const first = user.user_metadata?.first_name || '';
-    const last = user.user_metadata?.last_name || '';
-    return full || `${first} ${last}`.trim() || user.email || 'Unbekannt';
-  };
-
-  const getDateLabel = (dateStr: string) => {
-    const d = new Date(dateStr);
-    if (isToday(d)) return 'Heute';
-    if (isYesterday(d)) return 'Gestern';
-    return format(d, 'EEEE, d. MMMM', { locale: de });
-  };
-
-  const renderMentions = (text: string) => {
-    const parts = text.split(/(@\w+|@\S+)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('@')) {
-        return (
-          <span key={i} className="text-blue-400 font-medium bg-blue-900/20 px-1 rounded">
-            {part}
-          </span>
-        );
-      }
-      return <span key={i}>{part}</span>;
-    });
-  };
-
   // Check if date changes between groups
   let lastDateLabel = '';
 
@@ -162,7 +168,7 @@ export default function RiderChangelog({
           <span>{stats.confirmed} bestätigt</span>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-blue-400">
-          <ChatBubbleLeftIcon className="h-3.5 w-3.5" />
+          <HashtagIcon className="h-3.5 w-3.5" />
           <span>{stats.msgCount} Nachrichten</span>
         </div>
       </div>
