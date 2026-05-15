@@ -434,7 +434,7 @@ export default function OrderDetailPage() {
                   <span className="text-sm text-gray-400">Customer</span>
                   <span className="text-sm text-white">
                     {order.customer ? (
-                      <Link href={`/customers/${order.customer_id}`} className="text-blue-400 hover:text-blue-300">
+                      <Link href={`/customer-detail/${order.customer_id}`} className="text-blue-400 hover:text-blue-300">
                         {order.customer.company_name}
                       </Link>
                     ) : '-'}

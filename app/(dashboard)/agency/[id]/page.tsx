@@ -236,7 +236,7 @@ export default function AgencyLeadDetailPage() {
                 <label className="label">Linked Customer</label>
                 {lead.customer ? (
                   <Link
-                    href={`/customers/${lead.customer_id}`}
+                    href={`/customer-detail/${lead.customer_id}`}
                     className="inline-flex items-center text-blue-400 hover:text-blue-300"
                   >
                     {lead.customer.company_name}

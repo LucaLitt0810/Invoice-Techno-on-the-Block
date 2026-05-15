@@ -445,7 +445,7 @@ export default function AgencyPage() {
                     <td className="table-cell">
                       {lead.customer ? (
                         <Link
-                          href={`/customers/${lead.customer_id}`}
+                          href={`/customer-detail/${lead.customer_id}`}
                           className="inline-flex items-center text-sm text-blue-400 hover:text-blue-300"
                         >
                           {lead.customer.company_name}
@@ -575,7 +575,7 @@ export default function AgencyPage() {
                     <td className="table-cell">
                       {order.customer ? (
                         <Link
-                          href={`/customers/${order.customer_id}`}
+                          href={`/customer-detail/${order.customer_id}`}
                           className="inline-flex items-center text-sm text-blue-400 hover:text-blue-300"
                         >
                           {order.customer.company_name}

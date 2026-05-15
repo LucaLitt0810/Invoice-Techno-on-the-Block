@@ -384,6 +384,8 @@ export type Transaction = {
   invoice?: Invoice;
 };
 
+export type { Contract } from './contracts';
+
 export type AgencyLead = {
   id: string;
   user_id: string;

@@ -75,7 +75,11 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/reset-password')) {
     if (session) {
       const redirectTo = isCustomer ? '/customer/riders' : '/dashboard';
-      return NextResponse.redirect(new URL(redirectTo, request.url));
+      const redirectResponse = NextResponse.redirect(new URL(redirectTo, request.url));
+      redirectResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      redirectResponse.headers.set('Pragma', 'no-cache');
+      redirectResponse.headers.set('Expires', '0');
+      return redirectResponse;
     }
     return response;
   }
@@ -84,25 +88,23 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname === '/') {
     if (session) {
       const redirectTo = isCustomer ? '/customer/riders' : '/dashboard';
-      return NextResponse.redirect(new URL(redirectTo, request.url));
+      const redirectResponse = NextResponse.redirect(new URL(redirectTo, request.url));
+      redirectResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      redirectResponse.headers.set('Pragma', 'no-cache');
+      redirectResponse.headers.set('Expires', '0');
+      return redirectResponse;
     }
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  // Customer-specific routes: non-customers should not access them
-  if (request.nextUrl.pathname.startsWith('/customer')) {
-    if (!session) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-    if (!isCustomer) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-    return response;
+    const loginResponse = NextResponse.redirect(new URL('/login', request.url));
+    loginResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    loginResponse.headers.set('Pragma', 'no-cache');
+    loginResponse.headers.set('Expires', '0');
+    return loginResponse;
   }
 
   // Protected agency routes: customers should be redirected to their dashboard
   if (request.nextUrl.pathname.startsWith('/dashboard') ||
       request.nextUrl.pathname.startsWith('/customers') ||
+      request.nextUrl.pathname.startsWith('/customer-detail') ||
       request.nextUrl.pathname.startsWith('/invoices') ||
       request.nextUrl.pathname.startsWith('/products') ||
       request.nextUrl.pathname.startsWith('/coworkers') ||
@@ -117,11 +119,42 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/personal') ||
       request.nextUrl.pathname.startsWith('/meetings')) {
     if (!session) {
-      return NextResponse.redirect(new URL('/login', request.url));
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      redirectResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      redirectResponse.headers.set('Pragma', 'no-cache');
+      redirectResponse.headers.set('Expires', '0');
+      return redirectResponse;
     }
     if (isCustomer) {
-      return NextResponse.redirect(new URL('/customer/riders', request.url));
+      const redirectResponse = NextResponse.redirect(new URL('/customer/riders', request.url));
+      redirectResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      redirectResponse.headers.set('Pragma', 'no-cache');
+      redirectResponse.headers.set('Expires', '0');
+      return redirectResponse;
     }
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    return response;
+  }
+
+  // Customer-specific routes: non-customers should not access them
+  if (request.nextUrl.pathname.startsWith('/customer')) {
+    if (!session) {
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      redirectResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      redirectResponse.headers.set('Pragma', 'no-cache');
+      redirectResponse.headers.set('Expires', '0');
+      return redirectResponse;
+    }
+    if (!isCustomer) {
+      const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+      redirectResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      redirectResponse.headers.set('Pragma', 'no-cache');
+      redirectResponse.headers.set('Expires', '0');
+      return redirectResponse;
+    }
+    return response;
   }
 
   return response;

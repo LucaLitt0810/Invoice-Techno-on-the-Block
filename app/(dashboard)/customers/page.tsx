@@ -148,7 +148,7 @@ export default function CustomersPage() {
                 filteredCustomers.map((customer) => (
                   <tr key={customer.id} className="hover:bg-dark-700/50">
                     <td className="table-cell font-medium text-white">
-                      <Link href={`/customers/${customer.id}`} className="hover:text-blue-400 transition-colors">
+                      <Link href={`/customer-detail/${customer.id}`} className="hover:text-blue-400 transition-colors">
                         {customer.company_name}
                       </Link>
                     </td>
@@ -165,10 +165,10 @@ export default function CustomersPage() {
                     </td>
                     <td className="table-cell">
                       <div className="flex items-center space-x-3">
-                        <Link href={`/customers/${customer.id}`} className="text-gray-400 hover:text-white" title="View">
+                        <Link href={`/customer-detail/${customer.id}`} className="text-gray-400 hover:text-white" title="View">
                           <EyeIcon className="h-5 w-5" />
                         </Link>
-                        <Link href={`/customers/${customer.id}/edit`} className="text-gray-400 hover:text-blue-400" title="Edit">
+                        <Link href={`/customer-detail/${customer.id}/edit`} className="text-gray-400 hover:text-blue-400" title="Edit">
                           <PencilIcon className="h-5 w-5" />
                         </Link>
                         <button onClick={() => handleDelete(customer.id)} className="text-gray-400 hover:text-red-400" title="Delete">
