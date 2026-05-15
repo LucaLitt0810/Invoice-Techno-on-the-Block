@@ -177,18 +177,18 @@ ON CONFLICT DO NOTHING;
 
 DO $$
 DECLARE
-    template_id UUID;
+    v_template_id UUID;
     section_id UUID;
     existing_sections INTEGER;
 BEGIN
-    SELECT id INTO template_id FROM dj_rider_templates WHERE is_default = true LIMIT 1;
+    SELECT id INTO v_template_id FROM dj_rider_templates WHERE is_default = true LIMIT 1;
 
-    IF template_id IS NULL THEN
+    IF v_template_id IS NULL THEN
         RETURN;
     END IF;
 
     -- Check if sections already exist for this template
-    SELECT COUNT(*) INTO existing_sections FROM dj_rider_template_sections WHERE template_id = template_id;
+    SELECT COUNT(*) INTO existing_sections FROM dj_rider_template_sections WHERE template_id = v_template_id;
 
     IF existing_sections > 0 THEN
         RETURN;
@@ -196,7 +196,7 @@ BEGIN
 
     -- Section: Show
     INSERT INTO dj_rider_template_sections (template_id, name, sort_order)
-    VALUES (template_id, 'Show', 10)
+    VALUES (v_template_id, 'Show', 10)
     RETURNING id INTO section_id;
 
     INSERT INTO dj_rider_template_fields (section_id, label, field_type, sort_order) VALUES
@@ -210,7 +210,7 @@ BEGIN
 
     -- Section: Promoter
     INSERT INTO dj_rider_template_sections (template_id, name, sort_order)
-    VALUES (template_id, 'Promoter', 20)
+    VALUES (v_template_id, 'Promoter', 20)
     RETURNING id INTO section_id;
 
     INSERT INTO dj_rider_template_fields (section_id, label, field_type, sort_order) VALUES
@@ -223,7 +223,7 @@ BEGIN
 
     -- Section: Arrival
     INSERT INTO dj_rider_template_sections (template_id, name, sort_order)
-    VALUES (template_id, 'Arrival', 30)
+    VALUES (v_template_id, 'Arrival', 30)
     RETURNING id INTO section_id;
 
     INSERT INTO dj_rider_template_fields (section_id, label, field_type, placeholder, sort_order) VALUES
@@ -234,7 +234,7 @@ BEGIN
 
     -- Section: Departure
     INSERT INTO dj_rider_template_sections (template_id, name, sort_order)
-    VALUES (template_id, 'Departure', 40)
+    VALUES (v_template_id, 'Departure', 40)
     RETURNING id INTO section_id;
 
     INSERT INTO dj_rider_template_fields (section_id, label, field_type, sort_order) VALUES
@@ -245,7 +245,7 @@ BEGIN
 
     -- Section: Show Transfers
     INSERT INTO dj_rider_template_sections (template_id, name, sort_order)
-    VALUES (template_id, 'Show Transfers', 50)
+    VALUES (v_template_id, 'Show Transfers', 50)
     RETURNING id INTO section_id;
 
     INSERT INTO dj_rider_template_fields (section_id, label, field_type, sort_order) VALUES
@@ -259,7 +259,7 @@ BEGIN
 
     -- Section: Hotel
     INSERT INTO dj_rider_template_sections (template_id, name, sort_order)
-    VALUES (template_id, 'Hotel', 60)
+    VALUES (v_template_id, 'Hotel', 60)
     RETURNING id INTO section_id;
 
     INSERT INTO dj_rider_template_fields (section_id, label, field_type, sort_order) VALUES
@@ -273,7 +273,7 @@ BEGIN
 
     -- Section: Dinner
     INSERT INTO dj_rider_template_sections (template_id, name, sort_order)
-    VALUES (template_id, 'Dinner', 70)
+    VALUES (v_template_id, 'Dinner', 70)
     RETURNING id INTO section_id;
 
     INSERT INTO dj_rider_template_fields (section_id, label, field_type, placeholder, sort_order) VALUES
@@ -284,7 +284,7 @@ BEGIN
 
     -- Section: Soundcheck
     INSERT INTO dj_rider_template_sections (template_id, name, sort_order)
-    VALUES (template_id, 'Soundcheck', 80)
+    VALUES (v_template_id, 'Soundcheck', 80)
     RETURNING id INTO section_id;
 
     INSERT INTO dj_rider_template_fields (section_id, label, field_type, sort_order) VALUES
