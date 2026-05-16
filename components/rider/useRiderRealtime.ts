@@ -282,6 +282,19 @@ export function useRiderRealtime(riderId: string | null, userId: string | null) 
     async (valueId: string, isAgency: boolean) => {
       if (!userId) return;
 
+      // Optimistic update — Haken sofort grün
+      setValues((prev) =>
+        prev.map((v) =>
+          v.id === valueId
+            ? {
+                ...v,
+                confirmed_by_agency: isAgency ? true : v.confirmed_by_agency,
+                confirmed_by_customer: !isAgency ? true : v.confirmed_by_customer,
+              }
+            : v
+        )
+      );
+
       const update: Record<string, boolean> = isAgency
         ? { confirmed_by_agency: true }
         : { confirmed_by_customer: true };
