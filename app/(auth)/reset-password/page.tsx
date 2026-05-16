@@ -33,75 +33,88 @@ export default function ResetPasswordPage() {
 
   if (sent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 text-center">
+      <>
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 mb-5">
+            <svg className="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+            </svg>
+          </div>
+          <div className="text-xl font-bold tracking-wide text-blue-400">Techno on the Block</div>
+          <div className="text-sm font-medium text-gray-500 uppercase tracking-widest mt-1">Workspace</div>
+        </div>
+
+        <div className="card-glass p-8 text-center space-y-6">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-500/10 border border-green-500/20">
+            <svg className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
           <div>
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-              Check your email
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              We&apos;ve sent password reset instructions to {email}
+            <h2 className="text-2xl font-bold uppercase tracking-wider mb-2">Check your email</h2>
+            <p className="text-gray-400 text-sm">
+              We&apos;ve sent password reset instructions to <span className="text-white">{email}</span>
             </p>
           </div>
-          <div>
-            <Link
-              href="/login"
-              className="font-medium text-primary-600 hover:text-primary-500"
-            >
-              Return to sign in
-            </Link>
-          </div>
+          <Link href="/login" className="btn-secondary w-full inline-flex">
+            Return to sign in
+          </Link>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Reset your password
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+    <>
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 mb-5">
+          <svg className="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+          </svg>
+        </div>
+        <div className="text-xl font-bold tracking-wide text-blue-400">Techno on the Block</div>
+        <div className="text-sm font-medium text-gray-500 uppercase tracking-widest mt-1">Workspace</div>
+      </div>
+
+      <div className="card-glass p-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold uppercase tracking-wider mb-2">Reset Password</h2>
+          <p className="text-gray-400 text-sm">
             Enter your email address and we&apos;ll send you instructions to reset your password.
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email-address" className="sr-only">
-              Email address
-            </label>
+            <label htmlFor="email" className="label">Email Address</label>
             <input
-              id="email-address"
+              id="email"
               name="email"
               type="email"
               autoComplete="email"
               required
-              className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-              placeholder="Email address"
+              className="input"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Sending...' : 'Send reset instructions'}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full"
+          >
+            {loading ? 'Sending...' : 'Send reset instructions'}
+          </button>
 
           <div className="text-center">
-            <Link href="/login" className="font-medium text-primary-600 hover:text-primary-500">
+            <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">
               Back to sign in
             </Link>
           </div>
         </form>
       </div>
-    </div>
+    </>
   );
 }

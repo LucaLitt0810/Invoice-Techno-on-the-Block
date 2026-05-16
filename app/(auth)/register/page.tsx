@@ -50,15 +50,20 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full max-w-md px-4">
-      <div className="text-center mb-12">
+    <>
+      <div className="text-center mb-10">
         <Link href="/" className="block">
-          <div className="text-xl font-bold tracking-wide" style={{ color: '#3b82f6' }}>Techno on the Block</div>
-          <div className="text-lg font-semibold text-white">Workspace</div>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 mb-5">
+            <svg className="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+            </svg>
+          </div>
+          <div className="text-xl font-bold tracking-wide text-blue-400">Techno on the Block</div>
+          <div className="text-sm font-medium text-gray-500 uppercase tracking-widest mt-1">Workspace</div>
         </Link>
       </div>
 
-      <div className="card p-8">
+      <div className="card-glass p-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold uppercase tracking-wider mb-2">Create Account</h2>
           <p className="text-gray-400 text-sm">
@@ -124,6 +129,6 @@ export default function RegisterPage() {
           </button>
         </form>
       </div>
-    </div>
+    </>
   );
 }
