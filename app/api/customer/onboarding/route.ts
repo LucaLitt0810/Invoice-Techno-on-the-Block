@@ -30,13 +30,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid user role' }, { status: 403 });
     }
 
-    const { first_name, last_name, label, password } = await request.json();
+    const { password, dataConfirmed } = await request.json();
 
-    if (!first_name || !last_name || !label || !password) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+    if (!dataConfirmed) {
+      return NextResponse.json({ error: 'Customer data must be confirmed' }, { status: 400 });
     }
 
-    if (password.length < 6) {
+    if (!password || password.length < 6) {
       return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
     }
 
@@ -49,9 +49,6 @@ export async function POST(request: NextRequest) {
         password,
         user_metadata: {
           ...currentUser.user_metadata,
-          first_name,
-          last_name,
-          label,
           onboarding_complete: true,
         },
       }
@@ -60,21 +57,6 @@ export async function POST(request: NextRequest) {
     if (authError) {
       console.error('Error updating auth user:', authError);
       return NextResponse.json({ error: authError.message }, { status: 500 });
-    }
-
-    // Update customers table
-    const { error: customerError } = await supabase
-      .from('customers')
-      .update({
-        contact_person: `${first_name} ${last_name}`,
-        company_name: label,
-        onboarding_complete: true,
-      })
-      .eq('auth_user_id', currentUser.id);
-
-    if (customerError) {
-      console.error('Error updating customer:', customerError);
-      return NextResponse.json({ error: 'Failed to update customer profile' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, message: 'Onboarding completed' });

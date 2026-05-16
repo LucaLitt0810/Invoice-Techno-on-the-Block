@@ -1,32 +1,41 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import OnboardingModal from '@/components/customer/OnboardingModal';
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (authLoading) return;
+    if (!user) {
       router.push('/login');
       return;
     }
 
-    if (user) {
-      const onboardingComplete = user.user_metadata?.onboarding_complete === true;
-      setShowOnboarding(!onboardingComplete);
-      setChecked(true);
+    const onboardingComplete = user.user_metadata?.onboarding_complete === true;
+    const isOnboardingPage = pathname === '/customer/onboarding';
+
+    if (!onboardingComplete && !isOnboardingPage) {
+      router.push('/customer/onboarding');
+      return;
     }
-  }, [user, authLoading, router]);
+
+    if (onboardingComplete && isOnboardingPage) {
+      router.push('/customer/riders');
+      return;
+    }
+
+    setChecked(true);
+  }, [user, authLoading, pathname, router]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -68,17 +77,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
-
-      {/* Onboarding Modal */}
-      {showOnboarding && user && (
-        <OnboardingModal
-          userId={user.id}
-          onComplete={() => {
-            setShowOnboarding(false);
-            window.location.reload();
-          }}
-        />
-      )}
     </div>
   );
 }

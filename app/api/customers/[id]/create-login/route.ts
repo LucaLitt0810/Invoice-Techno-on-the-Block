@@ -71,7 +71,7 @@ export async function POST(
         role: 'customer',
         first_name: customer.contact_person?.split(' ')[0] || '',
         last_name: customer.contact_person?.split(' ').slice(1).join(' ') || '',
-        onboarding_complete: true,
+        onboarding_complete: false,
       },
     });
 
