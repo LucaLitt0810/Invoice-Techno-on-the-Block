@@ -20,7 +20,6 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
 
-    // Get current user
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (!currentUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -30,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid user role' }, { status: 403 });
     }
 
-    const { password, dataConfirmed } = await request.json();
+    const { password, dataConfirmed, customerData } = await request.json();
 
     if (!dataConfirmed) {
       return NextResponse.json({ error: 'Customer data must be confirmed' }, { status: 400 });
@@ -42,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const adminClient = createAdminClient();
 
-    // Update auth user metadata and password
+    // Update auth user password and onboarding flag
     const { error: authError } = await adminClient.auth.admin.updateUserById(
       currentUser.id,
       {
@@ -57,6 +56,28 @@ export async function POST(request: NextRequest) {
     if (authError) {
       console.error('Error updating auth user:', authError);
       return NextResponse.json({ error: authError.message }, { status: 500 });
+    }
+
+    // Update customer data if provided
+    if (customerData) {
+      const { error: customerError } = await supabase
+        .from('customers')
+        .update({
+          company_name: customerData.company_name,
+          contact_person: customerData.contact_person,
+          email: customerData.email,
+          phone: customerData.phone,
+          street: customerData.street,
+          postal_code: customerData.postal_code,
+          city: customerData.city,
+          country: customerData.country,
+        })
+        .eq('auth_user_id', currentUser.id);
+
+      if (customerError) {
+        console.error('Error updating customer:', customerError);
+        return NextResponse.json({ error: 'Failed to update customer data' }, { status: 500 });
+      }
     }
 
     return NextResponse.json({ success: true, message: 'Onboarding completed' });
