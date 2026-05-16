@@ -65,9 +65,9 @@ export default function RiderForm({
             return (
               <div
                 key={section.id}
-                className="bg-dark-800 border border-dark-500 rounded-xl overflow-hidden"
+                className="card-glass overflow-hidden"
               >
-                <div className="px-5 py-3 border-b border-dark-500">
+                <div className="sticky top-0 z-10 px-5 py-3 bg-black/60 backdrop-blur-xl border-b border-white/[0.06]">
                   <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
                     {section.name}
                   </h3>

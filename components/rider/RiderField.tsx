@@ -27,10 +27,10 @@ export default function RiderField({ field, value, isAgency, canEdit, onChange, 
 
   const needsMyConfirmation = !!value?.id && value.value !== null && value.value !== '' && !confirmedByMe;
 
-  // Entire row green when fully confirmed
+  // Entire row green with pulse ring when fully confirmed
   const rowClass = isFullyConfirmed
-    ? 'bg-green-900/10 border-green-800/30'
-    : 'bg-[#111] border-white/5';
+    ? 'bg-green-900/10 border-green-800/30 animate-pulse-ring'
+    : 'bg-white/[0.02] border-white/[0.06]';
 
   const handleBlur = useCallback(() => {
     if (!canEdit) return;
@@ -42,7 +42,7 @@ export default function RiderField({ field, value, isAgency, canEdit, onChange, 
   const renderInput = () => {
     const disabled = !canEdit;
     const baseClasses =
-      'w-full bg-dark-900 border border-dark-500 rounded px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+      'w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/60 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
 
     switch (field.field_type) {
       case 'textarea':
@@ -148,7 +148,7 @@ export default function RiderField({ field, value, isAgency, canEdit, onChange, 
   };
 
   return (
-    <div className={`flex items-start gap-3 p-3 rounded-lg border ${rowClass} transition-colors`}>
+    <div className={`flex items-start gap-3 p-3.5 rounded-xl border ${rowClass} transition-all duration-200`}>
       <div className="flex-1 min-w-0">
         <label className="block text-sm font-medium text-gray-300 mb-1">
           {field.label}

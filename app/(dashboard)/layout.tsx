@@ -72,6 +72,7 @@ export default function DashboardLayout({
   const [userRole, setUserRole] = useState<string>('user');
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -115,14 +116,14 @@ export default function DashboardLayout({
 
   if (loading || companyLoading) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-[#0a0a0a]">
       {/* Mobile sidebar */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 flex md:hidden">
@@ -130,7 +131,7 @@ export default function DashboardLayout({
             className="fixed inset-0 bg-black/80 backdrop-blur-sm" 
             onClick={() => setSidebarOpen(false)}
           />
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-dark-800 border-r border-dark-500">
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#0a0a0a] border-r border-white/[0.06]">
             <div className="absolute top-0 right-0 -mr-12 pt-4">
               <button
                 type="button"
@@ -150,43 +151,44 @@ export default function DashboardLayout({
                   <div className="text-white">Workspace</div>
                 </div>
               </div>
-              <nav className="px-4 space-y-1">
-                {getNavigation(userRole).map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`group flex items-center px-4 py-3 text-sm font-medium uppercase tracking-wider transition-colors ${
-                      pathname === item.href
-                        ? 'bg-white text-black'
-                        : 'text-gray-400 hover:bg-dark-700 hover:text-white'
-                    }`}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <item.icon className="mr-3 flex-shrink-0 h-5 w-5" />
-                    {item.name}
-                  </Link>
-                ))}
+              <nav className="px-3 space-y-0.5">
+                {getNavigation(userRole).map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`group flex items-center px-4 py-2.5 text-sm font-medium uppercase tracking-wider rounded-lg transition-all duration-200 ${
+                        isActive
+                          ? 'text-white border-l-2 border-blue-500 bg-blue-500/[0.06]'
+                          : 'text-gray-400 hover:bg-white/[0.03] hover:text-white'
+                      }`}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <item.icon className={`mr-3 flex-shrink-0 h-5 w-5 transition-colors ${isActive ? 'text-blue-400' : 'text-gray-500 group-hover:text-gray-300'}`} />
+                      {item.name}
+                    </Link>
+                  );
+                })}
               </nav>
             </div>
-            <div className="flex-shrink-0 flex border-t border-dark-500 p-4">
+            <div className="flex-shrink-0 flex border-t border-white/[0.06] p-4 gap-2">
               <Link
                 href="/settings"
-                className={`flex items-center text-sm font-medium uppercase tracking-wider transition-colors mr-auto ${
+                className={`flex-1 flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium uppercase tracking-wider transition-all duration-200 ${
                   pathname === '/settings'
-                    ? 'text-white'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'text-white bg-blue-500/[0.06] border-l-2 border-blue-500'
+                    : 'text-gray-400 hover:bg-white/[0.03] hover:text-white'
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
-                <Cog6ToothIcon className="mr-3 h-5 w-5" />
-                Settings
+                <Cog6ToothIcon className="h-5 w-5" />
               </Link>
               <button
                 onClick={() => { setSidebarOpen(false); handleSignOut(); }}
-                className="flex items-center text-sm font-medium text-gray-400 hover:text-white uppercase tracking-wider"
+                className="flex-1 flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/[0.03] uppercase tracking-wider transition-all"
               >
-                <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" />
-                Sign out
+                <ArrowRightOnRectangleIcon className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -194,59 +196,76 @@ export default function DashboardLayout({
       )}
 
       {/* Static sidebar for desktop */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-        <div className="flex-1 flex flex-col min-h-0 bg-dark-800 border-r border-dark-500">
+      <div className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 transition-all duration-300 ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
+        <div className="flex-1 flex flex-col min-h-0 bg-[#0a0a0a] border-r border-white/[0.06]">
           <div className="flex-1 flex flex-col pt-6 pb-4 overflow-y-auto">
             <div className="flex items-center flex-shrink-0 px-6 mb-8">
               <Link href="/" className="text-lg font-bold tracking-wider leading-tight">
-                <div className="text-blue-500">Techno on the Block</div>
-                <div className="text-white">Workspace</div>
+                <div className="text-blue-500">TOTB</div>
+                {!sidebarCollapsed && <div className="text-white text-xs tracking-widest mt-0.5">WORKSPACE</div>}
               </Link>
             </div>
-            <nav className="flex-1 px-4 space-y-1">
-              {getNavigation(userRole).map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`group flex items-center px-4 py-3 text-sm font-medium uppercase tracking-wider transition-colors ${
-                    pathname === item.href
-                      ? 'bg-white text-black'
-                      : 'text-gray-400 hover:bg-dark-700 hover:text-white'
-                  }`}
-                >
-                  <item.icon className="mr-3 flex-shrink-0 h-5 w-5" />
-                  {item.name}
-                </Link>
-              ))}
+            <nav className="flex-1 px-3 space-y-0.5">
+              {getNavigation(userRole).map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    title={sidebarCollapsed ? item.name : undefined}
+                    className={`group flex items-center px-4 py-2.5 text-sm font-medium uppercase tracking-wider rounded-lg transition-all duration-200 ${
+                      sidebarCollapsed ? 'justify-center' : ''
+                    } ${
+                      isActive
+                        ? 'text-white border-l-2 border-blue-500 bg-blue-500/[0.06]'
+                        : 'text-gray-400 hover:bg-white/[0.03] hover:text-white'
+                    }`}
+                  >
+                    <item.icon className={`flex-shrink-0 h-5 w-5 transition-colors ${isActive ? 'text-blue-400' : 'text-gray-500 group-hover:text-gray-300'} ${sidebarCollapsed ? '' : 'mr-3'}`} />
+                    {!sidebarCollapsed && item.name}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
-          <div className="flex-shrink-0 flex border-t border-dark-500 p-4">
-            <Link
-              href="/settings"
-              className={`flex items-center text-sm font-medium uppercase tracking-wider transition-colors mr-auto ${
-                pathname === '/settings'
-                  ? 'text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Cog6ToothIcon className="mr-3 h-5 w-5" />
-              Settings
-            </Link>
+          <div className="flex-shrink-0 flex flex-col border-t border-white/[0.06] p-4 gap-2">
             <button
-              onClick={handleSignOut}
-              className="flex items-center text-sm font-medium text-gray-400 hover:text-white uppercase tracking-wider"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/[0.03] uppercase tracking-wider transition-all"
+              title={sidebarCollapsed ? 'Expand' : 'Collapse'}
             >
-              <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" />
-              Sign out
+              <svg className={`h-5 w-5 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              </svg>
             </button>
+            <div className="flex gap-2">
+              <Link
+                href="/settings"
+                title="Settings"
+                className={`flex-1 flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium uppercase tracking-wider transition-all duration-200 ${
+                  pathname === '/settings'
+                    ? 'text-white bg-blue-500/[0.06] border-l-2 border-blue-500'
+                    : 'text-gray-400 hover:bg-white/[0.03] hover:text-white'
+                }`}
+              >
+                <Cog6ToothIcon className="h-5 w-5" />
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="flex-1 flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/[0.03] uppercase tracking-wider transition-all"
+                title="Sign out"
+              >
+                <ArrowRightOnRectangleIcon className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="md:pl-64 flex flex-col flex-1">
+      <div className={`flex flex-col flex-1 transition-all duration-300 ${sidebarCollapsed ? 'md:pl-20' : 'md:pl-64'}`}>
         {/* Top header */}
-        <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-dark-800/90 backdrop-blur-md border-b border-dark-500">
+        <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-white/[0.06]">
           <button
             type="button"
             className="px-4 border-r border-dark-500 text-gray-400 hover:text-white focus:outline-none md:hidden"
@@ -257,9 +276,12 @@ export default function DashboardLayout({
           </button>
 
           <div className="flex-1 px-4 flex justify-end">
-            <div className="ml-4 flex items-center md:ml-6">
+            <div className="ml-4 flex items-center md:ml-6 gap-4">
               <div className="text-sm text-gray-400">
                 {user?.email}
+              </div>
+              <div className="h-8 w-8 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+                <span className="text-xs font-bold text-blue-400">{user?.email?.charAt(0).toUpperCase()}</span>
               </div>
             </div>
           </div>
