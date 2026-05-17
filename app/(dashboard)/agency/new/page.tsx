@@ -382,13 +382,12 @@ export default function NewAgencyLeadPage() {
       if (formData.email && formData.contact_person && formData.email_venue && emailSenderId) {
         try {
           const selSender = teamMembers.find((m) => m.id === emailSenderId);
-          const subjCity = formData.city || 'Basel';
           const emailRes = await fetch('/api/email/send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               to: formData.email,
-              subject: `Artists from ${subjCity} – Techno on the Block`,
+              subject: 'Artists from Basel – Techno on the Block',
               from: 'The Agency Techno on the Block <agency@technoontheblock.ch>',
               html: buildEmailHtml(),
             }),
@@ -599,7 +598,7 @@ export default function NewAgencyLeadPage() {
             {(formData.contact_person || formData.email_venue || emailSenderId) && (
               <div className="mt-4 rounded-lg border border-white/10 bg-[#0a0a0a] p-4">
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500">Vorschau</p>
-                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: Artists from {formData.city || 'Basel'} – Techno on the Block</p>
+                <p className="mb-2 text-sm text-[#d0ff59]">Betreff: Artists from Basel – Techno on the Block</p>
                 <div
                   className="text-sm text-gray-300 space-y-2"
                   dangerouslySetInnerHTML={{ __html: emailPreview }}
