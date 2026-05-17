@@ -110,7 +110,7 @@ export default function NewAgencyLeadPage() {
     const sender = selectedSender?.name || 'Luca Littmann';
     const senderCity = formData.city || 'Basel';
     const ort = formData.city || 'Basel';
-    const websiteLink = '<p style="margin:0 0 4px 0;font-size:11px;"><a href="https://www.technoontheblock.ch" style="color:#2563eb;text-decoration:none;">www.technoontheblock.ch</a></p>';
+    const websiteLink = '<p style="margin:0 0 4px 0;font-size:11px;"><a href="https://www.technoontheblock.ch/artists" style="color:#2563eb;text-decoration:none;">www.technoontheblock.ch/artists</a></p>';
     const instagramLink = '<p style="margin:0;font-size:11px;"><a href="https://www.instagram.com/techno_on_the_block" style="color:#2563eb;text-decoration:none;">@techno_on_the_block</a></p>';
 
     const activeDJs = djs.filter((d) => d.active);
