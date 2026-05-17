@@ -110,8 +110,8 @@ export default function NewAgencyLeadPage() {
     const sender = selectedSender?.name || 'Luca Littmann';
     const senderCity = formData.city || 'Basel';
     const ort = formData.city || 'Basel';
-    const websiteLink = '<p style="margin:0 0 4px 0;font-size:11px;"><a href="https://www.technoontheblock.ch/artists" style="color:#2563eb;text-decoration:none;">www.technoontheblock.ch/artists</a></p>';
-    const instagramLink = '<p style="margin:0;font-size:11px;"><a href="https://www.instagram.com/techno_on_the_block" style="color:#2563eb;text-decoration:none;">@techno_on_the_block</a></p>';
+    const websiteLink = '<p style="margin:0 0 6px 0;"><a href="https://www.technoontheblock.ch/artists" style="color:#2563eb;text-decoration:none;display:inline-flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>Website</a></p>';
+    const instagramLink = '<p style="margin:0;"><a href="https://www.instagram.com/techno_on_the_block" style="color:#2563eb;text-decoration:none;display:inline-flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>Instagram</a></p>';
 
     const activeDJs = djs.filter((d) => d.active);
     const defaultDJs = [
