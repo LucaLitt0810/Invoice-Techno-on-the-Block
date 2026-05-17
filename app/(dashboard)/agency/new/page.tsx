@@ -33,8 +33,6 @@ export default function NewAgencyLeadPage() {
     status: 'contacted' as 'contacted' | 'negotiation' | 'closed',
     notes: '',
     email_venue: '',
-    website: '',
-    instagram: '',
   });
 
   // Load DJ roster & team
@@ -112,8 +110,8 @@ export default function NewAgencyLeadPage() {
     const sender = selectedSender?.name || 'Luca Littmann';
     const senderCity = formData.city || 'Basel';
     const ort = formData.city || 'Basel';
-    const websiteLink = formData.website ? `<p style="margin:0 0 4px 0;font-size:11px;"><a href="${formData.website}" style="color:#2563eb;text-decoration:none;">${formData.website}</a></p>` : '';
-    const instagramLink = formData.instagram ? `<p style="margin:0;font-size:11px;"><a href="${formData.instagram}" style="color:#2563eb;text-decoration:none;">${formData.instagram}</a></p>` : '';
+    const websiteLink = '<p style="margin:0 0 4px 0;font-size:11px;"><a href="https://www.technoontheblock.ch" style="color:#2563eb;text-decoration:none;">www.technoontheblock.ch</a></p>';
+    const instagramLink = '<p style="margin:0;font-size:11px;"><a href="https://www.instagram.com/techno_on_the_block" style="color:#2563eb;text-decoration:none;">@techno_on_the_block</a></p>';
 
     const activeDJs = djs.filter((d) => d.active);
     const defaultDJs = [
@@ -361,8 +359,6 @@ export default function NewAgencyLeadPage() {
         country: formData.country,
         status: formData.status,
         notes: formData.notes || null,
-        website: formData.website || null,
-        instagram: formData.instagram || null,
         customer_id: customerId,
       };
 
@@ -597,28 +593,7 @@ export default function NewAgencyLeadPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label className="label">Website</label>
-                <input
-                  type="url"
-                  className="input"
-                  value={formData.website}
-                  onChange={(e) => handleChange('website', e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
-              <div>
-                <label className="label">Instagram</label>
-                <input
-                  type="url"
-                  className="input"
-                  value={formData.instagram}
-                  onChange={(e) => handleChange('instagram', e.target.value)}
-                  placeholder="https://instagram.com/..."
-                />
-              </div>
-            </div>
+
 
             {/* Email Preview */}
             {(formData.contact_person || formData.email_venue || emailSenderId) && (
