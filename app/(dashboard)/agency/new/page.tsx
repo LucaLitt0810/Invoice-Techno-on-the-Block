@@ -212,7 +212,6 @@ export default function NewAgencyLeadPage() {
                   <!-- CENTER: MAIN CONTENT -->
                   <td style="padding:32px 28px;vertical-align:top;">
                     <p class="dm-text-primary" style="margin:0 0 16px 0;font-size:15px;color:#111111;line-height:1.55;">Hey ${contact},</p>
-                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">${sender}</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">I'm confident some of them would be a great match for future nights at <strong class="dm-text-strong" style="color:#111111;">${venue}</strong>.</p>
@@ -255,7 +254,6 @@ export default function NewAgencyLeadPage() {
                 <tr>
                   <td class="mob-wrap mob-pad" style="padding:28px 20px;word-wrap:break-word;overflow-wrap:break-word;">
                     <p class="dm-text-primary" style="margin:0 0 16px 0;font-size:15px;color:#111111;line-height:1.55;">Hey ${contact},</p>
-                    <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">Big respect for what you've built with <strong style="color:#2563eb;">${venue}</strong>. The space, the sound and the atmosphere have become a real pillar of the ${ort} techno scene.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">My name is <strong class="dm-text-strong" style="color:#111111;">${sender}</strong> and I'm reaching out from <strong class="dm-text-strong" style="color:#111111;">The Agency – Artist Management</strong>, part of Techno on the Block, based in Basel.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">We represent a group of strong techno artists who deliver the kind of raw, driving and uncompromising sound that fits rooms like yours perfectly.</p>
                     <p class="dm-text-secondary" style="margin:0 0 16px 0;font-size:15px;color:#444444;line-height:1.55;">I'm confident some of them would be a great match for future nights at <strong class="dm-text-strong" style="color:#111111;">${venue}</strong>.</p>
