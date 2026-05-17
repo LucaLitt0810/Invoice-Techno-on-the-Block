@@ -33,6 +33,8 @@ export default function NewAgencyLeadPage() {
     status: 'contacted' as 'contacted' | 'negotiation' | 'closed',
     notes: '',
     email_venue: '',
+    website: '',
+    instagram: '',
   });
 
   // Load DJ roster & team
@@ -110,6 +112,8 @@ export default function NewAgencyLeadPage() {
     const sender = selectedSender?.name || 'Luca Littmann';
     const senderCity = formData.city || 'Basel';
     const ort = formData.city || 'Basel';
+    const websiteLink = formData.website ? `<p style="margin:0 0 4px 0;font-size:11px;"><a href="${formData.website}" style="color:#2563eb;text-decoration:none;">${formData.website}</a></p>` : '';
+    const instagramLink = formData.instagram ? `<p style="margin:0;font-size:11px;"><a href="${formData.instagram}" style="color:#2563eb;text-decoration:none;">${formData.instagram}</a></p>` : '';
 
     const activeDJs = djs.filter((d) => d.active);
     const defaultDJs = [
@@ -234,7 +238,9 @@ export default function NewAgencyLeadPage() {
                           <p style="margin:0;font-size:10px;color:#888888;line-height:1.5;">
                             <strong style="color:#2563eb;">Club</strong><br>
                             Techno on the Block<br>
-                            Basel, Switzerland<br><br>
+                            Basel, Switzerland<br>
+                            ${websiteLink}
+                            ${instagramLink}<br>
                             <a href="mailto:agency@technoontheblock.ch" style="color:#2563eb;text-decoration:none;">agency@technoontheblock.ch</a>
                           </p>
                         </td>
@@ -284,7 +290,9 @@ export default function NewAgencyLeadPage() {
                     <p style="margin:12px 0 0 0;padding-top:12px;border-top:1px solid #e0e0e0;font-size:10px;color:#888888;line-height:1.5;" class="dm-border">
                       <strong style="color:#2563eb;">Club</strong><br>
                       Techno on the Block<br>
-                      Basel, Switzerland<br><br>
+                      Basel, Switzerland<br>
+                      ${websiteLink}
+                      ${instagramLink}<br>
                       <a href="mailto:agency@technoontheblock.ch" style="color:#2563eb;text-decoration:none;">agency@technoontheblock.ch</a>
                     </p>
                   </td>
@@ -353,6 +361,8 @@ export default function NewAgencyLeadPage() {
         country: formData.country,
         status: formData.status,
         notes: formData.notes || null,
+        website: formData.website || null,
+        instagram: formData.instagram || null,
         customer_id: customerId,
       };
 
@@ -583,6 +593,29 @@ export default function NewAgencyLeadPage() {
                   value={formData.contact_person || '—'}
                   readOnly
                   title="Wird automatisch aus dem Contact Person Feld übernommen"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <label className="label">Website</label>
+                <input
+                  type="url"
+                  className="input"
+                  value={formData.website}
+                  onChange={(e) => handleChange('website', e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
+                <label className="label">Instagram</label>
+                <input
+                  type="url"
+                  className="input"
+                  value={formData.instagram}
+                  onChange={(e) => handleChange('instagram', e.target.value)}
+                  placeholder="https://instagram.com/..."
                 />
               </div>
             </div>

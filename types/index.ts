@@ -400,6 +400,8 @@ export type AgencyLead = {
   country: string;
   status: AgencyStatus;
   notes: string | null;
+  website: string | null;
+  instagram: string | null;
   customer_id: string | null;
   created_at: string;
   updated_at: string;
